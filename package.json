@@ -5,7 +5,7 @@
     "test:forge:debug": "forge test -vvv",
     "test:gas": "bash scripts/plotGas.sh",
     "hint": "solhint 'contracts/**/*.sol' 'test/**/*.sol'",
-    "prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol' 'test/**/*.sol'",
+    "prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol' 'test/**/*.sol'"
   },
   "dependencies": {
     "@axelar-network/axelar-cgp-solidity": "^4.5.0",
