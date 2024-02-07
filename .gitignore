@@ -1,0 +1,16 @@
+node_modules
+.env
+coverage
+coverage.json
+typechain
+typechain-types
+.vscode
+# Hardhat files
+cache
+artifacts
+secrets.json
+flattened
+# Forge files
+cache_forge
+out
+.gas-snapshot
