@@ -20,6 +20,6 @@
     "@layerzerolabs/scan-client": "^0.0.6",
     "@layerzerolabs/solidity-examples": "github:LayerZero-Labs/solidity-examples",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "fs": "^0.0.1-security",
+    "fs": "^0.0.1-security"
   }
 }
