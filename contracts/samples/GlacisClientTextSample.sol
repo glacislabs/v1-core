@@ -3,13 +3,13 @@ pragma solidity 0.8.18;
 import {GlacisClientOwnable} from "../../../contracts/client/GlacisClientOwnable.sol";
 import {GlacisCommons} from "../../../contracts/commons/GlacisCommons.sol";
 
-contract GlacisClientSample is GlacisClientOwnable {
-    uint256 public value;
+contract GlacisClientTextSample is GlacisClientOwnable {
+    string public value;
 
     constructor(
         address glacisRouter_,
         address owner_
-    ) GlacisClientOwnable(glacisRouter_, 1, owner_) {}
+    ) GlacisClientOwnable(glacisRouter_, 0, owner_) {}
 
     function setRemoteValue__execute(
         uint256 toChainId,
@@ -105,17 +105,13 @@ contract GlacisClientSample is GlacisClientOwnable {
             );
     }
 
-    event ValueChanged(uint256 indexed value);
-
     function _receiveMessage(
         uint8[] memory, // fromGmpId,
         uint256, // fromChainId,
         address, // fromAddress,
         bytes memory payload
     ) internal override {
-        // NOTE: changed += to test for redundant messages
-        if (payload.length > 0) (value) += abi.decode(payload, (uint256));
-        emit ValueChanged(value);
+        (value) = abi.decode(payload, (string));
     }
 
     // Setup of custom quorum (for testing purposes)

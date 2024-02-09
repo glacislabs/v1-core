@@ -18,7 +18,7 @@ import {GlacisCCIPAdapter} from "../../../contracts/adapters/GlacisCCIPAdapter.s
 import {CCIPRouterMock} from "../../contracts/mocks/ccip/CCIPRouterMock.sol";
 
 /* solhint-disable contract-name-camelcase */
-contract ExecutionTests__Axelar is LocalTestSetup {
+contract AbstractionTests__Axelar is LocalTestSetup {
     AxelarGatewayMock internal axelarGatewayMock;
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
@@ -36,7 +36,7 @@ contract ExecutionTests__Axelar is LocalTestSetup {
         clientSample = deployGlacisClientSample(glacisRouter);
     }
 
-    function test__Execution_Axelar(uint256 val) external {
+    function test__Abstraction_Axelar(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
             address(clientSample),
@@ -69,7 +69,7 @@ contract ExecutionTests__Axelar is LocalTestSetup {
     receive() external payable {}
 }
 
-contract ExecutionTests__LayerZero is LocalTestSetup {
+contract AbstractionTests__LayerZero is LocalTestSetup {
     LayerZeroGMPMock internal lzGatewayMock;
     GlacisLayerZeroAdapter internal lzAdapter;
     GlacisRouter internal glacisRouter;
@@ -82,7 +82,7 @@ contract ExecutionTests__LayerZero is LocalTestSetup {
         clientSample = deployGlacisClientSample(glacisRouter);
     }
 
-    function test__Execution_LayerZero(uint256 val) external {
+    function test__Abstraction_LayerZero(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
             address(clientSample),
@@ -116,7 +116,7 @@ contract ExecutionTests__LayerZero is LocalTestSetup {
     receive() external payable {}
 }
 
-contract ExecutionTests__Wormhole is LocalTestSetup {
+contract AbstractionTests__Wormhole is LocalTestSetup {
     WormholeRelayerMock internal wormholeRelayerMock;
     GlacisWormholeAdapter internal wormholeAdapter;
 
@@ -131,10 +131,9 @@ contract ExecutionTests__Wormhole is LocalTestSetup {
             wormholeRelayerMock
         );
         clientSample = deployGlacisClientSample(glacisRouter);
-        wormholeRelayerMock.setGlacisAdapter(address(wormholeAdapter));
     }
 
-    function test__Execution_Wormhole(uint256 val) external {
+    function test__Abstraction_Wormhole(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
             address(clientSample),
@@ -168,7 +167,7 @@ contract ExecutionTests__Wormhole is LocalTestSetup {
     receive() external payable {}
 }
 
-contract ExecutionTests__Hyperlane is LocalTestSetup {
+contract AbstractionTests__Hyperlane is LocalTestSetup {
     HyperlaneMailboxMock internal hyperlaneMailboxMock;
     GlacisHyperlaneAdapter internal hyperlaneAdapter;
 
@@ -185,7 +184,7 @@ contract ExecutionTests__Hyperlane is LocalTestSetup {
         clientSample = deployGlacisClientSample(glacisRouter);
     }
 
-    function test__Execution_Hyperlane(uint256 val) external {
+    function test__Abstraction_Hyperlane(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
             address(clientSample),
@@ -220,7 +219,7 @@ contract ExecutionTests__Hyperlane is LocalTestSetup {
     receive() external payable {}
 }
 
-contract ExecutionTests__CCIP is LocalTestSetup {
+contract AbstractionTests__CCIP is LocalTestSetup {
     CCIPRouterMock internal ccipMock;
     GlacisCCIPAdapter internal ccipAdapter;
 
@@ -234,7 +233,7 @@ contract ExecutionTests__CCIP is LocalTestSetup {
         clientSample = deployGlacisClientSample(glacisRouter);
     }
 
-    function test__Execution_CCIP(uint256 val) external {
+    function test__Abstraction_CCIP(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
             address(clientSample),
@@ -268,7 +267,7 @@ contract ExecutionTests__CCIP is LocalTestSetup {
     receive() external payable {}
 }
 
-contract ExecutionTests__GasBenchmark is LocalTestSetup {
+contract AbstractionTests__GasBenchmark is LocalTestSetup {
     AxelarOneWayGatewayMock internal axelarGatewayMock;
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
@@ -317,7 +316,7 @@ contract ExecutionTests__GasBenchmark is LocalTestSetup {
         lzTextSample.setTrustedRemote(1, abi.encode(lzTextSample));
     }
 
-    // =============== Sending portion of Execution ================
+    // =============== Sending portion of Abstraction ================
     function test_gas__ExecuteSend_GlacAx(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
@@ -348,7 +347,7 @@ contract ExecutionTests__GasBenchmark is LocalTestSetup {
         lzSample.setRemoteValue{value: 0.1 ether}(1, val);
     }
 
-    // ======= Sending portion of Execution with Long String ========
+    // ======= Sending portion of Abstraction with Long String ========
     function test_gas__ExecTxtSend_GlacAx(uint256) external {
         glacisTextSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
@@ -391,7 +390,7 @@ contract ExecutionTests__GasBenchmark is LocalTestSetup {
     receive() external payable {}
 }
 
-contract ExecutionTests__FullGasBenchmark is LocalTestSetup {
+contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     AxelarGatewayMock internal axelarGatewayMock;
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
@@ -429,7 +428,7 @@ contract ExecutionTests__FullGasBenchmark is LocalTestSetup {
         lzSample.setTrustedRemoteAddress(1, abi.encodePacked(lzSample));
     }
 
-    // ============== Receiving portion of Execution ===============
+    // ============== Receiving portion of Abstraction ===============
     function test_gas__ExecReceive_GlacAx(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,

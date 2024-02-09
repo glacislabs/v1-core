@@ -6,16 +6,42 @@ import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IMessageDispatcher} from "../interfaces/IMessageDispatcher.sol";
 import {IMessageExecutor} from "../interfaces/IMessageExecutor.sol";
 
-abstract contract IGlacisRouterEvents is GlacisCommons {
+abstract contract IGlacisRouterEvents is GlacisCommons, IMessageDispatcher, IMessageExecutor {
     event GlacisAbstractRouter__MessageIdCreated(
         bytes32 indexed messageId,
         address indexed sender,
         uint256 nonce
     );
-    event GlacisRouter__ReceivedMessage(GlacisData data);
+    event GlacisRouter__ReceivedMessage(
+        bytes32 indexed messageId,
+        address indexed from,
+        uint256 indexed fromChainId,
+        address to
+    );
+    event GlacisRouter__MessageDispatched(
+        bytes32 indexed messageId,
+        address indexed from,
+        uint256 indexed toChainId,
+        address to,
+        bytes data,
+        uint8[] gmps,
+        uint256[] fees,
+        address refundAddress,
+        bool retriable
+    );
+    event GlacisRouter__MessageRetried(
+        bytes32 indexed messageId,
+        address indexed from,
+        uint256 indexed toChainId,
+        address to,
+        bytes data,
+        uint8[] gmps,
+        uint256[] fees,
+        address refundAddress
+    );
 }
 
-interface IGlacisRouter is IMessageDispatcher, IMessageExecutor {
+interface IGlacisRouter {
     function route(
         uint256 chainId,
         address to,

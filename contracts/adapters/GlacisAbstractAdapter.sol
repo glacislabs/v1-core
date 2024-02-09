@@ -66,11 +66,9 @@ abstract contract GlacisAbstractAdapter is IGlacisAdapter, Ownable {
         uint256 chainId,
         address adapter
     ) internal onlyOwner {
-        if (chainId == 0) revert GlacisAbstractAdapter__InvalidChainId();
         if (address(adapter) == address(0))
             revert GlacisAbstractAdapter__InvalidAdapterAddress();
         if (chainId == 0) revert GlacisAbstractAdapter__ChainCannotBeZero();
-        delete remoteAdapters[chainId];
         remoteAdapters[chainId] = adapter;
     }
 

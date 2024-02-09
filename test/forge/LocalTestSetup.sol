@@ -28,7 +28,7 @@ import {GlacisTokenClientSampleSource} from "../contracts/samples/GlacisTokenCli
 import {GlacisTokenClientSampleDestination} from "../contracts/samples/GlacisTokenClientSampleDestination.sol";
 import {GlacisHyperlaneAdapter} from "../../contracts/adapters/GlacisHyperlaneAdapter.sol";
 import {HyperlaneMailboxMock} from "../contracts/mocks/hyperlane/HyperlaneMailboxMock.sol";
-import {GlacisCCIPAdapter} from "../../../contracts/adapters/GlacisCCIPAdapter.sol";
+import {GlacisCCIPAdapter} from "../../contracts/adapters/GlacisCCIPAdapter.sol";
 import {CCIPRouterMock} from "../contracts/mocks/ccip/CCIPRouterMock.sol";
 
 contract LocalTestSetup is Test {
@@ -185,6 +185,8 @@ contract LocalTestSetup is Test {
         router.registerAdapter(WORMHOLE_GMP_ID, address(adapter));
         adapter.addRemoteAdapter(block.chainid, address(adapter));
 
+        wormholeRelayer.setGlacisAdapter(address(adapter));
+
         return adapter;
     }
 
@@ -303,7 +305,7 @@ contract LocalTestSetup is Test {
             GlacisTokenClientSampleDestination glacisTokenClientSampleDestination
         )
     {
-        glacisTokenMediator = new GlacisTokenMediator(address(glacisRouter), 1);
+        glacisTokenMediator = new GlacisTokenMediator(address(glacisRouter), 1, address(this));
         xERC20Sample = new XERC20Sample(address(this));
         erc20Sample = new ERC20Sample(address(this));
         xERC20LockboxSample = new XERC20LockboxSample(
@@ -350,6 +352,12 @@ contract LocalTestSetup is Test {
             10e18,
             10e18
         );
+
+        uint256[] memory chainIdArr = new uint256[](1);
+        chainIdArr[0] = block.chainid;
+        address[] memory mediatorArr = new address[](1);
+        mediatorArr[0] = address(glacisTokenMediator);
+        glacisTokenMediator.addRemoteMediators(chainIdArr, mediatorArr);
     }
 
     // endregion

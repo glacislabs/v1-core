@@ -1,53 +1,82 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
-import {GlacisClientOwnable} from "../../../contracts/client/GlacisClientOwnable.sol";
+import {GlacisTokenClientOwnable} from "../../../contracts/client/GlacisTokenClientOwnable.sol";
 import {GlacisCommons} from "../../../contracts/commons/GlacisCommons.sol";
+import {XERC20} from "../../../contracts/token/XERC20.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract GlacisClientSample is GlacisClientOwnable {
+contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
     uint256 public value;
 
+    receive() external payable {}
+
     constructor(
+        address XERC20Sample_,
+        address ERC20Sample_,
+        address XERC20LockboxSample_,
+        address glacisTokenMediator_,
         address glacisRouter_,
         address owner_
-    ) GlacisClientOwnable(glacisRouter_, 1, owner_) {}
+    ) GlacisTokenClientOwnable(glacisTokenMediator_, glacisRouter_, 0, owner_) {
+        XERC20(XERC20Sample_).approve(glacisTokenMediator_, 10e18);
+        ERC20(ERC20Sample_).approve(XERC20LockboxSample_, 10e18);
+    }
 
-    function setRemoteValue__execute(
+    function sendMessageAndTokens__abstract(
         uint256 toChainId,
         address to,
         uint8 gmp,
-        bytes calldata payload
+        bytes memory payload,
+        address token,
+        uint256 amount
     ) external payable returns (bytes32) {
-        return _routeSingle(toChainId, to, payload, gmp, msg.sender, msg.value);
+        return
+            _routeWithTokensSingle(
+                toChainId,
+                to,
+                payload,
+                gmp,
+                msg.sender,
+                token,
+                amount,
+                msg.value
+            );
     }
 
-    function setRemoteValue__redundancy(
+    function sendMessageAndTokens__redundant(
         uint256 toChainId,
         address to,
         uint8[] memory gmps,
         uint256[] memory fees,
-        bytes calldata payload
+        bytes memory payload,
+        address token,
+        uint256 amount
     ) external payable returns (bytes32) {
         return
-            _routeRedundant(
+            _routeWithTokensRedundant(
                 toChainId,
                 to,
                 payload,
                 gmps,
                 fees,
                 msg.sender,
+                token,
+                amount,
                 msg.value
             );
     }
 
-    function setRemoteValue__retriable(
+    function sendMessageAndTokens__retriable(
         uint256 chainId,
         address to,
         uint8[] memory gmps,
         uint256[] memory fees,
-        bytes memory payload
+        bytes memory payload,
+        address token,
+        uint256 amount
     ) external payable returns (bytes32) {
         return
-            _route(
+            _routeWithTokens(
                 chainId,
                 to,
                 payload,
@@ -55,44 +84,25 @@ contract GlacisClientSample is GlacisClientOwnable {
                 fees,
                 msg.sender,
                 true,
+                token,
+                amount,
                 msg.value
             );
     }
 
-    function setRemoteValue(
-        uint256 chainId,
-        address to,
-        bytes memory payload,
-        uint8[] memory gmps,
-        uint256[] memory fees,
-        address refundAddress,
-        bool retriable,
-        uint256 gasPayment
-    ) external payable returns (bytes32) {
-        return
-            _route(
-                chainId,
-                to,
-                payload,
-                gmps,
-                fees,
-                refundAddress,
-                retriable,
-                gasPayment
-            );
-    }
-
-    function setRemoteValue__retry(
+    function retrySendWithTokens(
         uint256 chainId,
         address to,
         uint8[] memory gmps,
         uint256[] memory fees,
         bytes memory payload,
+        address token,
+        uint256 amount,
         bytes32 messageId,
         uint256 nonce
     ) external payable returns (bytes32) {
         return
-            _retryRoute(
+            _retryRouteWithTokens(
                 chainId,
                 to,
                 payload,
@@ -101,19 +111,22 @@ contract GlacisClientSample is GlacisClientOwnable {
                 msg.sender,
                 messageId,
                 nonce,
+                token,
+                amount,
                 msg.value
             );
     }
 
     event ValueChanged(uint256 indexed value);
 
-    function _receiveMessage(
+    function _receiveMessageWithTokens(
         uint8[] memory, // fromGmpId,
         uint256, // fromChainId,
         address, // fromAddress,
-        bytes memory payload
+        bytes memory payload,
+        address, // token,
+        uint256 // amount
     ) internal override {
-        // NOTE: changed += to test for redundant messages
         if (payload.length > 0) (value) += abi.decode(payload, (uint256));
         emit ValueChanged(value);
     }

@@ -7,7 +7,7 @@ import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {SimpleNonblockingLzApp} from "./SimpleNonblockingLzApp.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid} from "../GlacisAbstractAdapter.sol";
 
-error GlacisAbstractAdapter__LZChainIdNotAccepted(uint256);
+error GlacisLayerZeroAdapter__LZChainIdNotAccepted(uint256);
 
 /// @title Glacis Adapter for Layer Zero GMP
 /// @notice This adapter receives GlacisRouter requests through the _sendMessage function and forwards them to
@@ -126,7 +126,7 @@ contract GlacisLayerZeroAdapter is
         )
     {
         if (adapterChainIdToGlacisChainId[srcChainId] == 0)
-            revert GlacisAbstractAdapter__LZChainIdNotAccepted(srcChainId);
+            revert GlacisLayerZeroAdapter__LZChainIdNotAccepted(srcChainId);
         GLACIS_ROUTER.receiveMessage(
             adapterChainIdToGlacisChainId[srcChainId],
             payload

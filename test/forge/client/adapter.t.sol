@@ -28,7 +28,7 @@ contract AdapterTests__Axelar is LocalTestSetup {
         clientSample = deployGlacisClientSample(glacisRouter);
     }
 
-    function test__onlySelfFailure_Axelar() external {
+    function test__onlyAdapterAllowedFailure_Axelar() external {
         // 1. Expect error
         vm.expectRevert(GlacisAbstractAdapter__OnlyAdapterAllowed.selector);
 
