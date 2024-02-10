@@ -47,13 +47,6 @@ contract AdapterTests__Axelar is LocalTestSetup {
             )
         );
     }
-
-    // TODO : Add harness test this
-    /*     function test__toLowerCase() external {
-        string memory addrStr = "0x1234567890AbcdEF1234567890aBcdef12345678";
-        string memory addrStrLoweCase = axelarAdapter._toLowerCase(addrStr);
-        assertEq(addrStrLoweCase, "0x1234567890abcdef1234567890abcdef12345678");
-    } */
 }
 
 // solhint-disable-next-line

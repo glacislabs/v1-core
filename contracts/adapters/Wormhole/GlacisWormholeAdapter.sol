@@ -23,11 +23,9 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     mapping(uint256 => uint16) public glacisChainIdToAdapterChainId;
     mapping(uint16 => uint256) public adapterChainIdToGlacisChainId;
 
-    // TODO: figure out a better solution for the gas limit
     uint256 internal constant GAS_LIMIT = 900000;
     uint16 internal immutable WORMHOLE_CHAIN_ID;
 
-    // TODO: Look into transfers with token to see if this too can be abstracted.
     uint256 internal constant RECEIVER_VALUE = 0;
 
     constructor(
@@ -85,7 +83,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     /// @param deliveryHash Wormhole delivery hash
     function receiveWormholeMessages(
         bytes memory payload,
-        bytes[] memory, // TODO: figure out the use of the additional VAAs
+        bytes[] memory,
         bytes32 sourceAddress,
         uint16 sourceChain,
         bytes32 deliveryHash

@@ -192,8 +192,6 @@ contract GlacisDaoSampleTests is LocalTestSetup, IGlacisRouterEvents {
         assertEq(128, abstractHarness.value());
     }
 
-    // TODO: test fees for multiple chains at a time
-
     function test_SampleDAO_FeesWithTooSmallValueShouldFail() external {
         // Set up proposal with complex fees & routes
         GlacisDAOSample.Proposal[] memory p = new GlacisDAOSample.Proposal[](2);
