@@ -15,6 +15,7 @@ error GlacisTokenMediator__OnlyTokenMediatorAllowed();
 error GlacisTokenMediator__IncorrectTokenVariant(address, uint256);
 error GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
 error GlacisTokenMediator__MediatorsAndChainIDsMustHaveSameLength();
+error GlacisTokenMediator__DestinationChainUnavailable();
 
 contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
     constructor(address glacisRouter_, uint256 quorum, address owner) IGlacisClient(quorum) {
@@ -49,6 +50,9 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
+        address destinationTokenMediator = remoteMediators[chainId];
+        if(destinationTokenMediator == address(0)) revert GlacisTokenMediator__DestinationChainUnavailable();
+
         IXERC20(token).burn(msg.sender, tokenAmount);
         bytes memory tokenPayload = packTokenPayload(
             chainId,
@@ -61,7 +65,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         return
             IGlacisRouter(GLACIS_ROUTER).route{value: msg.value}(
                 chainId,
-                address(this),
+                destinationTokenMediator,
                 tokenPayload,
                 gmps,
                 fees,
@@ -93,6 +97,9 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
+        address destinationTokenMediator = remoteMediators[chainId];
+        if(destinationTokenMediator == address(0)) revert GlacisTokenMediator__DestinationChainUnavailable();
+
         // Pack with a function (otherwise stack too deep)
         bytes memory tokenPayload = packTokenPayload(
             chainId,
@@ -105,7 +112,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         return
             IGlacisRouter(GLACIS_ROUTER).routeRetry{value: msg.value}(
                 chainId,
-                address(this),
+                destinationTokenMediator,
                 tokenPayload,
                 gmps,
                 fees,
@@ -217,8 +224,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         uint8 fromGmpId,
         bytes memory payload
     ) external view returns (bool) {
-        // First checks to ensure that the GlacisTokenMediator is speaking to itself
-        if (fromAddress != address(this)) return false;
+        // First checks to ensure that the GlacisTokenMediator is speaking to a registered remote version
+        if (fromAddress != remoteMediators[fromChainId]) return false;
 
         (
             address to,
