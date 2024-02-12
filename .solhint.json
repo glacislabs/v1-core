@@ -9,9 +9,6 @@
 	  "one-contract-per-file": "off",
 	  "event-name-camelcase": "off",
 	  "check-send-result" : "off",
-	  "avoid-low-level-calls" : "off",
-	  "avoid-tx-origin" : "off",
-	  "compiler-version": "off",
 	  "var-name-mixedcase": "off",
 	  "no-console" : "off"
 	}

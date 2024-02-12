@@ -258,7 +258,6 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
         address, // token
         uint256 // tokenAmount
     ) internal override {
-        // TODO: figure out a way to reuse the code above. Calldata vs memory should be standardized
         if (fromAddress != address(this))
             revert GlacisDAOSample__CanOnlyBeCalledBySelf();
 

@@ -3,13 +3,9 @@
 pragma solidity 0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../../contracts/samples/GlacisClientSample.sol";
-import {GlacisTokenClientSampleSource} from "../../contracts/samples/GlacisTokenClientSampleSource.sol";
-import {GlacisTokenClientSampleDestination} from "../../contracts/samples/GlacisTokenClientSampleDestination.sol";
-import {GlacisRouter__ClientDeniedRoute} from "../../contracts/routers/GlacisRouter.sol";
 import {GlacisTokenMediator__OnlyTokenMediatorAllowed} from "../../contracts/mediators/GlacisTokenMediator.sol";
-import {GlacisCommons} from "../../contracts/commons/GlacisCommons.sol";
 
-import {GlacisTokenMediator, GlacisTokenClientSampleSource, GlacisTokenClientSampleDestination, XERC20Sample, ERC20Sample, XERC20LockboxSample, XERC20NativeLockboxSample} from "../LocalTestSetup.sol";
+import {GlacisTokenMediator, XERC20Sample} from "../LocalTestSetup.sol";
 
 contract TokenMediatorTests is LocalTestSetup {
     AxelarGatewayMock internal axelarGatewayMock;
@@ -136,7 +132,9 @@ contract TokenMediatorTests is LocalTestSetup {
         assertEq(xERC20Sample.balanceOf(address(0x123)), 1);
     }
 
-    function test__TokenMediator_IsAllowedRouteFalseWhenSendToEOAWithoutRemoteMediator(uint256 chainId) external {
+    function test__TokenMediator_IsAllowedRouteFalseWhenSendToEOAWithoutRemoteMediator(
+        uint256 chainId
+    ) external {
         vm.assume(chainId != 0);
         bytes memory payload = abi.encode(
             address(0x123), // EOA
@@ -147,15 +145,18 @@ contract TokenMediatorTests is LocalTestSetup {
             bytes("")
         );
         bool isAllowed = glacisTokenMediator.isAllowedRoute(
-            chainId, 
+            chainId,
             address(0x456), // wrong mediator address (what we're testing)
-            1, 
+            1,
             payload
         );
         assertFalse(isAllowed);
     }
 
-    function test__TokenMediator_IsAllowedRouteTrueWhenSendToEOAWithRemoteMediator(address addr, uint256 chainId) external {
+    function test__TokenMediator_IsAllowedRouteTrueWhenSendToEOAWithRemoteMediator(
+        address addr,
+        uint256 chainId
+    ) external {
         vm.assume(chainId != 0);
         vm.assume(addr != address(0) && addr.code.length == 0);
         bytes memory payload = abi.encode(
@@ -168,9 +169,9 @@ contract TokenMediatorTests is LocalTestSetup {
         );
         addRemoteMediator(chainId, addr);
         bool isAllowed = glacisTokenMediator.isAllowedRoute(
-            chainId, 
+            chainId,
             addr, // correct mediator address (what we're testing)
-            1, 
+            1,
             payload
         );
         assertTrue(isAllowed);

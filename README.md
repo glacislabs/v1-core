@@ -7,3 +7,10 @@ You must install to `node_modules` instead of using git submodules:
 ```
 npm install
 ```
+
+## Testing
+You can execute forge tests of Glacis core operation through:  
+
+```
+npm run test
+```

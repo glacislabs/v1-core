@@ -55,7 +55,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
         address destinationTokenMediator = remoteMediators[chainId];
-        if(destinationTokenMediator == address(0)) revert GlacisTokenMediator__DestinationChainUnavailable();
+        if (destinationTokenMediator == address(0))
+            revert GlacisTokenMediator__DestinationChainUnavailable();
 
         IXERC20(token).burn(msg.sender, tokenAmount);
         bytes memory tokenPayload = packTokenPayload(
@@ -102,7 +103,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
         address destinationTokenMediator = remoteMediators[chainId];
-        if(destinationTokenMediator == address(0)) revert GlacisTokenMediator__DestinationChainUnavailable();
+        if (destinationTokenMediator == address(0))
+            revert GlacisTokenMediator__DestinationChainUnavailable();
 
         // Pack with a function (otherwise stack too deep)
         bytes memory tokenPayload = packTokenPayload(
@@ -324,7 +326,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         if (chainIds.length != mediators.length)
             revert GlacisTokenMediator__MediatorsAndChainIDsMustHaveSameLength();
 
-        for (uint i; i < chainIds.length; ++i) {
+        for (uint256 i; i < chainIds.length; ++i) {
             if (chainIds[i] == 0)
                 revert GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
             remoteMediators[chainIds[i]] = mediators[i];
