@@ -89,6 +89,7 @@ abstract contract SimpleNonblockingLzApp is
 
     function _lzSend(
         uint16 _dstChainId,
+        address _dstChainAddress,
         bytes memory _payload,
         address payable _refundAddress,
         address _zroPaymentAddress,
@@ -98,7 +99,7 @@ abstract contract SimpleNonblockingLzApp is
         _checkPayloadSize(_dstChainId, _payload.length);
         lzEndpoint.send{value: _nativeFee}(
             _dstChainId,
-            abi.encodePacked(address(this), address(this)),
+            abi.encodePacked(_dstChainAddress, address(this)),
             _payload,
             _refundAddress,
             _zroPaymentAddress,

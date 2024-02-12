@@ -135,4 +135,44 @@ contract TokenMediatorTests is LocalTestSetup {
         );
         assertEq(xERC20Sample.balanceOf(address(0x123)), 1);
     }
+
+    function test__TokenMediator_IsAllowedRouteFalseWhenSendToEOAWithoutRemoteMediator(uint256 chainId) external {
+        vm.assume(chainId != 0);
+        bytes memory payload = abi.encode(
+            address(0x123), // EOA
+            msg.sender,
+            address(xERC20Sample),
+            address(xERC20Sample),
+            1,
+            bytes("")
+        );
+        bool isAllowed = glacisTokenMediator.isAllowedRoute(
+            chainId, 
+            address(0x456), // wrong mediator address (what we're testing)
+            1, 
+            payload
+        );
+        assertFalse(isAllowed);
+    }
+
+    function test__TokenMediator_IsAllowedRouteTrueWhenSendToEOAWithRemoteMediator(address addr, uint256 chainId) external {
+        vm.assume(chainId != 0);
+        vm.assume(addr != address(0) && addr.code.length == 0);
+        bytes memory payload = abi.encode(
+            address(0x123), // EOA
+            msg.sender,
+            address(xERC20Sample),
+            address(xERC20Sample),
+            1,
+            bytes("")
+        );
+        addRemoteMediator(chainId, addr);
+        bool isAllowed = glacisTokenMediator.isAllowedRoute(
+            chainId, 
+            addr, // correct mediator address (what we're testing)
+            1, 
+            payload
+        );
+        assertTrue(isAllowed);
+    }
 }
