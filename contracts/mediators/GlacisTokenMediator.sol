@@ -17,14 +17,18 @@ error GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
 error GlacisTokenMediator__MediatorsAndChainIDsMustHaveSameLength();
 
 contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
-    constructor(address glacisRouter_, uint256 quorum, address owner) IGlacisClient(quorum) {
+    constructor(
+        address glacisRouter_,
+        uint256 quorum,
+        address owner
+    ) IGlacisClient(quorum) {
         // Approve conversation between token routers in all chains through all GMPs
         GLACIS_ROUTER = glacisRouter_;
         transferOwnership(owner);
     }
 
     address public immutable GLACIS_ROUTER;
-    
+
     mapping(uint256 => address) public remoteMediators;
 
     /// @notice Routes the payload to the specific address on destination chain through GlacisRouter using GMPs
@@ -310,10 +314,12 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         uint256[] calldata chainIds,
         address[] calldata mediators
     ) external onlyOwner {
-        if (chainIds.length != mediators.length) revert GlacisTokenMediator__MediatorsAndChainIDsMustHaveSameLength();
+        if (chainIds.length != mediators.length)
+            revert GlacisTokenMediator__MediatorsAndChainIDsMustHaveSameLength();
 
-        for(uint i; i < chainIds.length; ++i) {
-            if (chainIds[i] == 0) revert GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
+        for (uint i; i < chainIds.length; ++i) {
+            if (chainIds[i] == 0)
+                revert GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
             remoteMediators[chainIds[i]] = mediators[i];
         }
     }
@@ -321,7 +327,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
     /// @notice Removes an authorized adapter on remote chain that this adapter accepts messages from
     /// @param chainId The chainId to remove the remote adapter
     function removeRemoteMediator(uint256 chainId) external onlyOwner {
-        if (chainId == 0) revert GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
+        if (chainId == 0)
+            revert GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
         delete remoteMediators[chainId];
     }
 }

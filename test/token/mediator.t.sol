@@ -22,7 +22,15 @@ contract TokenMediatorTests is LocalTestSetup {
 
     function setUp() public {
         glacisRouter = deployGlacisRouter();
-        (glacisTokenMediator, xERC20Sample,,,,,) = deployGlacisTokenFixture(glacisRouter);
+        (
+            glacisTokenMediator,
+            xERC20Sample,
+            ,
+            ,
+            ,
+            ,
+
+        ) = deployGlacisTokenFixture(glacisRouter);
         (axelarGatewayMock, axelarGasServiceMock) = deployAxelarFixture();
         axelarAdapter = deployAxelarAdapters(
             glacisRouter,
@@ -42,13 +50,19 @@ contract TokenMediatorTests is LocalTestSetup {
         glacisTokenMediator.addRemoteMediators(chainIdArr, addrArr);
     }
 
-    function test__TokenMediator_AddsRemoteAddress(address addr, uint256 chainId) external {
+    function test__TokenMediator_AddsRemoteAddress(
+        address addr,
+        uint256 chainId
+    ) external {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr);
         assertEq(glacisTokenMediator.remoteMediators(chainId), addr);
     }
 
-    function test__TokenMediator_RemovesRemoteAddress(address addr, uint256 chainId) external {
+    function test__TokenMediator_RemovesRemoteAddress(
+        address addr,
+        uint256 chainId
+    ) external {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr);
         glacisTokenMediator.removeRemoteMediator(chainId);
@@ -67,7 +81,11 @@ contract TokenMediatorTests is LocalTestSetup {
         glacisTokenMediator.removeRemoteMediator(block.chainid);
     }
 
-    function test__TokenMediator_RejectsExecuteFromNonMediatorSources(address addr, address otherAddr, uint256 chainId) external {
+    function test__TokenMediator_RejectsExecuteFromNonMediatorSources(
+        address addr,
+        address otherAddr,
+        uint256 chainId
+    ) external {
         vm.assume(addr != otherAddr);
         vm.assume(chainId != 0);
 
@@ -88,7 +106,10 @@ contract TokenMediatorTests is LocalTestSetup {
         );
     }
 
-    function test__TokenMediator_AcceptsExecuteFromMediatorSource(address addr, uint256 chainId) external {
+    function test__TokenMediator_AcceptsExecuteFromMediatorSource(
+        address addr,
+        uint256 chainId
+    ) external {
         vm.assume(chainId != 0);
 
         addRemoteMediator(chainId, addr);
@@ -103,9 +124,15 @@ contract TokenMediatorTests is LocalTestSetup {
             gmpArray,
             chainId,
             addr,
-            abi.encode(address(0x123), address(0x123), address(xERC20Sample), address(xERC20Sample), 1, bytes(""))
+            abi.encode(
+                address(0x123),
+                address(0x123),
+                address(xERC20Sample),
+                address(xERC20Sample),
+                1,
+                bytes("")
+            )
         );
         assertEq(xERC20Sample.balanceOf(address(0x123)), 1);
     }
 }
-

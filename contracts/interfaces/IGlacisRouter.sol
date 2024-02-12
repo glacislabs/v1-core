@@ -6,7 +6,11 @@ import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IMessageDispatcher} from "../interfaces/IMessageDispatcher.sol";
 import {IMessageExecutor} from "../interfaces/IMessageExecutor.sol";
 
-abstract contract IGlacisRouterEvents is GlacisCommons, IMessageDispatcher, IMessageExecutor {
+abstract contract IGlacisRouterEvents is
+    GlacisCommons,
+    IMessageDispatcher,
+    IMessageExecutor
+{
     event GlacisAbstractRouter__MessageIdCreated(
         bytes32 indexed messageId,
         address indexed sender,

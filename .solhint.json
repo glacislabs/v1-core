@@ -1,0 +1,19 @@
+{
+	"extends": "solhint:recommended",
+	"rules": {
+	  "func-visibility": ["warn",{"ignoreConstructors":true}],
+	  "no-inline-assembly"	: "off",
+	  "no-empty-blocks" : "off",
+	  "explicit-types": ["warn","explicit"],
+	  "func-name-mixedcase": "off",
+	  "one-contract-per-file": "off",
+	  "event-name-camelcase": "off",
+	  "check-send-result" : "off",
+	  "avoid-low-level-calls" : "off",
+	  "avoid-tx-origin" : "off",
+	  "compiler-version": "off",
+	  "var-name-mixedcase": "off",
+	  "no-console" : "off"
+	}
+  }
+  

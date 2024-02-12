@@ -305,7 +305,11 @@ contract LocalTestSetup is Test {
             GlacisTokenClientSampleDestination glacisTokenClientSampleDestination
         )
     {
-        glacisTokenMediator = new GlacisTokenMediator(address(glacisRouter), 1, address(this));
+        glacisTokenMediator = new GlacisTokenMediator(
+            address(glacisRouter),
+            1,
+            address(this)
+        );
         xERC20Sample = new XERC20Sample(address(this));
         erc20Sample = new ERC20Sample(address(this));
         xERC20LockboxSample = new XERC20LockboxSample(

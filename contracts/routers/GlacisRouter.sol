@@ -83,7 +83,15 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         // Emit both Glacis event and the EIP-5164 event
         emit MessageDispatched(messageId, msg.sender, chainId, to, payload);
         emit GlacisRouter__MessageDispatched(
-            messageId, msg.sender, chainId, to, payload, gmps, fees, refundAddress, retriable
+            messageId,
+            msg.sender,
+            chainId,
+            to,
+            payload,
+            gmps,
+            fees,
+            refundAddress,
+            retriable
         );
 
         return messageId;
@@ -141,11 +149,18 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             fees,
             refundAddress
         );
-        
+
         // Emit both Glacis event and the EIP-5164 event
         emit MessageDispatched(messageId, msg.sender, chainId, to, payload);
         emit GlacisRouter__MessageRetried(
-            messageId, msg.sender, chainId, to, payload, gmps, fees, refundAddress
+            messageId,
+            msg.sender,
+            chainId,
+            to,
+            payload,
+            gmps,
+            fees,
+            refundAddress
         );
 
         // There is no need to check that this has been retried before. Retry as many times as desired.
@@ -233,7 +248,10 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         currentReceipt.uniqueMessagesReceived += 1;
 
         emit GlacisRouter__ReceivedMessage(
-            glacisData.messageId, glacisData.originalFrom, fromChainId, glacisData.originalTo
+            glacisData.messageId,
+            glacisData.originalFrom,
+            fromChainId,
+            glacisData.originalTo
         );
 
         // Verify that the messageID can be calculated from the data provided,
