@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
-import {XERC20Lockbox} from "../../../../contracts/token/XERC20Lockbox.sol";
+import {XERC20Lockbox} from "../../token/XERC20Lockbox.sol";
 
 contract XERC20NativeLockboxSample is XERC20Lockbox {
     constructor(

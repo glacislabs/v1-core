@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
-import {GlacisTokenClientOwnable} from "../../../contracts/client/GlacisTokenClientOwnable.sol";
-import {GlacisCommons} from "../../../contracts/commons/GlacisCommons.sol";
-import {XERC20} from "../../../contracts/token/XERC20.sol";
+import {GlacisTokenClientOwnable} from "../client/GlacisTokenClientOwnable.sol";
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
+import {XERC20} from "../token/XERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {

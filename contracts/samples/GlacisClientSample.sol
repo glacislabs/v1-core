@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
-import {GlacisClientOwnable} from "../../../contracts/client/GlacisClientOwnable.sol";
-import {GlacisCommons} from "../../../contracts/commons/GlacisCommons.sol";
+import {GlacisClientOwnable} from "../client/GlacisClientOwnable.sol";
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
 contract GlacisClientSample is GlacisClientOwnable {
     uint256 public value;

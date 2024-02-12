@@ -109,7 +109,6 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
         ];
         if (remoteAdapters[toChainId] == address(0))
             revert GlacisAbstractAdapter__NoRemoteAdapterForChainId(toChainId);
-        // TODO: check to see if it is cheaper to cache this string in immutable function
         string memory destinationAddress = remoteAdapters[toChainId]
             .toHexString();
         if (bytes(destinationChain).length == 0)

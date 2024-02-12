@@ -72,7 +72,6 @@ abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
         uint8 fromGmpId,
         bytes memory // payload
     ) public view override returns (bool) {
-        // TODO:  Explore optimization using a bloom filter
         for (uint256 i = 0; i < allowedRoutes.length; i++) {
             GlacisCommons.GlacisRoute memory allowedRoute = allowedRoutes[i];
             if (

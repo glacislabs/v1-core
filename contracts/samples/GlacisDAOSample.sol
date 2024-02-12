@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
 
-import {GlacisTokenClientOwnable} from "../../../contracts/client/GlacisTokenClientOwnable.sol";
-import {GlacisCommons} from "../../../contracts/commons/GlacisCommons.sol";
+import {GlacisTokenClientOwnable} from "../client/GlacisTokenClientOwnable.sol";
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {XERC20Sample} from "./token/XERC20Sample.sol";
 
 error GlacisDAOSample__MembersOnly();
@@ -258,7 +258,6 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
         address, // token
         uint256 // tokenAmount
     ) internal override {
-        // TODO: figure out a way to reuse the code above. Calldata vs memory should be standardized
         if (fromAddress != address(this))
             revert GlacisDAOSample__CanOnlyBeCalledBySelf();
 
