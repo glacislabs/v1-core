@@ -15,3 +15,5 @@ docs/
 
 node_modules
 cache_forge
+
+.vscode/
