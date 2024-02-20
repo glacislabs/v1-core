@@ -80,20 +80,6 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
         return bytes(glacisChainIdToAdapterChainId[chainId]).length > 0;
     }
 
-    /// @notice Adds a remote adapter on a destination chain where this adapter can route messages
-    /// @param chainId The chainId to add the remote adapter
-    /// @param adapter The address of the adapter on remote chain
-    function addRemoteAdapter(uint256 chainId, address adapter) external {
-        if (!chainIsAvailable(chainId))
-            revert GlacisAbstractAdapter__DestinationChainIdNotValid();
-        _addRemoteAdapter(chainId, adapter);
-    }
-
-    /// @notice Removes an authorized adapter on remote chain that this adapter accepts messages from
-    /// @param chainId The chainId to remove the remote adapter
-    function removeRemoteAdapter(uint256 chainId) external {
-        _removeRemoteAdapter(chainId);
-    }
 
     /// @notice Dispatch payload to specified Glacis chain ID and address through Axelar GMP
     /// @param toChainId Destination chain (Glacis ID)
@@ -107,9 +93,9 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
         string memory destinationChain = glacisChainIdToAdapterChainId[
             toChainId
         ];
-        if (remoteAdapters[toChainId] == address(0))
+        if (remoteCounterpart[toChainId] == address(0))
             revert GlacisAbstractAdapter__NoRemoteAdapterForChainId(toChainId);
-        string memory destinationAddress = remoteAdapters[toChainId]
+        string memory destinationAddress = remoteCounterpart[toChainId]
             .toHexString();
         if (bytes(destinationChain).length == 0)
             revert IGlacisAdapter__ChainIsNotAvailable(toChainId);

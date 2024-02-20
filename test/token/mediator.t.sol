@@ -43,7 +43,7 @@ contract TokenMediatorTests is LocalTestSetup {
         address[] memory addrArr = new address[](1);
         addrArr[0] = addr;
 
-        glacisTokenMediator.addRemoteMediators(chainIdArr, addrArr);
+        glacisTokenMediator.addRemoteCounterpart(chainIdArr, addrArr);
     }
 
     function test__TokenMediator_AddsRemoteAddress(
@@ -52,7 +52,7 @@ contract TokenMediatorTests is LocalTestSetup {
     ) external {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr);
-        assertEq(glacisTokenMediator.remoteMediators(chainId), addr);
+        assertEq(glacisTokenMediator.remoteCounterpart(chainId), addr);
     }
 
     function test__TokenMediator_RemovesRemoteAddress(
@@ -61,8 +61,8 @@ contract TokenMediatorTests is LocalTestSetup {
     ) external {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr);
-        glacisTokenMediator.removeRemoteMediator(chainId);
-        assertEq(glacisTokenMediator.remoteMediators(chainId), address(0));
+        glacisTokenMediator.removeRemoteCounterpart(chainId);
+        assertEq(glacisTokenMediator.remoteCounterpart(chainId), address(0));
     }
 
     function test__TokenMediator_NonOwnersCannotAddRemote() external {
@@ -74,7 +74,7 @@ contract TokenMediatorTests is LocalTestSetup {
     function test__TokenMediator_NonOwnersCannotRemoveRemote() external {
         vm.startPrank(address(0x123));
         vm.expectRevert("Ownable: caller is not the owner");
-        glacisTokenMediator.removeRemoteMediator(block.chainid);
+        glacisTokenMediator.removeRemoteCounterpart(block.chainid);
     }
 
     function test__TokenMediator_RejectsExecuteFromNonMediatorSources(

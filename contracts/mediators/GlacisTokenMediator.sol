@@ -8,16 +8,15 @@ import {IGlacisTokenMediator} from "../interfaces/IGlacisTokenMediator.sol";
 import {IGlacisClient} from "../interfaces/IGlacisClient.sol";
 import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
+import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpartManager.sol";
 import {GlacisClient__CanOnlyBeCalledByRouter} from "../client/GlacisClient.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 error GlacisTokenMediator__OnlyTokenMediatorAllowed();
 error GlacisTokenMediator__IncorrectTokenVariant(address, uint256);
-error GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
-error GlacisTokenMediator__MediatorsAndChainIDsMustHaveSameLength();
 error GlacisTokenMediator__DestinationChainUnavailable();
 
-contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
+contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartManager,  IGlacisClient {
     constructor(
         address glacisRouter_,
         uint256 quorum,
@@ -30,7 +29,6 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
 
     address public immutable GLACIS_ROUTER;
 
-    mapping(uint256 => address) public remoteMediators;
 
     /// @notice Routes the payload to the specific address on destination chain through GlacisRouter using GMPs
     /// specified in gmps array
@@ -54,7 +52,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
-        address destinationTokenMediator = remoteMediators[chainId];
+        address destinationTokenMediator = remoteCounterpart[chainId];
         if (destinationTokenMediator == address(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();
 
@@ -102,7 +100,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
-        address destinationTokenMediator = remoteMediators[chainId];
+        address destinationTokenMediator = remoteCounterpart[chainId];
         if (destinationTokenMediator == address(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();
 
@@ -142,7 +140,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         // Ensure that the executor is the glacis router and that the source is from an accepted mediator.
         if (msg.sender != GLACIS_ROUTER)
             revert GlacisClient__CanOnlyBeCalledByRouter();
-        if (fromAddress != remoteMediators[fromChainId]) {
+        if (fromAddress != remoteCounterpart[fromChainId]) {
             revert GlacisTokenMediator__OnlyTokenMediatorAllowed();
         }
 
@@ -231,7 +229,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         bytes memory payload
     ) external view returns (bool) {
         // First checks to ensure that the GlacisTokenMediator is speaking to a registered remote version
-        if (fromAddress != remoteMediators[fromChainId]) return false;
+        if (fromAddress != remoteCounterpart[fromChainId]) return false;
 
         (
             address to,
@@ -316,28 +314,5 @@ contract GlacisTokenMediator is IGlacisTokenMediator, IGlacisClient, Ownable {
         );
     }
 
-    /// @notice Adds a remote mediator on a destination chain where this mediator can route messages
-    /// @param chainIds The chainId to add the remote mediator
-    /// @param mediators The address of the mediator on remote chain
-    function addRemoteMediators(
-        uint256[] calldata chainIds,
-        address[] calldata mediators
-    ) external onlyOwner {
-        if (chainIds.length != mediators.length)
-            revert GlacisTokenMediator__MediatorsAndChainIDsMustHaveSameLength();
 
-        for (uint256 i; i < chainIds.length; ++i) {
-            if (chainIds[i] == 0)
-                revert GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
-            remoteMediators[chainIds[i]] = mediators[i];
-        }
-    }
-
-    /// @notice Removes an authorized adapter on remote chain that this adapter accepts messages from
-    /// @param chainId The chainId to remove the remote adapter
-    function removeRemoteMediator(uint256 chainId) external onlyOwner {
-        if (chainId == 0)
-            revert GlacisTokenMediator__RemoteMediatorCannotHaveChainIdZero();
-        delete remoteMediators[chainId];
-    }
 }

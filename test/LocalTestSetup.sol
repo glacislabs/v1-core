@@ -133,9 +133,11 @@ contract LocalTestSetup is Test {
         glacisIDs[0] = block.chainid;
         string[] memory axelarLabels = new string[](1);
         axelarLabels[0] = "Anvil";
+        
         adapter.setGlacisChainIds(glacisIDs, axelarLabels);
-
-        adapter.addRemoteAdapter(block.chainid, address(adapter));
+        address[] memory adapterCounterparts = new address[](1);
+        adapterCounterparts[0] = address(adapter);
+        adapter.addRemoteCounterpart(glacisIDs, adapterCounterparts);
 
         return adapter;
     }
@@ -158,7 +160,9 @@ contract LocalTestSetup is Test {
         adapter.setGlacisChainIds(glacisIDs, lzIDs);
 
         router.registerAdapter(LAYERZERO_GMP_ID, address(adapter));
-        adapter.addRemoteAdapter(block.chainid, address(adapter));
+        address[] memory adapterCounterparts = new address[](1);
+        adapterCounterparts[0] = address(adapter);
+        adapter.addRemoteCounterpart(glacisIDs, adapterCounterparts);
 
         return adapter;
     }
@@ -183,7 +187,9 @@ contract LocalTestSetup is Test {
         adapter.setGlacisChainIds(glacisIDs, wormholeIDs);
 
         router.registerAdapter(WORMHOLE_GMP_ID, address(adapter));
-        adapter.addRemoteAdapter(block.chainid, address(adapter));
+        address[] memory adapterCounterparts = new address[](1);
+        adapterCounterparts[0] = address(adapter);
+        adapter.addRemoteCounterpart(glacisIDs, adapterCounterparts);
 
         wormholeRelayer.setGlacisAdapter(address(adapter));
 
@@ -208,7 +214,9 @@ contract LocalTestSetup is Test {
 
         adapter.setAdapterChains(glacisIDs, chainSelectors);
         router.registerAdapter(CCIP_GMP_ID, address(adapter));
-        adapter.addRemoteAdapter(block.chainid, address(adapter));
+        address[] memory adapterCounterparts = new address[](1);
+        adapterCounterparts[0] = address(adapter);
+        adapter.addRemoteCounterpart(glacisIDs, adapterCounterparts);
 
         return adapter;
     }
@@ -232,7 +240,9 @@ contract LocalTestSetup is Test {
         adapter.setGlacisChainIds(glacisIDs, hyperlaneDomains);
 
         router.registerAdapter(HYPERLANE_GMP_ID, address(adapter));
-        adapter.addRemoteAdapter(block.chainid, address(adapter));
+        address[] memory adapterCounterparts = new address[](1);
+        adapterCounterparts[0] = address(adapter);
+        adapter.addRemoteCounterpart(glacisIDs, adapterCounterparts);
 
         return adapter;
     }
@@ -361,7 +371,7 @@ contract LocalTestSetup is Test {
         chainIdArr[0] = block.chainid;
         address[] memory mediatorArr = new address[](1);
         mediatorArr[0] = address(glacisTokenMediator);
-        glacisTokenMediator.addRemoteMediators(chainIdArr, mediatorArr);
+        glacisTokenMediator.addRemoteCounterpart(chainIdArr, mediatorArr);
     }
 
     // endregion
