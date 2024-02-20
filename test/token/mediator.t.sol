@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock} from "../LocalTestSetup.sol";
-import {GlacisClientSample} from "../../contracts/samples/GlacisClientSample.sol";
+import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisTokenMediator__OnlyTokenMediatorAllowed} from "../../contracts/mediators/GlacisTokenMediator.sol";
 
 import {GlacisTokenMediator, XERC20Sample} from "../LocalTestSetup.sol";

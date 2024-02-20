@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock} from "../LocalTestSetup.sol";
-import {GlacisClientSample} from "../../contracts/samples/GlacisClientSample.sol";
-import {GlacisTokenClientSampleSource} from "../../contracts/samples/GlacisTokenClientSampleSource.sol";
-import {GlacisTokenClientSampleDestination} from "../../contracts/samples/GlacisTokenClientSampleDestination.sol";
+import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
+import {GlacisTokenClientSampleSource} from "../contracts/samples/GlacisTokenClientSampleSource.sol";
+import {GlacisTokenClientSampleDestination} from "../contracts/samples/GlacisTokenClientSampleDestination.sol";
 import {GlacisRouter__ClientDeniedRoute} from "../../contracts/routers/GlacisRouter.sol";
 import {GlacisCommons} from "../../contracts/commons/GlacisCommons.sol";
 
