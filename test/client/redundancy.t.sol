@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter, WormholeRelayerMock, GlacisWormholeAdapter} from "../LocalTestSetup.sol";
-import {GlacisClientSample} from "../../contracts/samples/GlacisClientSample.sol";
+import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisCommons} from "../../contracts/commons/GlacisCommons.sol";
 import {GlacisClient} from "../../contracts/client/GlacisClient.sol";
 

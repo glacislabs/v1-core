@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter} from "../LocalTestSetup.sol";
-import {GlacisClientSample} from "../../contracts/samples/GlacisClientSample.sol";
+import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {GlacisAbstractAdapter__OnlyAdapterAllowed} from "../../contracts/adapters/GlacisAbstractAdapter.sol";
 import {SimpleNonblockingLzAppEvents} from "../../contracts/adapters/LayerZero/SimpleNonblockingLzApp.sol";
