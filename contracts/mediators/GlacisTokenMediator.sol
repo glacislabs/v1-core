@@ -10,13 +10,16 @@ import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpartManager.sol";
 import {GlacisClient__CanOnlyBeCalledByRouter} from "../client/GlacisClient.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 error GlacisTokenMediator__OnlyTokenMediatorAllowed();
 error GlacisTokenMediator__IncorrectTokenVariant(address, uint256);
 error GlacisTokenMediator__DestinationChainUnavailable();
 
-contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartManager,  IGlacisClient {
+contract GlacisTokenMediator is
+    IGlacisTokenMediator,
+    GlacisRemoteCounterpartManager,
+    IGlacisClient
+{
     constructor(
         address glacisRouter_,
         uint256 quorum,
@@ -28,7 +31,6 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
     }
 
     address public immutable GLACIS_ROUTER;
-
 
     /// @notice Routes the payload to the specific address on destination chain through GlacisRouter using GMPs
     /// specified in gmps array
@@ -313,6 +315,4 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
             (address, address, address, address, uint256, bytes)
         );
     }
-
-
 }

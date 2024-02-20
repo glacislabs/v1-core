@@ -102,7 +102,8 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
         );
 
         // Ensure that we have enough of the required fee (will revert if not this value)
-        bytes32 destinationAddress = remoteCounterpart[toChainId].addressToBytes32();
+        bytes32 destinationAddress = remoteCounterpart[toChainId]
+            .addressToBytes32();
         uint256 nativePriceQuote = MAIL_BOX.quoteDispatch(
             destinationDomain,
             destinationAddress,
@@ -160,6 +161,4 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
 
         GLACIS_ROUTER.receiveMessage(glacisChainId, _message);
     }
-
-
 }

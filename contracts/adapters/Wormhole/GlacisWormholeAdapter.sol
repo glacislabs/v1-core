@@ -152,6 +152,4 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     function chainIsAvailable(uint256 chainId) public view returns (bool) {
         return glacisChainIdToAdapterChainId[chainId] != 0;
     }
-
-
 }

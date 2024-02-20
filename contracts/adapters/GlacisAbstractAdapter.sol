@@ -19,7 +19,10 @@ error GlacisAbstractAdapter__NoRemoteAdapterForChainId(uint256 chainId); //0xb29
 /// @title Glacis Abstract Adapter for all GMPs
 /// @notice All adapters inheriting from this contract will be able to receive GlacisRouter requests through _sendMessage
 /// function
-abstract contract GlacisAbstractAdapter is GlacisRemoteCounterpartManager, IGlacisAdapter {
+abstract contract GlacisAbstractAdapter is
+    GlacisRemoteCounterpartManager,
+    IGlacisAdapter
+{
     IGlacisRouter public immutable GLACIS_ROUTER;
 
     constructor(IGlacisRouter _glacisRouter, address owner_) {

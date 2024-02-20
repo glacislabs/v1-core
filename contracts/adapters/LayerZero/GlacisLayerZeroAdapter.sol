@@ -71,7 +71,6 @@ contract GlacisLayerZeroAdapter is
         return glacisChainIdToAdapterChainId[chainId] != 0;
     }
 
-
     /// @notice Dispatch payload to specified Glacis chain ID and address through LayerZero GMP
     /// @param toChainId Destination chain (Glacis ID)
     /// @param refundAddress The address to refund native asset surplus

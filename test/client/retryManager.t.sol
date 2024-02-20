@@ -51,7 +51,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         adapter.setGlacisChainIds(glacisIDs, axelarLabels);
         address[] memory adapterCounterparts = new address[](1);
         adapterCounterparts[0] = address(adapter);
-        adapter.addRemoteCounterpart(glacisIDs, adapterCounterparts);
+        adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
         assertEq(
             glacisRouter.glacisGMPIdToAdapter(AXELAR_GMP_ID),
             address(adapter)

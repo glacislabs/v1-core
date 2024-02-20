@@ -8,13 +8,12 @@ error GlacisRemoteCounterpartManager__RemoteMediatorCannotHaveChainIdZero();
 error GlacisRemoteCounterpartManager__MediatorsAndChainIDsMustHaveSameLength();
 
 contract GlacisRemoteCounterpartManager is Ownable {
-
     mapping(uint256 => address) public remoteCounterpart;
 
     /// @notice Adds an authorized glacis counterpart component in a remote chain that interacts with this component
     /// @param chainIds An array with chains of the glacis remote components
     /// @param glacisComponents An array of addresses of the glacis components on remote chains
-    function addRemoteCounterpart(
+    function addRemoteCounterparts(
         uint256[] calldata chainIds,
         address[] calldata glacisComponents
     ) external onlyOwner {
