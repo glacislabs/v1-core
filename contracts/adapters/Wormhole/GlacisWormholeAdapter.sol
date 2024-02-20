@@ -23,9 +23,11 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     mapping(uint256 => uint16) public glacisChainIdToAdapterChainId;
     mapping(uint16 => uint256) public adapterChainIdToGlacisChainId;
 
+    // TODO: figure out a better solution for the gas limit
     uint256 internal constant GAS_LIMIT = 900000;
     uint16 internal immutable WORMHOLE_CHAIN_ID;
 
+    // TODO: Look into transfers with token to see if this too can be abstracted.
     uint256 internal constant RECEIVER_VALUE = 0;
 
     constructor(
@@ -59,7 +61,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
 
         WORMHOLE_RELAYER.sendPayloadToEvm{value: nativePriceQuote}(
             destinationChainId,
-            address(this),
+            remoteCounterpart[toChainId],
             payload,
             RECEIVER_VALUE,
             GAS_LIMIT,
@@ -83,7 +85,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     /// @param deliveryHash Wormhole delivery hash
     function receiveWormholeMessages(
         bytes memory payload,
-        bytes[] memory,
+        bytes[] memory, // TODO: figure out the use of the additional VAAs
         bytes32 sourceAddress,
         uint16 sourceChain,
         bytes32 deliveryHash
@@ -149,20 +151,5 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     /// @return True if chain is supported, false otherwise
     function chainIsAvailable(uint256 chainId) public view returns (bool) {
         return glacisChainIdToAdapterChainId[chainId] != 0;
-    }
-
-    /// @notice Adds a remote adapter on a destination chain where this adapter can route messages
-    /// @param chainId The chainId to add the remote adapter
-    /// @param adapter The address of the adapter on remote chain
-    function addRemoteAdapter(uint256 chainId, address adapter) external {
-        if (!chainIsAvailable(chainId))
-            revert GlacisAbstractAdapter__DestinationChainIdNotValid();
-        _addRemoteAdapter(chainId, adapter);
-    }
-
-    /// @notice Removes an authorized adapter on remote chain that this adapter accepts messages from
-    /// @param chainId The chainId to remove the remote adapter
-    function removeRemoteAdapter(uint256 chainId) external {
-        _removeRemoteAdapter(chainId);
     }
 }

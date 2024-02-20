@@ -71,21 +71,6 @@ contract GlacisLayerZeroAdapter is
         return glacisChainIdToAdapterChainId[chainId] != 0;
     }
 
-    /// @notice Adds a remote adapter on a destination chain where this adapter can route messages
-    /// @param chainId The chainId to add the remote adapter
-    /// @param adapter The address of the adapter on remote chain
-    function addRemoteAdapter(uint256 chainId, address adapter) external {
-        if (!chainIsAvailable(chainId))
-            revert GlacisAbstractAdapter__DestinationChainIdNotValid();
-        _addRemoteAdapter(chainId, adapter);
-    }
-
-    /// @notice Removes an authorized adapter on remote chain that this adapter accepts messages from
-    /// @param chainId The chainId to remove the remote adapter
-    function removeRemoteAdapter(uint256 chainId) external {
-        _removeRemoteAdapter(chainId);
-    }
-
     /// @notice Dispatch payload to specified Glacis chain ID and address through LayerZero GMP
     /// @param toChainId Destination chain (Glacis ID)
     /// @param refundAddress The address to refund native asset surplus
@@ -100,7 +85,7 @@ contract GlacisLayerZeroAdapter is
             revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
         _lzSend({
             _dstChainId: glacisChainIdToAdapterChainId[toChainId],
-            _dstChainAddress: remoteAdapters[toChainId],
+            _dstChainAddress: remoteCounterpart[toChainId],
             _payload: payload,
             _refundAddress: payable(refundAddress),
             _zroPaymentAddress: address(0x0),

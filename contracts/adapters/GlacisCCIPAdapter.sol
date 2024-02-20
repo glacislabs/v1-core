@@ -103,7 +103,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
 
         // Create an EVM2AnyMessage struct in memory with necessary information for sending a cross-chain message
         Client.EVM2AnyMessage memory evm2AnyMessage = Client.EVM2AnyMessage({
-            receiver: abi.encode(address(this)), // ABI-encoded receiver address
+            receiver: abi.encode(remoteCounterpart[toChainId]), // ABI-encoded receiver address
             data: payload,
             tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
             // NOTE: extraArgs is subject to changes by CCIP in the future.
@@ -213,14 +213,5 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
 
         // Calculates x = (y-b) / m, but increased m by 0.5% to overestimate value needed
         return (value - b) / (m + (m / 200));
-    }
-
-    /// @notice Adds a remote adapter on a destination chain where this adapter can route messages
-    /// @param chainId The chainId to add the remote adapter
-    /// @param adapter The address of the adapter on remote chain
-    function addRemoteAdapter(uint256 chainId, address adapter) external {
-        if (!chainIsAvailable(chainId))
-            revert GlacisAbstractAdapter__DestinationChainIdNotValid();
-        _addRemoteAdapter(chainId, adapter);
     }
 }
