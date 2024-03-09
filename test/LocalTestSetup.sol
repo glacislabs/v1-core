@@ -148,8 +148,8 @@ contract LocalTestSetup is Test {
         LayerZeroGMPMock lzEndpoint
     ) internal returns (GlacisLayerZeroAdapter adapter) {
         adapter = new GlacisLayerZeroAdapter(
-            address(lzEndpoint),
             address(router),
+            address(lzEndpoint),
             address(this)
         );
 

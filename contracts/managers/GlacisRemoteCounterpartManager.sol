@@ -3,11 +3,15 @@
 pragma solidity 0.8.18;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IGlacisRemoteCounterpartManager} from "../interfaces/IGlacisRemoteCounterpartManager.sol";
 
 error GlacisRemoteCounterpartManager__RemoteMediatorCannotHaveChainIdZero();
 error GlacisRemoteCounterpartManager__MediatorsAndChainIDsMustHaveSameLength();
 
-contract GlacisRemoteCounterpartManager is Ownable {
+contract GlacisRemoteCounterpartManager is
+    IGlacisRemoteCounterpartManager,
+    Ownable
+{
     mapping(uint256 => address) public remoteCounterpart;
 
     /// @notice Adds an authorized glacis counterpart component in a remote chain that interacts with this component
@@ -34,4 +38,9 @@ contract GlacisRemoteCounterpartManager is Ownable {
             revert GlacisRemoteCounterpartManager__RemoteMediatorCannotHaveChainIdZero();
         delete remoteCounterpart[chainId];
     }
+
+    /// @notice Gets an authorized glacis counterpart component on remote chain that this components interacts with
+    /// @param chainId The chainId to of the remote component
+    function getRemoteCounterpart(uint256 chainId) public  view returns (address)
+    { return remoteCounterpart[chainId];}
 }

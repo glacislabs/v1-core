@@ -41,7 +41,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     /// @notice Sets the corresponding CCIP selectors for the specified Glacis chain ID
     /// @param chainIds Glacis chain IDs
     /// @param chainSelectors Corresponding CCIP chain selectors
-    function setAdapterChains(
+    function setGlacisChainIds(
         uint256[] memory chainIds,
         uint64[] memory chainSelectors
     ) external onlyOwner {
@@ -92,7 +92,6 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         uint64 destinationChain = glacisChainIdToAdapterChainId[toChainId];
         if (destinationChain == 0)
             revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
-
         // Extrapolate gas limit
         uint256 extrapolation = extrapolateGasLimitFromValue(
             msg.value,
@@ -100,7 +99,6 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             payload
         );
         emit GlacisCCIPAdapter__ExtrapolatedGasLimit(extrapolation, msg.value);
-
         // Create an EVM2AnyMessage struct in memory with necessary information for sending a cross-chain message
         Client.EVM2AnyMessage memory evm2AnyMessage = Client.EVM2AnyMessage({
             receiver: abi.encode(remoteCounterpart[toChainId]), // ABI-encoded receiver address
@@ -131,9 +129,9 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             );
 
         // Send the CCIP message through the router and store the returned CCIP message ID
-        router.ccipSend{value: fees}(destinationChain, evm2AnyMessage);
-
-        // Forward any remaining balance to user
+         router.ccipSend{value: fees}(destinationChain, evm2AnyMessage);
+ 
+         // Forward any remaining balance to user
         uint256 refund = msg.value - fees;
         if (refund > 0) {
             (bool successful, ) = address(refundAddress).call{value: refund}(
@@ -174,10 +172,10 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         bytes memory payload
     ) public view returns (uint256) {
         IRouterClient router = IRouterClient(this.getRouter());
-        uint256 b = router.getFee(
+        uint256 feeAt0GasLimit = router.getFee(
             destinationChain,
             Client.EVM2AnyMessage({
-                receiver: abi.encode(address(this)), // ABI-encoded receiver address
+                receiver: abi.encode(remoteCounterpart[destinationChain]), // ABI-encoded receiver address
                 data: payload,
                 tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
                 // NOTE: extraArgs is subject to changes by CCIP in the future.
@@ -193,10 +191,10 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
                 feeToken: address(0)
             })
         );
-        uint256 feeAt100k = router.getFee(
+        uint256 feeAt100kGasLimit = router.getFee(
             destinationChain,
             Client.EVM2AnyMessage({
-                receiver: abi.encode(address(this)),
+                receiver: abi.encode(remoteCounterpart[destinationChain]),
                 data: payload,
                 tokenAmounts: new Client.EVMTokenAmount[](0),
                 extraArgs: Client._argsToBytes(
@@ -205,13 +203,16 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
                 feeToken: address(0)
             })
         );
-        uint256 m = (feeAt100k / 100_000) - b;
-
-        if (b > value) {
+        if (feeAt0GasLimit > value) {
             revert GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
         }
+        uint256 m = (feeAt100kGasLimit - feeAt0GasLimit) / 100_000 + 1;
 
         // Calculates x = (y-b) / m, but increased m by 0.5% to overestimate value needed
-        return (value - b) / (m + (m / 200));
+        uint256 gasLimit = (value - feeAt0GasLimit) / (m + (m / 200));
+
+        // CCIP caps at 2 million gas: https://docs.chain.link/ccip/service-limits
+        if (gasLimit > 2_000_000) return 2_000_000;
+        else return gasLimit;
     }
 }

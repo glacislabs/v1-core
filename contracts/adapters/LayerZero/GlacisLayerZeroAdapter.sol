@@ -19,8 +19,8 @@ contract GlacisLayerZeroAdapter is
     GlacisAbstractAdapter
 {
     constructor(
-        address lzEndpoint_,
         address glacisRouter_,
+        address lzEndpoint_,
         address owner_
     )
         SimpleNonblockingLzApp(lzEndpoint_)

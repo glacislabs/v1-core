@@ -52,7 +52,7 @@ contract TokenMediatorTests is LocalTestSetup {
     ) external {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr);
-        assertEq(glacisTokenMediator.remoteCounterpart(chainId), addr);
+        assertEq(glacisTokenMediator.getRemoteCounterpart(chainId), addr);
     }
 
     function test__TokenMediator_RemovesRemoteAddress(
@@ -62,7 +62,7 @@ contract TokenMediatorTests is LocalTestSetup {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr);
         glacisTokenMediator.removeRemoteCounterpart(chainId);
-        assertEq(glacisTokenMediator.remoteCounterpart(chainId), address(0));
+        assertEq(glacisTokenMediator.getRemoteCounterpart(chainId), address(0));
     }
 
     function test__TokenMediator_NonOwnersCannotAddRemote() external {
