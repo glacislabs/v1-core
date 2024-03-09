@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 import {GlacisTokenClientOwnable} from "../../../contracts/client/GlacisTokenClientOwnable.sol";
 import {GlacisCommons} from "../../../contracts/commons/GlacisCommons.sol";
-import {XERC20Sample} from "./token/XERC20Sample.sol";
+import {GXTSample} from "./token/GXTSample.sol";
 
 error GlacisDAOSample__MembersOnly();
 error GlacisDAOSample__VoterMustReceiveValue();
@@ -36,7 +36,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     uint256 public nextProposal;
     string public configText;
     uint256 public configVersion;
-    XERC20Sample public immutable SAMPLE_TOKEN;
+    GXTSample public immutable SAMPLE_TOKEN;
 
     modifier onlyMembers() {
         if (!members[msg.sender]) revert GlacisDAOSample__MembersOnly();
@@ -63,7 +63,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
             membersArray = members_;
         }
 
-        SAMPLE_TOKEN = new XERC20Sample(address(this));
+        SAMPLE_TOKEN = new GXTSample(address(this));
         SAMPLE_TOKEN.approve(glacisTokenMediator_, type(uint256).max);
         SAMPLE_TOKEN.setLimits(glacisTokenMediator_, 100 ether, 100 ether);
     }

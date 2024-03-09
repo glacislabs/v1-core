@@ -20,7 +20,7 @@ import {WormholeRelayerMock} from "./mocks/wormhole/WormholeRelayerMock.sol";
 import {GlacisWormholeAdapter} from "../contracts/adapters/Wormhole/GlacisWormholeAdapter.sol";
 import {GlacisCommons} from "../contracts/commons/GlacisCommons.sol";
 import {GlacisTokenMediator} from "../contracts/mediators/GlacisTokenMediator.sol";
-import {XERC20Sample} from "./contracts/samples/token/XERC20Sample.sol";
+import {GXTSample} from "./contracts/samples/token/GXTSample.sol";
 import {ERC20Sample} from "./contracts/samples/token/ERC20Sample.sol";
 import {XERC20LockboxSample} from "./contracts/samples/token/XERC20LockboxSample.sol";
 import {XERC20NativeLockboxSample} from "./contracts/samples/token/XERC20NativeLockboxSample.sol";
@@ -307,7 +307,7 @@ contract LocalTestSetup is Test {
         internal
         returns (
             GlacisTokenMediator glacisTokenMediator,
-            XERC20Sample xERC20Sample,
+            GXTSample xERC20Sample,
             ERC20Sample erc20Sample,
             XERC20LockboxSample xERC20LockboxSample,
             XERC20NativeLockboxSample xERC20NativeLockboxSample,
@@ -320,7 +320,7 @@ contract LocalTestSetup is Test {
             1,
             address(this)
         );
-        xERC20Sample = new XERC20Sample(address(this));
+        xERC20Sample = new GXTSample(address(this));
         erc20Sample = new ERC20Sample(address(this));
         xERC20LockboxSample = new XERC20LockboxSample(
             address(xERC20Sample),

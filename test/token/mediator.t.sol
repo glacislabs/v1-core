@@ -5,7 +5,7 @@ import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, Ax
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisTokenMediator__OnlyTokenMediatorAllowed} from "../../contracts/mediators/GlacisTokenMediator.sol";
 
-import {GlacisTokenMediator, XERC20Sample} from "../LocalTestSetup.sol";
+import {GlacisTokenMediator, GXTSample} from "../LocalTestSetup.sol";
 
 contract TokenMediatorTests is LocalTestSetup {
     AxelarGatewayMock internal axelarGatewayMock;
@@ -14,7 +14,7 @@ contract TokenMediatorTests is LocalTestSetup {
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;
     GlacisTokenMediator internal glacisTokenMediator;
-    XERC20Sample internal xERC20Sample;
+    GXTSample internal xERC20Sample;
 
     function setUp() public {
         glacisRouter = deployGlacisRouter();
