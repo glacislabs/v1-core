@@ -5,6 +5,8 @@ import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, Ax
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisTokenMediator__OnlyTokenMediatorAllowed} from "../../contracts/mediators/GlacisTokenMediator.sol";
 import {GlacisTokenMediator, GlacisCrossChainTokenRegistry, XERC20Sample} from "../LocalTestSetup.sol";
+// solhint-disable-next-line no-global-import
+import "forge-std/console2.sol";
 
 contract TokenMediatorTests is LocalTestSetup {
     AxelarGatewayMock internal axelarGatewayMock;
@@ -20,8 +22,8 @@ contract TokenMediatorTests is LocalTestSetup {
         glacisRouter = deployGlacisRouter();
         (
             glacisTokenMediator,
-            ,
-            ,
+            glacisCrossChainTokenRegistry,
+            xERC20Sample,
             ,
             ,
             ,
@@ -43,8 +45,15 @@ contract TokenMediatorTests is LocalTestSetup {
         chainIdArr[0] = chainId;
         address[] memory addrArr = new address[](1);
         addrArr[0] = addr;
+        address[] memory tokenArr = new address[](1);
+        tokenArr[0] = address(xERC20Sample);
 
         glacisTokenMediator.addRemoteCounterparts(chainIdArr, addrArr);
+        glacisCrossChainTokenRegistry.addTokenCounterparts(
+            chainIdArr,
+            tokenArr,
+            tokenArr
+        );
     }
 
     function test__TokenMediator_AddsRemoteAddress(
@@ -108,7 +117,7 @@ contract TokenMediatorTests is LocalTestSetup {
         uint256 chainId
     ) external {
         vm.assume(chainId != 0);
-
+        vm.assume(addr != address(0));
         addRemoteMediator(chainId, addr);
 
         // Message is being received by the router

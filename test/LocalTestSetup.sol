@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 /* solhint-disable no-console  */
 // solhint-disable-next-line no-global-import
-import "forge-std/console.sol";
+import "forge-std/console2.sol";
 
 import {Test} from "forge-std/Test.sol";
 import {GlacisRouter} from "../contracts/routers/GlacisRouter.sol";
@@ -308,7 +308,7 @@ contract LocalTestSetup is Test {
         internal
         returns (
             GlacisTokenMediator glacisTokenMediator,
-            GlacisCrossChainTokenRegistry glacisTokenRegistry,
+            GlacisCrossChainTokenRegistry glacisCrossChainTokenRegistry,
             XERC20Sample xERC20Sample,
             ERC20Sample erc20Sample,
             XERC20LockboxSample xERC20LockboxSample,
@@ -317,10 +317,10 @@ contract LocalTestSetup is Test {
             GlacisTokenClientSampleDestination glacisTokenClientSampleDestination
         )
     {
-        glacisTokenRegistry = new GlacisCrossChainTokenRegistry();
+        glacisCrossChainTokenRegistry = new GlacisCrossChainTokenRegistry();
         glacisTokenMediator = new GlacisTokenMediator(
             address(glacisRouter),
-            address(glacisTokenRegistry),
+            address(glacisCrossChainTokenRegistry),
             1,
             address(this)
         );
@@ -377,11 +377,13 @@ contract LocalTestSetup is Test {
         mediatorArr[0] = address(glacisTokenMediator);
         address[] memory tokenArr = new address[](1);
         tokenArr[0] = address(xERC20Sample);
-
         glacisTokenMediator.addRemoteCounterparts(chainIdArr, mediatorArr);
-
-/*         glacisTokenRegistry.addTokenCounterparts(chainIdArr,tokenArr, tokenArr );
- */    }
+        glacisCrossChainTokenRegistry.addTokenCounterparts(
+            chainIdArr,
+            tokenArr,
+            tokenArr
+        );
+    }
 
     // endregion
 }
