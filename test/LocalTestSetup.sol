@@ -20,7 +20,8 @@ import {WormholeRelayerMock} from "./mocks/wormhole/WormholeRelayerMock.sol";
 import {GlacisWormholeAdapter} from "../contracts/adapters/Wormhole/GlacisWormholeAdapter.sol";
 import {GlacisCommons} from "../contracts/commons/GlacisCommons.sol";
 import {GlacisTokenMediator} from "../contracts/mediators/GlacisTokenMediator.sol";
-import {GXTSample} from "./contracts/samples/token/GXTSample.sol";
+import {GlacisCrossChainTokenRegistry} from "../contracts/token/GlacisCrossChainTokenRegistry.sol";
+import {XERC20Sample} from "./contracts/samples/token/XERC20Sample.sol";
 import {ERC20Sample} from "./contracts/samples/token/ERC20Sample.sol";
 import {XERC20LockboxSample} from "./contracts/samples/token/XERC20LockboxSample.sol";
 import {XERC20NativeLockboxSample} from "./contracts/samples/token/XERC20NativeLockboxSample.sol";
@@ -307,7 +308,8 @@ contract LocalTestSetup is Test {
         internal
         returns (
             GlacisTokenMediator glacisTokenMediator,
-            GXTSample xERC20Sample,
+            GlacisCrossChainTokenRegistry glacisTokenRegistry,
+            XERC20Sample xERC20Sample,
             ERC20Sample erc20Sample,
             XERC20LockboxSample xERC20LockboxSample,
             XERC20NativeLockboxSample xERC20NativeLockboxSample,
@@ -315,12 +317,14 @@ contract LocalTestSetup is Test {
             GlacisTokenClientSampleDestination glacisTokenClientSampleDestination
         )
     {
+        glacisTokenRegistry = new GlacisCrossChainTokenRegistry();
         glacisTokenMediator = new GlacisTokenMediator(
             address(glacisRouter),
+            address(glacisTokenRegistry),
             1,
             address(this)
         );
-        xERC20Sample = new GXTSample(address(this));
+        xERC20Sample = new XERC20Sample(address(this));
         erc20Sample = new ERC20Sample(address(this));
         xERC20LockboxSample = new XERC20LockboxSample(
             address(xERC20Sample),
@@ -371,8 +375,13 @@ contract LocalTestSetup is Test {
         chainIdArr[0] = block.chainid;
         address[] memory mediatorArr = new address[](1);
         mediatorArr[0] = address(glacisTokenMediator);
+        address[] memory tokenArr = new address[](1);
+        tokenArr[0] = address(xERC20Sample);
+
         glacisTokenMediator.addRemoteCounterparts(chainIdArr, mediatorArr);
-    }
+
+/*         glacisTokenRegistry.addTokenCounterparts(chainIdArr,tokenArr, tokenArr );
+ */    }
 
     // endregion
 }

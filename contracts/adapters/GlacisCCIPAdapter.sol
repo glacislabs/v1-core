@@ -129,9 +129,9 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             );
 
         // Send the CCIP message through the router and store the returned CCIP message ID
-         router.ccipSend{value: fees}(destinationChain, evm2AnyMessage);
- 
-         // Forward any remaining balance to user
+        router.ccipSend{value: fees}(destinationChain, evm2AnyMessage);
+
+        // Forward any remaining balance to user
         uint256 refund = msg.value - fees;
         if (refund > 0) {
             (bool successful, ) = address(refundAddress).call{value: refund}(

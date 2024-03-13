@@ -17,5 +17,5 @@ interface IGlacisRemoteCounterpartManager {
 
     /// @notice Gets an authorized glacis counterpart component on remote chain that this components interacts with
     /// @param chainId The chainId to of the remote component
-    function getRemoteCounterpart(uint256 chainId) external  returns (address) ;
+    function getRemoteCounterpart(uint256 chainId) external returns (address);
 }

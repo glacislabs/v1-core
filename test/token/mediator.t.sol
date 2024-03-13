@@ -4,8 +4,7 @@ pragma solidity 0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisTokenMediator__OnlyTokenMediatorAllowed} from "../../contracts/mediators/GlacisTokenMediator.sol";
-
-import {GlacisTokenMediator, GXTSample} from "../LocalTestSetup.sol";
+import {GlacisTokenMediator, GlacisCrossChainTokenRegistry, XERC20Sample} from "../LocalTestSetup.sol";
 
 contract TokenMediatorTests is LocalTestSetup {
     AxelarGatewayMock internal axelarGatewayMock;
@@ -14,13 +13,15 @@ contract TokenMediatorTests is LocalTestSetup {
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;
     GlacisTokenMediator internal glacisTokenMediator;
-    GXTSample internal xERC20Sample;
+    GlacisCrossChainTokenRegistry internal glacisCrossChainTokenRegistry;
+    XERC20Sample internal xERC20Sample;
 
     function setUp() public {
         glacisRouter = deployGlacisRouter();
         (
             glacisTokenMediator,
-            xERC20Sample,
+            ,
+            ,
             ,
             ,
             ,
