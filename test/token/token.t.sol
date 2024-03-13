@@ -8,7 +8,7 @@ import {GlacisTokenClientSampleDestination} from "../contracts/samples/GlacisTok
 import {GlacisRouter__ClientDeniedRoute} from "../../contracts/routers/GlacisRouter.sol";
 import {GlacisCommons} from "../../contracts/commons/GlacisCommons.sol";
 
-import {GlacisTokenMediator,GlacisCrossChainTokenRegistry,  GlacisTokenClientSampleSource, GlacisTokenClientSampleDestination, XERC20Sample, ERC20Sample, XERC20LockboxSample, XERC20NativeLockboxSample} from "../LocalTestSetup.sol";
+import {GlacisTokenMediator, GlacisCrossChainTokenRegistry, GlacisTokenClientSampleSource, GlacisTokenClientSampleDestination, XERC20Sample, ERC20Sample, XERC20LockboxSample, XERC20NativeLockboxSample} from "../LocalTestSetup.sol";
 
 /* solhint-disable contract-name-camelcase */
 contract TokenTests__Axelar is LocalTestSetup {

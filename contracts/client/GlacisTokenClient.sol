@@ -119,16 +119,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     ) internal returns (bytes32) {
         bytes32 messageId = IGlacisTokenMediator(GLACIS_TOKEN_ROUTER).route{
             value: gasPayment
-        }(
-            chainId,
-            to,
-            payload,
-            gmps,
-            fees,
-            refundAddress,
-            token,
-            tokenAmount
-        );
+        }(chainId, to, payload, gmps, fees, refundAddress, token, tokenAmount);
         emit GlacisTokenClient__MessageRouted(messageId, chainId, to);
         return messageId;
     }
