@@ -153,13 +153,14 @@ contract GlacisTokenMediator is
             address to,
             address originalFrom,
             address sourceToken,
-            address token_, // No use with registry
+            address token,
             uint256 tokenAmount,
             bytes memory originalPayload
         ) = abi.decode(
                 payload,
                 (address, address, address, address, uint256, bytes)
             );
+        token = token; // TODO: remove this
         address destinationToken = IGlacisCrossChainTokenRegistry(
             GLACIS_TOKEN_REGISTRY
         ).getTokenCounterpart(fromChainId, sourceToken);
