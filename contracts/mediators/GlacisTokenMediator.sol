@@ -149,7 +149,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
             address token,
             uint256 tokenAmount,
             bytes memory originalPayload
-        ) = abi.decode(
+        ) = abi.decode( 
                 payload,
                 (address, address, address, address, uint256, bytes)
             );

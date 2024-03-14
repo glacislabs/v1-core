@@ -42,7 +42,15 @@ contract TokenMediatorTests is LocalTestSetup {
         chainIdArr[0] = chainId;
         address[] memory addrArr = new address[](1);
         addrArr[0] = addr;
+        address[] memory tokenArr = new address[](1);
+        tokenArr[0] = address(xERC20Sample);
+ 
         glacisTokenMediator.addRemoteCounterparts(chainIdArr, addrArr);
+        glacisCrossChainTokenRegistry.addTokenCounterparts(
+            chainIdArr,
+            tokenArr,
+            tokenArr
+        );
     }
 
     function test__TokenMediator_AddsRemoteAddress(

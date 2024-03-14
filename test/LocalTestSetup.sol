@@ -372,6 +372,11 @@ contract LocalTestSetup is Test {
         address[] memory mediatorArr = new address[](1);
         mediatorArr[0] = address(glacisTokenMediator);
         glacisTokenMediator.addRemoteCounterparts(chainIdArr, mediatorArr);
+        glacisCrossChainTokenRegistry.addTokenCounterparts(
+            chainIdArr,
+            tokenArr, 
+            tokenArr
+        );
     }
 
     // endregion
