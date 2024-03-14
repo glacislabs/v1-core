@@ -42,7 +42,6 @@ contract TokenMediatorTests is LocalTestSetup {
         chainIdArr[0] = chainId;
         address[] memory addrArr = new address[](1);
         addrArr[0] = addr;
-
         glacisTokenMediator.addRemoteCounterparts(chainIdArr, addrArr);
     }
 

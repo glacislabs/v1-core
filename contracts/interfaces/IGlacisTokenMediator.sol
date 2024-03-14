@@ -24,7 +24,6 @@ interface IGlacisTokenMediator is IMessageDispatcher, IMessageExecutor {
         uint8[] memory gmps,
         uint256[] memory fees,
         address refundAddress,
-        bool retry,
         address token,
         uint256 tokenAmount
     ) external payable returns (bytes32);

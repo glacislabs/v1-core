@@ -170,7 +170,6 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 gmps: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
-                retriable: p.retriable,
                 gasPayment: gasPayment,
                 token: p.token,
                 tokenAmount: p.tokenAmount

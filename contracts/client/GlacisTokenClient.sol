@@ -59,7 +59,6 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
                 gmps,
                 fees,
                 refundAddress,
-                false,
                 token,
                 tokenAmount,
                 gasPayment
@@ -94,7 +93,6 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
                 gmps,
                 fees,
                 refundAddress,
-                false,
                 token,
                 tokenAmount,
                 gasPayment
@@ -115,24 +113,13 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         uint8[] memory gmps,
         uint256[] memory fees,
         address refundAddress,
-        bool retriable,
         address token,
         uint256 tokenAmount,
         uint256 gasPayment
     ) internal returns (bytes32) {
         bytes32 messageId = IGlacisTokenMediator(GLACIS_TOKEN_ROUTER).route{
             value: gasPayment
-        }(
-            chainId,
-            to,
-            payload,
-            gmps,
-            fees,
-            refundAddress,
-            retriable,
-            token,
-            tokenAmount
-        );
+        }(chainId, to, payload, gmps, fees, refundAddress, token, tokenAmount);
         emit GlacisTokenClient__MessageRouted(messageId, chainId, to);
         return messageId;
     }

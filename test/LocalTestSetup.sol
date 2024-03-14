@@ -148,8 +148,8 @@ contract LocalTestSetup is Test {
         LayerZeroGMPMock lzEndpoint
     ) internal returns (GlacisLayerZeroAdapter adapter) {
         adapter = new GlacisLayerZeroAdapter(
-            address(lzEndpoint),
             address(router),
+            address(lzEndpoint),
             address(this)
         );
 
@@ -212,7 +212,7 @@ contract LocalTestSetup is Test {
         uint64[] memory chainSelectors = new uint64[](1);
         chainSelectors[0] = uint64(block.chainid);
 
-        adapter.setAdapterChains(glacisIDs, chainSelectors);
+        adapter.setGlacisChainIds(glacisIDs, chainSelectors);
         router.registerAdapter(CCIP_GMP_ID, address(adapter));
         address[] memory adapterCounterparts = new address[](1);
         adapterCounterparts[0] = address(adapter);

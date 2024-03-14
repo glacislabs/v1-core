@@ -10,16 +10,13 @@ import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpartManager.sol";
 import {GlacisClient__CanOnlyBeCalledByRouter} from "../client/GlacisClient.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 error GlacisTokenMediator__OnlyTokenMediatorAllowed();
 error GlacisTokenMediator__IncorrectTokenVariant(address, uint256);
 error GlacisTokenMediator__DestinationChainUnavailable();
 
-contract GlacisTokenMediator is
-    IGlacisTokenMediator,
-    GlacisRemoteCounterpartManager,
-    IGlacisClient
-{
+contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartManager,  IGlacisClient {
     constructor(
         address glacisRouter_,
         uint256 quorum,
@@ -32,6 +29,7 @@ contract GlacisTokenMediator is
 
     address public immutable GLACIS_ROUTER;
 
+
     /// @notice Routes the payload to the specific address on destination chain through GlacisRouter using GMPs
     /// specified in gmps array
     /// @param chainId Destination chain (Glacis chain ID)
@@ -40,7 +38,6 @@ contract GlacisTokenMediator is
     /// @param gmps The GMP Ids to use for routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
-    /// @param retriable True if this message could be retried
     /// @param token Token (implementing XERC20 standard) to be sent to remote contract
     /// @param tokenAmount Amount of token to send to remote contract
     function route(
@@ -50,7 +47,6 @@ contract GlacisTokenMediator is
         uint8[] memory gmps,
         uint256[] memory fees,
         address refundAddress,
-        bool retriable,
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
@@ -75,7 +71,7 @@ contract GlacisTokenMediator is
                 gmps,
                 fees,
                 refundAddress,
-                retriable
+                true // Token Mediator always enables retry
             );
     }
 
@@ -315,4 +311,6 @@ contract GlacisTokenMediator is
             (address, address, address, address, uint256, bytes)
         );
     }
+
+
 }

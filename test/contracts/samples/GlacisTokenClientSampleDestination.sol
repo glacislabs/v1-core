@@ -83,7 +83,6 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
                 gmps,
                 fees,
                 msg.sender,
-                true,
                 token,
                 amount,
                 msg.value

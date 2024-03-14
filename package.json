@@ -15,11 +15,11 @@
     "@openzeppelin/contracts": "^4.5.0",
     "prettier": "^3.0.3",
     "prettier-plugin-solidity": "^1.1.3",
+    "solhint": "^4.1.1",
     "@chainlink/contracts-ccip": "^1.2.1",
     "@hyperlane-xyz/core": "^3.5.1",
     "@layerzerolabs/scan-client": "^0.0.6",
     "@layerzerolabs/solidity-examples": "github:LayerZero-Labs/solidity-examples",
-    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "fs": "^0.0.1-security"
   }
 }

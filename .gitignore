@@ -17,3 +17,6 @@ node_modules
 cache_forge
 
 .vscode/
+package-lock.json
+forge-std
+ds-test
