@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.4 <0.9.0;
 
-import {IXERC20} from "../interfaces/IXERC20.sol";
+import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract XERC20 is ERC20, Ownable, IXERC20, ERC20Permit {
+error XERC20__OnlyBridge();
+
+contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
     /**
      * @notice The duration it takes for the limits to fully replenish
      */
@@ -66,7 +68,6 @@ contract XERC20 is ERC20, Ownable, IXERC20, ERC20Permit {
         if (msg.sender != _user) {
             _spendAllowance(_user, msg.sender, _amount);
         }
-
         _burnWithCaller(msg.sender, _user, _amount);
     }
 
@@ -236,7 +237,6 @@ contract XERC20 is ERC20, Ownable, IXERC20, ERC20Permit {
      * @param _limit The new limit
      * @param _oldLimit The old limit
      * @param _currentLimit The current limit
-     * @return _newCurrentLimit The new current limit
      */
 
     function _calculateNewCurrentLimit(
@@ -264,7 +264,6 @@ contract XERC20 is ERC20, Ownable, IXERC20, ERC20Permit {
      * @param _maxLimit The max limit
      * @param _timestamp The timestamp of the last update
      * @param _ratePerSecond The rate per second
-     * @return _limit The current limit
      */
 
     function _getCurrentLimit(
@@ -327,5 +326,56 @@ contract XERC20 is ERC20, Ownable, IXERC20, ERC20Permit {
             _useMinterLimits(_caller, _amount);
         }
         _mint(_user, _amount);
+    }
+}
+
+contract XERC20 is XERC20Basic, IXERC20GlacisExtension {
+    /**
+     * @notice Constructs the initial config of the XERC20
+     *
+     * @param _name The name of the token
+     * @param _symbol The symbol of the token
+     * @param _factory The factory which deployed this contract
+     */
+
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address _factory
+    ) XERC20Basic(_name, _symbol, _factory) {}
+
+    mapping(uint256 => address) private chainIdToTokenVariant;
+
+    /**
+     * @notice Returns a token variant for a specific chainId if it exists.
+     *
+     * @param chainId The chainId of the token variant.
+     */
+    function getTokenVariant(
+        uint256 chainId
+    ) external view override returns (address) {
+        return chainIdToTokenVariant[chainId];
+    }
+
+    /**
+     * @notice Sets a token variant for a specific chainId.
+     *
+     * @param chainId The chainId of the token variant.
+     * @param variant The address of the token variant.
+     */
+    function setTokenVariant(
+        uint256 chainId,
+        address variant
+    ) external onlyOwner {
+        chainIdToTokenVariant[chainId] = variant;
+    }
+
+    /**
+     * @notice Removes a token variant for a specific chainId.
+     *
+     * @param chainId The chainId of the token variant.
+     */
+    function removeTokenVariant(uint256 chainId) external onlyOwner {
+        delete chainIdToTokenVariant[chainId];
     }
 }

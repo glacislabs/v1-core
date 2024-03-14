@@ -129,3 +129,20 @@ interface IXERC20 {
 
     function burn(address _user, uint256 _amount) external;
 }
+
+interface IXERC20GlacisExtension {
+    /**
+     * @notice Returns a token variant for a specific chainId if it exists.
+     *
+     * @param chainId The chainId of the token variant.
+     */
+    function getTokenVariant(uint256 chainId) external view returns (address);
+
+    /**
+     * @notice Sets a token variant for a specific chainId.
+     *
+     * @param chainId The chainId of the token variant.
+     * @param variant The address of the token variant.
+     */
+    function setTokenVariant(uint256 chainId, address variant) external;
+}

@@ -3,7 +3,7 @@ pragma solidity 0.8.18;
 
 /* solhint-disable no-console  */
 // solhint-disable-next-line no-global-import
-import "forge-std/console2.sol";
+import "forge-std/console.sol";
 
 import {Test} from "forge-std/Test.sol";
 import {GlacisRouter} from "../contracts/routers/GlacisRouter.sol";
@@ -20,7 +20,6 @@ import {WormholeRelayerMock} from "./mocks/wormhole/WormholeRelayerMock.sol";
 import {GlacisWormholeAdapter} from "../contracts/adapters/Wormhole/GlacisWormholeAdapter.sol";
 import {GlacisCommons} from "../contracts/commons/GlacisCommons.sol";
 import {GlacisTokenMediator} from "../contracts/mediators/GlacisTokenMediator.sol";
-import {GlacisCrossChainTokenRegistry} from "../contracts/token/GlacisCrossChainTokenRegistry.sol";
 import {XERC20Sample} from "./contracts/samples/token/XERC20Sample.sol";
 import {ERC20Sample} from "./contracts/samples/token/ERC20Sample.sol";
 import {XERC20LockboxSample} from "./contracts/samples/token/XERC20LockboxSample.sol";
@@ -149,8 +148,8 @@ contract LocalTestSetup is Test {
         LayerZeroGMPMock lzEndpoint
     ) internal returns (GlacisLayerZeroAdapter adapter) {
         adapter = new GlacisLayerZeroAdapter(
-            address(router),
             address(lzEndpoint),
+            address(router),
             address(this)
         );
 
@@ -308,7 +307,6 @@ contract LocalTestSetup is Test {
         internal
         returns (
             GlacisTokenMediator glacisTokenMediator,
-            GlacisCrossChainTokenRegistry glacisCrossChainTokenRegistry,
             XERC20Sample xERC20Sample,
             ERC20Sample erc20Sample,
             XERC20LockboxSample xERC20LockboxSample,
@@ -317,10 +315,8 @@ contract LocalTestSetup is Test {
             GlacisTokenClientSampleDestination glacisTokenClientSampleDestination
         )
     {
-        glacisCrossChainTokenRegistry = new GlacisCrossChainTokenRegistry();
         glacisTokenMediator = new GlacisTokenMediator(
             address(glacisRouter),
-            address(glacisCrossChainTokenRegistry),
             1,
             address(this)
         );
@@ -375,14 +371,7 @@ contract LocalTestSetup is Test {
         chainIdArr[0] = block.chainid;
         address[] memory mediatorArr = new address[](1);
         mediatorArr[0] = address(glacisTokenMediator);
-        address[] memory tokenArr = new address[](1);
-        tokenArr[0] = address(xERC20Sample);
         glacisTokenMediator.addRemoteCounterparts(chainIdArr, mediatorArr);
-        glacisCrossChainTokenRegistry.addTokenCounterparts(
-            chainIdArr,
-            tokenArr,
-            tokenArr
-        );
     }
 
     // endregion

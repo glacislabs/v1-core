@@ -6,34 +6,29 @@ import {IGlacisTokenClient} from "../interfaces/IGlacisTokenClient.sol";
 import {IGlacisRouter} from "../interfaces/IGlacisRouter.sol";
 import {IGlacisTokenMediator} from "../interfaces/IGlacisTokenMediator.sol";
 import {IGlacisClient} from "../interfaces/IGlacisClient.sol";
-import {IXERC20} from "../interfaces/IXERC20.sol";
+import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpartManager.sol";
-import {IGlacisCrossChainTokenRegistry} from "../interfaces/IGlacisCrossChainTokenRegistry.sol";
 import {GlacisClient__CanOnlyBeCalledByRouter} from "../client/GlacisClient.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
 error GlacisTokenMediator__OnlyTokenMediatorAllowed();
 error GlacisTokenMediator__IncorrectTokenVariant(address, uint256);
 error GlacisTokenMediator__DestinationChainUnavailable();
-error GlacisTokenMediator__CrossChainTokenNotRegistered();
 
-contract GlacisTokenMediator is
-    IGlacisTokenMediator,
-    IGlacisClient,
-    GlacisRemoteCounterpartManager
-{
+contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartManager,  IGlacisClient {
     constructor(
         address glacisRouter_,
-        address glacisTokenRegistry_,
         uint256 quorum,
         address owner
     ) IGlacisClient(quorum) {
+        // Approve conversation between token routers in all chains through all GMPs
         GLACIS_ROUTER = glacisRouter_;
-        GLACIS_TOKEN_REGISTRY = glacisTokenRegistry_;
         transferOwnership(owner);
     }
 
     address public immutable GLACIS_ROUTER;
-    address public immutable GLACIS_TOKEN_REGISTRY;
+
 
     /// @notice Routes the payload to the specific address on destination chain through GlacisRouter using GMPs
     /// specified in gmps array
@@ -55,13 +50,10 @@ contract GlacisTokenMediator is
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
-        address destinationTokenMediator = getRemoteCounterpart(chainId);
+        address destinationTokenMediator = remoteCounterpart[chainId];
         if (destinationTokenMediator == address(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();
-        if (
-            IGlacisCrossChainTokenRegistry(GLACIS_TOKEN_REGISTRY)
-                .getTokenCounterpart(chainId, token) == address(0)
-        ) revert GlacisTokenMediator__CrossChainTokenNotRegistered();
+
         IXERC20(token).burn(msg.sender, tokenAmount);
         bytes memory tokenPayload = packTokenPayload(
             chainId,
@@ -79,7 +71,7 @@ contract GlacisTokenMediator is
                 gmps,
                 fees,
                 refundAddress,
-                true
+                true // Token Mediator always enables retry
             );
     }
 
@@ -106,7 +98,7 @@ contract GlacisTokenMediator is
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
-        address destinationTokenMediator = getRemoteCounterpart(chainId);
+        address destinationTokenMediator = remoteCounterpart[chainId];
         if (destinationTokenMediator == address(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();
 
@@ -146,9 +138,10 @@ contract GlacisTokenMediator is
         // Ensure that the executor is the glacis router and that the source is from an accepted mediator.
         if (msg.sender != GLACIS_ROUTER)
             revert GlacisClient__CanOnlyBeCalledByRouter();
-        if (fromAddress != getRemoteCounterpart(fromChainId)) {
+        if (fromAddress != remoteCounterpart[fromChainId]) {
             revert GlacisTokenMediator__OnlyTokenMediatorAllowed();
         }
+
         (
             address to,
             address originalFrom,
@@ -160,20 +153,21 @@ contract GlacisTokenMediator is
                 payload,
                 (address, address, address, address, uint256, bytes)
             );
-        token = token; // TODO: remove this
-        address destinationToken = IGlacisCrossChainTokenRegistry(
-            GLACIS_TOKEN_REGISTRY
-        ).getTokenCounterpart(fromChainId, sourceToken);
-        if (destinationToken == address(0)) {
-            revert GlacisTokenMediator__CrossChainTokenNotRegistered();
+
+        // Ensure that the destination token accepts the source token.
+        if (
+            sourceToken != token &&
+            sourceToken != getTokenVariant(token, fromChainId)
+        ) {
+            revert GlacisTokenMediator__IncorrectTokenVariant(
+                sourceToken,
+                fromChainId
+            );
         }
+
         // Mint & execute
-        IXERC20(destinationToken).mint(to, tokenAmount);
-        emit GlacisTokenMediator__TokensMinted(
-            to,
-            destinationToken,
-            tokenAmount
-        );
+        IXERC20(token).mint(to, tokenAmount);
+        emit GlacisTokenMediator__TokensMinted(to, token, tokenAmount);
         IGlacisTokenClient client = IGlacisTokenClient(to);
 
         if (to.code.length > 0) {
@@ -182,7 +176,7 @@ contract GlacisTokenMediator is
                 fromChainId,
                 originalFrom,
                 originalPayload,
-                destinationToken,
+                token,
                 tokenAmount
             );
         }
@@ -233,7 +227,7 @@ contract GlacisTokenMediator is
         bytes memory payload
     ) external view returns (bool) {
         // First checks to ensure that the GlacisTokenMediator is speaking to a registered remote version
-        if (fromAddress != getRemoteCounterpart(fromChainId)) return false;
+        if (fromAddress != remoteCounterpart[fromChainId]) return false;
 
         (
             address to,
@@ -259,20 +253,33 @@ contract GlacisTokenMediator is
             );
     }
 
+    function getTokenVariant(
+        address token,
+        uint256 chainId
+    ) internal view returns (address destinationToken) {
+        try IXERC20GlacisExtension(token).getTokenVariant(chainId) returns (
+            address variant
+        ) {
+            if (variant == address(0)) destinationToken = token;
+            else destinationToken = variant;
+        } catch {
+            destinationToken = token;
+        }
+    }
+
     function packTokenPayload(
         uint256 chainId,
         address to,
         address token,
         uint256 tokenAmount,
         bytes memory payload
-    ) internal returns (bytes memory) {
+    ) internal view returns (bytes memory) {
         return
             abi.encode(
                 to,
                 msg.sender,
                 token,
-                IGlacisCrossChainTokenRegistry(GLACIS_TOKEN_REGISTRY)
-                    .getTokenCounterpart(chainId, token),
+                getTokenVariant(token, chainId),
                 tokenAmount,
                 payload
             );
@@ -304,4 +311,6 @@ contract GlacisTokenMediator is
             (address, address, address, address, uint256, bytes)
         );
     }
+
+
 }

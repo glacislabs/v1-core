@@ -4,9 +4,8 @@ pragma solidity 0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisTokenMediator__OnlyTokenMediatorAllowed} from "../../contracts/mediators/GlacisTokenMediator.sol";
-import {GlacisTokenMediator, GlacisCrossChainTokenRegistry, XERC20Sample} from "../LocalTestSetup.sol";
-// solhint-disable-next-line no-global-import
-import "forge-std/console2.sol";
+
+import {GlacisTokenMediator, XERC20Sample} from "../LocalTestSetup.sol";
 
 contract TokenMediatorTests is LocalTestSetup {
     AxelarGatewayMock internal axelarGatewayMock;
@@ -15,14 +14,12 @@ contract TokenMediatorTests is LocalTestSetup {
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;
     GlacisTokenMediator internal glacisTokenMediator;
-    GlacisCrossChainTokenRegistry internal glacisCrossChainTokenRegistry;
     XERC20Sample internal xERC20Sample;
 
     function setUp() public {
         glacisRouter = deployGlacisRouter();
         (
             glacisTokenMediator,
-            glacisCrossChainTokenRegistry,
             xERC20Sample,
             ,
             ,
@@ -45,15 +42,7 @@ contract TokenMediatorTests is LocalTestSetup {
         chainIdArr[0] = chainId;
         address[] memory addrArr = new address[](1);
         addrArr[0] = addr;
-        address[] memory tokenArr = new address[](1);
-        tokenArr[0] = address(xERC20Sample);
-
         glacisTokenMediator.addRemoteCounterparts(chainIdArr, addrArr);
-        glacisCrossChainTokenRegistry.addTokenCounterparts(
-            chainIdArr,
-            tokenArr,
-            tokenArr
-        );
     }
 
     function test__TokenMediator_AddsRemoteAddress(
@@ -62,7 +51,7 @@ contract TokenMediatorTests is LocalTestSetup {
     ) external {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr);
-        assertEq(glacisTokenMediator.getRemoteCounterpart(chainId), addr);
+        assertEq(glacisTokenMediator.remoteCounterpart(chainId), addr);
     }
 
     function test__TokenMediator_RemovesRemoteAddress(
@@ -72,7 +61,7 @@ contract TokenMediatorTests is LocalTestSetup {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr);
         glacisTokenMediator.removeRemoteCounterpart(chainId);
-        assertEq(glacisTokenMediator.getRemoteCounterpart(chainId), address(0));
+        assertEq(glacisTokenMediator.remoteCounterpart(chainId), address(0));
     }
 
     function test__TokenMediator_NonOwnersCannotAddRemote() external {
@@ -117,7 +106,7 @@ contract TokenMediatorTests is LocalTestSetup {
         uint256 chainId
     ) external {
         vm.assume(chainId != 0);
-        vm.assume(addr != address(0));
+
         addRemoteMediator(chainId, addr);
 
         // Message is being received by the router
