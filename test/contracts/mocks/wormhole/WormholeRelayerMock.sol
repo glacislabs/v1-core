@@ -9,8 +9,6 @@ import {GlacisWormholeAdapter} from "../../../../contracts/adapters/Wormhole/Gla
 contract WormholeRelayerMock is IWormholeRelayer, IWormholeReceiver {
     address public glacisWormholeAdapter;
 
-    //TODO: See if we can decode the payload within the mock wormhole router to get the destination address
-    // and remove this function.
     function setGlacisAdapter(address glacisWormholeAdapter_) public {
         glacisWormholeAdapter = glacisWormholeAdapter_;
     }
@@ -77,8 +75,6 @@ contract WormholeRelayerMock is IWormholeRelayer, IWormholeReceiver {
                 gasLimit
             );
     }
-
-    // TODO: implement everything below
 
     function deliver(
         bytes[] memory encodedVMs,

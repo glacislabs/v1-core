@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.18;
 import {AddressString} from "../../contracts/libraries/AddressString.sol";
-import {CheckSum} from "../../contracts/libraries/CheckSum.sol";
+import {CheckSum} from "../contracts/libraries/CheckSum.sol";
 import {LocalTestSetup} from "../LocalTestSetup.sol";
 /* solhint-disable no-console  */
 // solhint-disable-next-line no-global-import

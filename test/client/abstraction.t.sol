@@ -4,18 +4,18 @@ pragma solidity 0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisClientTextSample} from "../contracts/samples/GlacisClientTextSample.sol";
-import {AxelarOneWayGatewayMock} from "../mocks/axelar/AxelarOneWayGatewayMock.sol";
+import {AxelarOneWayGatewayMock} from "../contracts/mocks/axelar/AxelarOneWayGatewayMock.sol";
 import {AxelarSample} from "../contracts/samples/control/AxelarSample.sol";
 import {AxelarTextSample} from "../contracts/samples/control/AxelarTextSample.sol";
 import {LayerZeroSample} from "../contracts/samples/control/LayerZeroSample.sol";
 import {LayerZeroTextSample} from "../contracts/samples/control/LayerZeroTextSample.sol";
-import {LayerZeroOneWayMock} from "../mocks/lz/LayerZeroOneWayMock.sol";
-import {WormholeRelayerMock} from "../mocks/wormhole/WormholeRelayerMock.sol";
+import {LayerZeroOneWayMock} from "../contracts/mocks/lz/LayerZeroOneWayMock.sol";
+import {WormholeRelayerMock} from "../contracts/mocks/wormhole/WormholeRelayerMock.sol";
 import {GlacisWormholeAdapter} from "../../contracts/adapters/Wormhole/GlacisWormholeAdapter.sol";
 import {GlacisHyperlaneAdapter} from "../../contracts/adapters/GlacisHyperlaneAdapter.sol";
-import {HyperlaneMailboxMock} from "../mocks/hyperlane/HyperlaneMailboxMock.sol";
+import {HyperlaneMailboxMock} from "../contracts/mocks/hyperlane/HyperlaneMailboxMock.sol";
 import {GlacisCCIPAdapter} from "../../contracts/adapters/GlacisCCIPAdapter.sol";
-import {CCIPRouterMock} from "../mocks/ccip/CCIPRouterMock.sol";
+import {CCIPRouterMock} from "../contracts/mocks/ccip/CCIPRouterMock.sol";
 
 /* solhint-disable contract-name-camelcase */
 contract AbstractionTests__Axelar is LocalTestSetup {

@@ -3,9 +3,9 @@
 pragma solidity 0.8.18;
 import {LocalTestSetup, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, GlacisAxelarAdapter, LayerZeroGMPMock, GlacisLayerZeroAdapter} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
-import {IGlacisRouterEvents} from "../../contracts/interfaces/IGlacisRouter.sol";
+import {IGlacisRouterEvents} from "../../../../contracts/interfaces/IGlacisRouter.sol";
 import {GlacisRouter__MessageAlreadyReceivedFromGMP} from "../../contracts/routers/GlacisRouter.sol";
-import {AxelarRetryGatewayMock} from "../mocks/axelar/AxelarRetryGatewayMock.sol";
+import {AxelarRetryGatewayMock} from "../contracts/mocks/axelar/AxelarRetryGatewayMock.sol";
 
 contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
     AxelarGatewayMock internal axelarGatewayMock;
