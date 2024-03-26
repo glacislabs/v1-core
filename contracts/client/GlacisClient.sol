@@ -154,7 +154,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     function receiveMessage(
         uint8[] memory fromGmpIds,
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         bytes memory payload
     ) external virtual override {
         if (msg.sender != GLACIS_ROUTER)

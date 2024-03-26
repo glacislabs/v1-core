@@ -6,6 +6,7 @@ import {GlacisAbstractRouter} from "./GlacisAbstractRouter.sol";
 import {IGlacisClient} from "../interfaces/IGlacisClient.sol";
 import {IGlacisAdapter} from "../interfaces/IGlacisAdapter.sol";
 import {IGlacisRouter} from "../interfaces/IGlacisRouter.sol";
+import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 
 error GlacisRouter__GMPNotSupported(); //0xed2e8008
 error GlacisRouter__RouteDoesNotExist(); //0xeb470cd2
@@ -21,6 +22,10 @@ error GlacisRouter__GMPCountMustBeAtLeastOne();
 error GlacisRouter__FeeSumMustBeEqualToValue();
 
 contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
+
+    using AddressBytes32 for address;
+    using AddressBytes32 for bytes32;
+
     mapping(bytes32 => MessageData) private messageReceipts;
     mapping(bytes32 => address) public messageSenders;
 
@@ -45,7 +50,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param retriable True if this message could be retried
     function route(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -61,11 +66,12 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             to,
             payload
         );
+        bytes32 from = msg.sender.toBytes32();
         // @notice This follows GlacisData stored within GlacisCommons
         bytes memory glacisPackedPayload = abi.encode(
             messageId,
             nonce,
-            msg.sender,
+            from,
             to,
             payload
         );
@@ -81,10 +87,9 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         }
 
         // Emit both Glacis event and the EIP-5164 event
-        emit MessageDispatched(messageId, msg.sender, chainId, to, payload);
         emit GlacisRouter__MessageDispatched(
             messageId,
-            msg.sender,
+            from,
             chainId,
             to,
             payload,
@@ -109,7 +114,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param nonce Unique value for this message routing
     function routeRetry(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -135,10 +140,11 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             )
         ) revert GlacisRouter__MessageInputNotIdenticalForRetry();
 
+        bytes32 from = msg.sender.toBytes32();
         bytes memory glacisPackedPayload = abi.encode(
             messageId,
             nonce,
-            msg.sender,
+            from,
             to,
             payload
         );
@@ -151,10 +157,9 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         );
 
         // Emit both Glacis event and the EIP-5164 event
-        emit MessageDispatched(messageId, msg.sender, chainId, to, payload);
         emit GlacisRouter__MessageRetried(
             messageId,
-            msg.sender,
+            from,
             chainId,
             to,
             payload,
@@ -215,7 +220,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         );
 
         // Check if the route is allowed
-        IGlacisClient client = IGlacisClient(glacisData.originalTo);
+        IGlacisClient client = IGlacisClient(glacisData.originalTo.toAddress());
 
         bool routeAllowed = client.isAllowedRoute(
             fromChainId,
@@ -281,7 +286,6 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
                 payload
             );
 
-            emit MessageIdExecuted(fromChainId, glacisData.messageId);
         } else {
             messageReceipts[glacisData.messageId] = currentReceipt;
         }
