@@ -7,14 +7,6 @@ import {IWormholeRelayer, VaaKey} from "../../../../contracts/adapters/Wormhole/
 import {GlacisWormholeAdapter} from "../../../../contracts/adapters/Wormhole/GlacisWormholeAdapter.sol";
 
 contract WormholeRelayerMock is IWormholeRelayer, IWormholeReceiver {
-    address public glacisWormholeAdapter;
-
-    //TODO: See if we can decode the payload within the mock wormhole router to get the destination address
-    // and remove this function.
-    function setGlacisAdapter(address glacisWormholeAdapter_) public {
-        glacisWormholeAdapter = glacisWormholeAdapter_;
-    }
-
     function sendPayloadToEvm(
         uint16 targetChain,
         address targetAddress,
@@ -23,7 +15,7 @@ contract WormholeRelayerMock is IWormholeRelayer, IWormholeReceiver {
         uint256 gasLimit
     ) public payable returns (uint64) {
         // Execute on the same chain
-        IWormholeReceiver(this).receiveWormholeMessages(
+        receiveWormholeMessages(
             payload,
             new bytes[](0),
             bytes32(bytes20(msg.sender)) >> 96,
@@ -45,18 +37,19 @@ contract WormholeRelayerMock is IWormholeRelayer, IWormholeReceiver {
 
     function receiveWormholeMessages(
         bytes memory payload,
-        bytes[] memory additionalVaas,
+        bytes[] memory, // additionalVaas,
         bytes32 sourceAddress,
         uint16 sourceChain,
         bytes32 deliveryHash
     ) public payable override {
-        GlacisWormholeAdapter(glacisWormholeAdapter).receiveWormholeMessages(
-            payload,
-            additionalVaas,
-            sourceAddress,
-            sourceChain,
-            deliveryHash
-        );
+        IWormholeReceiver(address(uint160(uint256(sourceAddress))))
+            .receiveWormholeMessages(
+                payload,
+                new bytes[](0),
+                bytes32(bytes20(msg.sender)) >> 96,
+                sourceChain,
+                deliveryHash
+            );
     }
 
     function sendPayloadToEvm(
@@ -77,8 +70,6 @@ contract WormholeRelayerMock is IWormholeRelayer, IWormholeReceiver {
                 gasLimit
             );
     }
-
-    // TODO: implement everything below
 
     function deliver(
         bytes[] memory encodedVMs,

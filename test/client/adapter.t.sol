@@ -25,7 +25,7 @@ contract AdapterTests__Axelar is LocalTestSetup {
             axelarGatewayMock,
             axelarGasServiceMock
         );
-        clientSample = deployGlacisClientSample(glacisRouter);
+        (clientSample,) = deployGlacisClientSample(glacisRouter);
     }
 
     function test__onlyAdapterAllowedFailure_Axelar() external {
@@ -61,7 +61,7 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
         glacisRouter = deployGlacisRouter();
         (lzGatewayMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
-        clientSample = deployGlacisClientSample(glacisRouter);
+        (clientSample,) = deployGlacisClientSample(glacisRouter);
         lzAdapterHarness = new GlacisLayerZeroAdapterHarness(
             address(lzGatewayMock),
             address(glacisRouter),

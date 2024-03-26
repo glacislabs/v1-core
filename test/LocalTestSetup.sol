@@ -7,16 +7,16 @@ import "forge-std/console.sol";
 
 import {Test} from "forge-std/Test.sol";
 import {GlacisRouter} from "../contracts/routers/GlacisRouter.sol";
-import {AxelarGatewayMock} from "./mocks/axelar/AxelarGatewayMock.sol";
-import {AxelarRetryGatewayMock} from "./mocks/axelar/AxelarRetryGatewayMock.sol";
-import {AxelarGasServiceMock} from "./mocks/axelar/AxelarGasServiceMock.sol";
-import {LayerZeroGMPMock} from "./mocks/lz/LayerZeroMock.sol";
+import {AxelarGatewayMock} from "./contracts/mocks/axelar/AxelarGatewayMock.sol";
+import {AxelarRetryGatewayMock} from "./contracts/mocks/axelar/AxelarRetryGatewayMock.sol";
+import {AxelarGasServiceMock} from "./contracts/mocks/axelar/AxelarGasServiceMock.sol";
+import {LayerZeroGMPMock} from "./contracts/mocks/lz/LayerZeroMock.sol";
 import {GlacisAxelarAdapter} from "../contracts/adapters/GlacisAxelarAdapter.sol";
 import {GlacisLayerZeroAdapter} from "../contracts/adapters/LayerZero/GlacisLayerZeroAdapter.sol";
 import {GlacisClientSample} from "./contracts/samples/GlacisClientSample.sol";
 import {GlacisClientTextSample} from "./contracts/samples/GlacisClientTextSample.sol";
 import {GlacisDAOSample} from "./contracts/samples/GlacisDAOSample.sol";
-import {WormholeRelayerMock} from "./mocks/wormhole/WormholeRelayerMock.sol";
+import {WormholeRelayerMock} from "./contracts/mocks/wormhole/WormholeRelayerMock.sol";
 import {GlacisWormholeAdapter} from "../contracts/adapters/Wormhole/GlacisWormholeAdapter.sol";
 import {GlacisCommons} from "../contracts/commons/GlacisCommons.sol";
 import {GlacisTokenMediator} from "../contracts/mediators/GlacisTokenMediator.sol";
@@ -27,9 +27,9 @@ import {XERC20NativeLockboxSample} from "./contracts/samples/token/XERC20NativeL
 import {GlacisTokenClientSampleSource} from "./contracts/samples/GlacisTokenClientSampleSource.sol";
 import {GlacisTokenClientSampleDestination} from "./contracts/samples/GlacisTokenClientSampleDestination.sol";
 import {GlacisHyperlaneAdapter} from "../contracts/adapters/GlacisHyperlaneAdapter.sol";
-import {HyperlaneMailboxMock} from "./mocks/hyperlane/HyperlaneMailboxMock.sol";
+import {HyperlaneMailboxMock} from "./contracts/mocks/hyperlane/HyperlaneMailboxMock.sol";
 import {GlacisCCIPAdapter} from "../contracts/adapters/GlacisCCIPAdapter.sol";
-import {CCIPRouterMock} from "./mocks/ccip/CCIPRouterMock.sol";
+import {CCIPRouterMock} from "./contracts/mocks/ccip/CCIPRouterMock.sol";
 
 contract LocalTestSetup is Test {
     uint8 internal constant AXELAR_GMP_ID = 1;
@@ -191,8 +191,6 @@ contract LocalTestSetup is Test {
         adapterCounterparts[0] = address(adapter);
         adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
 
-        wormholeRelayer.setGlacisAdapter(address(adapter));
-
         return adapter;
     }
 
@@ -253,7 +251,13 @@ contract LocalTestSetup is Test {
 
     function deployGlacisClientSample(
         GlacisRouter router
-    ) internal returns (GlacisClientSample clientSample) {
+    )
+        internal
+        returns (
+            GlacisClientSample clientSample,
+            GlacisClientTextSample clientTextSample
+        )
+    {
         clientSample = new GlacisClientSample(address(router), address(this));
         GlacisClientSample(clientSample).addAllowedRoute(
             GlacisCommons.GlacisRoute(
@@ -262,11 +266,6 @@ contract LocalTestSetup is Test {
                 0 // fromGmpId
             )
         );
-    }
-
-    function deployGlacisClientTextSample(
-        GlacisRouter router
-    ) internal returns (GlacisClientTextSample clientTextSample) {
         clientTextSample = new GlacisClientTextSample(
             address(router),
             address(this)
@@ -279,6 +278,7 @@ contract LocalTestSetup is Test {
             )
         );
     }
+
 
     function deployGlacisDAOSample(
         address[] memory members,
