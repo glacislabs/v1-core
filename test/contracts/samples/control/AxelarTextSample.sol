@@ -47,6 +47,6 @@ contract AxelarTextSample is AxelarExecutable {
         string calldata,
         bytes calldata payload_
     ) internal override {
-        (, , value) = abi.decode(payload_, (bytes32, bytes32, string));
+        value = abi.decode(payload_, (string));
     }
 }

@@ -27,7 +27,7 @@ contract RedundancyTests is LocalTestSetup {
         );
         (lzGatewayMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
-        clientSample = deployGlacisClientSample(glacisRouter);
+        (clientSample,) = deployGlacisClientSample(glacisRouter);
     }
 
     function test__Redundancy_Quorum1_AxelarLayerZero(uint256 val) external {
@@ -116,7 +116,6 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
         whMock = deployWormholeFixture();
         whAdapter = deployWormholeAdapter(glacisRouter, whMock);
         harness = new RedundancyReceivingDataTestHarness(address(glacisRouter));
-        whMock.setGlacisAdapter(address(whAdapter));
     }
 
     function test_Redundancy_ReceivingGMPData() public {

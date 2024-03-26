@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter, WormholeRelayerMock, GlacisWormholeAdapter} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisClientTextSample} from "../contracts/samples/GlacisClientTextSample.sol";
 import {AxelarOneWayGatewayMock} from "../contracts/mocks/axelar/AxelarOneWayGatewayMock.sol";
@@ -11,11 +11,18 @@ import {LayerZeroSample} from "../contracts/samples/control/LayerZeroSample.sol"
 import {LayerZeroTextSample} from "../contracts/samples/control/LayerZeroTextSample.sol";
 import {LayerZeroOneWayMock} from "../contracts/mocks/lz/LayerZeroOneWayMock.sol";
 import {WormholeRelayerMock} from "../contracts/mocks/wormhole/WormholeRelayerMock.sol";
-import {GlacisWormholeAdapter} from "../../contracts/adapters/Wormhole/GlacisWormholeAdapter.sol";
+import {WormholeRelayerMock} from "../contracts/mocks/wormhole/WormholeRelayerMock.sol";
+import {WormholeSample} from "../contracts/samples/control/WormholeSample.sol";
+import {WormholeTextSample} from "../contracts/samples/control/WormholeTextSample.sol";
 import {GlacisHyperlaneAdapter} from "../../contracts/adapters/GlacisHyperlaneAdapter.sol";
 import {HyperlaneMailboxMock} from "../contracts/mocks/hyperlane/HyperlaneMailboxMock.sol";
 import {GlacisCCIPAdapter} from "../../contracts/adapters/GlacisCCIPAdapter.sol";
 import {CCIPRouterMock} from "../contracts/mocks/ccip/CCIPRouterMock.sol";
+import {CCIPSample} from "../contracts/samples/control/CCIPSample.sol";
+import {CCIPTextSample} from "../contracts/samples/control/CCIPTextSample.sol";
+import {HyperlaneSample} from "../contracts/samples/control/HyperlaneSample.sol";
+import {HyperlaneTextSample} from "../contracts/samples/control/HyperlaneTextSample.sol";
+import "forge-std/console.sol";
 
 /* solhint-disable contract-name-camelcase */
 contract AbstractionTests__Axelar is LocalTestSetup {
@@ -33,7 +40,7 @@ contract AbstractionTests__Axelar is LocalTestSetup {
             axelarGatewayMock,
             axelarGasServiceMock
         );
-        clientSample = deployGlacisClientSample(glacisRouter);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
     }
 
     function test__Abstraction_Axelar(uint256 val) external {
@@ -79,7 +86,7 @@ contract AbstractionTests__LayerZero is LocalTestSetup {
         glacisRouter = deployGlacisRouter();
         (lzGatewayMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
-        clientSample = deployGlacisClientSample(glacisRouter);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
     }
 
     function test__Abstraction_LayerZero(uint256 val) external {
@@ -130,7 +137,7 @@ contract AbstractionTests__Wormhole is LocalTestSetup {
             glacisRouter,
             wormholeRelayerMock
         );
-        clientSample = deployGlacisClientSample(glacisRouter);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
     }
 
     function test__Abstraction_Wormhole(uint256 val) external {
@@ -181,7 +188,7 @@ contract AbstractionTests__Hyperlane is LocalTestSetup {
             glacisRouter,
             hyperlaneMailboxMock
         );
-        clientSample = deployGlacisClientSample(glacisRouter);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
     }
 
     function test__Abstraction_Hyperlane(uint256 val) external {
@@ -230,7 +237,7 @@ contract AbstractionTests__CCIP is LocalTestSetup {
         glacisRouter = deployGlacisRouter();
         (ccipMock) = deployCCIPFixture();
         ccipAdapter = deployCCIPAdapter(glacisRouter, ccipMock);
-        clientSample = deployGlacisClientSample(glacisRouter);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
     }
 
     function test__Abstraction_CCIP(uint256 val) external {
@@ -267,136 +274,14 @@ contract AbstractionTests__CCIP is LocalTestSetup {
     receive() external payable {}
 }
 
-contract AbstractionTests__GasBenchmark is LocalTestSetup {
-    AxelarOneWayGatewayMock internal axelarGatewayMock;
-    AxelarGasServiceMock internal axelarGasServiceMock;
-    GlacisAxelarAdapter internal axelarAdapter;
+contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;
-    GlacisClientTextSample internal glacisTextSample;
-    AxelarSample internal axelarSample;
-    AxelarTextSample internal axelarTextSample;
+    GlacisClientTextSample internal clientTextSample;
 
-    LayerZeroOneWayMock internal lzEndpointMock;
-    GlacisLayerZeroAdapter internal lzAdapter;
-    LayerZeroSample internal lzSample;
-    LayerZeroTextSample internal lzTextSample;
-
-    function setUp() public {
-        glacisRouter = deployGlacisRouter();
-
-        // Uses one-way gateway mock to only find the gas on the send side & isolate gas
-        axelarGatewayMock = new AxelarOneWayGatewayMock();
-        axelarGasServiceMock = new AxelarGasServiceMock();
-        axelarAdapter = deployAxelarAdapters(
-            glacisRouter,
-            AxelarGatewayMock(address(axelarGatewayMock)),
-            axelarGasServiceMock
-        );
-        clientSample = deployGlacisClientSample(glacisRouter);
-        glacisTextSample = deployGlacisClientTextSample(glacisRouter);
-        axelarSample = new AxelarSample(
-            address(axelarGatewayMock),
-            address(axelarGasServiceMock)
-        );
-        axelarTextSample = new AxelarTextSample(
-            address(axelarGatewayMock),
-            address(axelarGasServiceMock)
-        );
-
-        // Uses lz one-way mock
-        lzEndpointMock = new LayerZeroOneWayMock();
-        lzAdapter = deployLayerZeroAdapters(
-            glacisRouter,
-            LayerZeroGMPMock(address(lzEndpointMock))
-        );
-        lzSample = new LayerZeroSample(address(lzEndpointMock));
-        lzTextSample = new LayerZeroTextSample(address(lzEndpointMock));
-        lzSample.setTrustedRemote(1, abi.encode(lzSample));
-        lzTextSample.setTrustedRemote(1, abi.encode(lzTextSample));
-    }
-
-    // =============== Sending portion of Abstraction ================
-    function test_gas__ExecuteSend_GlacAx(uint256 val) external {
-        clientSample.setRemoteValue__execute{value: 0.1 ether}(
-            block.chainid,
-            address(clientSample),
-            AXELAR_GMP_ID,
-            abi.encode(val)
-        );
-    }
-
-    function test_gas__ExecuteSend_Axelar(uint256 val) external {
-        axelarSample.setRemoteValue{value: 0.1 ether}(
-            "Anvil",
-            address(axelarSample),
-            abi.encode(val)
-        );
-    }
-
-    function test_gas__ExecuteSend_GlacLZ(uint256 val) external {
-        clientSample.setRemoteValue__execute{value: 0.1 ether}(
-            block.chainid,
-            address(clientSample),
-            LAYERZERO_GMP_ID,
-            abi.encode(val)
-        );
-    }
-
-    function test_gas__ExecuteSend_LZ(uint256 val) external {
-        lzSample.setRemoteValue{value: 0.1 ether}(1, val);
-    }
-
-    // ======= Sending portion of Abstraction with Long String ========
-    function test_gas__ExecTxtSend_GlacAx(uint256) external {
-        glacisTextSample.setRemoteValue__execute{value: 0.1 ether}(
-            block.chainid,
-            address(clientSample),
-            AXELAR_GMP_ID,
-            abi.encode(
-                "hellohellohellohellohellohellohellohellohellohellohellohellohel"
-            )
-        );
-    }
-
-    function test_gas__ExecTxtSend_Axelar(uint256) external {
-        axelarTextSample.setRemoteValue{value: 0.1 ether}(
-            "Anvil",
-            address(axelarSample),
-            abi.encode(
-                "hellohellohellohellohellohellohellohellohellohellohellohellohel"
-            )
-        );
-    }
-
-    function test_gas__ExecTxtSend_GlacLZ(uint256) external {
-        glacisTextSample.setRemoteValue__execute{value: 0.1 ether}(
-            block.chainid,
-            address(clientSample),
-            LAYERZERO_GMP_ID,
-            abi.encode(
-                "hellohellohellohellohellohellohellohellohellohellohellohellohel"
-            )
-        );
-    }
-
-    function test_gas__ExecTxtSend_LZ(uint256) external {
-        lzTextSample.setRemoteValue(
-            1,
-            "hellohellohellohellohellohellohellohellohellohellohellohellohel"
-        );
-    }
-
-    receive() external payable {}
-}
-
-contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     AxelarGatewayMock internal axelarGatewayMock;
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
-    GlacisRouter internal glacisRouter;
-    GlacisClientSample internal clientSample;
-    GlacisClientTextSample internal glacisTextSample;
     AxelarSample internal axelarSample;
     AxelarTextSample internal axelarTextSample;
 
@@ -404,6 +289,21 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     GlacisLayerZeroAdapter internal lzAdapter;
     LayerZeroSample internal lzSample;
     LayerZeroTextSample internal lzTextSample;
+
+    WormholeRelayerMock internal wormholeRelayerMock;
+    GlacisWormholeAdapter internal wormholeAdapter;
+    WormholeSample internal wormholeSample;
+    WormholeTextSample internal wormholeTextSample;
+
+    CCIPRouterMock internal ccipRouterMock;
+    GlacisCCIPAdapter internal ccipAdapter;
+    CCIPSample internal ccipSample;
+    CCIPTextSample internal ccipTextSample;
+
+    HyperlaneMailboxMock internal hyperlaneMailboxMock;
+    GlacisHyperlaneAdapter internal hyperlaneAdapter;
+    HyperlaneSample internal hyperlaneSample;
+    HyperlaneTextSample internal hyperlaneTextSample;
 
     function setUp() public {
         glacisRouter = deployGlacisRouter();
@@ -419,17 +319,47 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
             address(axelarGatewayMock),
             address(axelarGasServiceMock)
         );
-        clientSample = deployGlacisClientSample(glacisRouter);
+        axelarTextSample = new AxelarTextSample(
+            address(axelarGatewayMock),
+            address(axelarGasServiceMock)
+        );
+        (clientSample, clientTextSample) = deployGlacisClientSample(
+            glacisRouter
+        );
 
-        // Uses lz one-way mock
         (lzEndpointMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzEndpointMock);
         lzSample = new LayerZeroSample(address(lzEndpointMock));
         lzSample.setTrustedRemoteAddress(1, abi.encodePacked(lzSample));
+        lzTextSample = new LayerZeroTextSample(address(lzEndpointMock));
+        lzTextSample.setTrustedRemoteAddress(1, abi.encodePacked(lzTextSample));
+
+        (wormholeRelayerMock) = deployWormholeFixture();
+        wormholeAdapter = deployWormholeAdapter(
+            glacisRouter,
+            wormholeRelayerMock
+        );
+        wormholeSample = new WormholeSample(address(wormholeRelayerMock), 1);
+        wormholeTextSample = new WormholeTextSample(
+            address(wormholeRelayerMock),
+            1
+        );
+
+        (ccipRouterMock) = deployCCIPFixture();
+        ccipAdapter = deployCCIPAdapter(glacisRouter, ccipRouterMock);
+        ccipSample = new CCIPSample(address(ccipRouterMock));
+        ccipTextSample = new CCIPTextSample(address(ccipRouterMock));
+
+        (hyperlaneMailboxMock) = deployHyperlaneFixture();
+        hyperlaneAdapter = deployHyperlaneAdapter(
+            glacisRouter,
+            hyperlaneMailboxMock
+        );
+        hyperlaneSample = new HyperlaneSample(address(hyperlaneMailboxMock));
+        hyperlaneTextSample = new HyperlaneTextSample(address(hyperlaneMailboxMock));
     }
 
-    // ============== Receiving portion of Abstraction ===============
-    function test_gas__ExecReceive_GlacAx(uint256 val) external {
+    function test_gas__Axelar_Int_Glacis(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
             address(clientSample),
@@ -438,15 +368,32 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
         );
     }
 
-    function test_gas__ExecReceive_Axelar(uint256 val) external {
-        axelarSample.setRemoteValue{value: 0.1 ether}(
-            "Anvil",
-            address(axelarSample),
-            abi.encode(bytes32(0), bytes32(0), val)
+    function test_gas__Axelar_Str_Glacis(string memory val) external {
+        clientTextSample.setRemoteValue__execute{value: 0.1 ether}(
+            block.chainid,
+            address(clientTextSample),
+            AXELAR_GMP_ID,
+            abi.encode(val)
         );
     }
 
-    function test_gas__ExecReceive_GlacLZ(uint256 val) external {
+    function test_gas__Axelar_Int_Control(bytes memory val) external {
+        axelarSample.setRemoteValue{value: 0.1 ether}(
+            "Anvil",
+            address(axelarSample),
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__Axelar_Str_Control(string memory val) external {
+        axelarTextSample.setRemoteValue{value: 0.1 ether}(
+            "Anvil",
+            address(axelarTextSample),
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__LayerZero_Int_Glacis(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
             address(clientSample),
@@ -455,8 +402,123 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
         );
     }
 
-    function test_gas__ExecReceive_LZ(uint256 val) external {
-        lzSample.setRemoteValue{value: 0.1 ether}(1, val);
+    function test_gas__LayerZero_Str_Glacis(string memory val) external {
+        clientTextSample.setRemoteValue__execute{value: 0.1 ether}(
+            block.chainid,
+            address(clientTextSample),
+            LAYERZERO_GMP_ID,
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__LayerZero_Int_Control(uint256 val) external {
+        lzSample.setRemoteValue{value: 0.1 ether}(1, abi.encode(val));
+    }
+
+    function test_gas__LayerZero_Str_Control(string memory val) external {
+        lzTextSample.setRemoteValue{value: 0.1 ether}(1, abi.encode(val));
+    }
+
+    function test_gas__Wormhole_Int_Glacis(uint256 val) external {
+        clientSample.setRemoteValue__execute{value: 0.1 ether}(
+            block.chainid,
+            address(clientSample),
+            WORMHOLE_GMP_ID,
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__Wormhole_Str_Glacis(string memory val) external {
+        clientTextSample.setRemoteValue__execute{value: 0.1 ether}(
+            block.chainid,
+            address(clientTextSample),
+            WORMHOLE_GMP_ID,
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__Wormhole_Int_Control(uint256 val) external {
+        wormholeSample.setRemoteValue{value: 0.1 ether}(
+            uint16(block.chainid),
+            address(wormholeSample),
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__Wormhole_Str_Control(string memory val) external {
+        wormholeTextSample.setRemoteValue{value: 0.1 ether}(
+            uint16(block.chainid),
+            address(wormholeSample),
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__CCIP_Int_Control(uint256 val) external {
+        ccipSample.setRemoteValue{value: 0.1 ether}(
+            uint16(block.chainid),
+            address(ccipSample),
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__CCIP_Int_Glacis(uint256 val) external {
+        clientSample.setRemoteValue__execute{value: 0.1 ether}(
+            block.chainid,
+            address(clientSample),
+            CCIP_GMP_ID,
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__CCIP_Str_Control(string memory val) external {
+        ccipTextSample.setRemoteValue{value: 0.1 ether}(
+            uint16(block.chainid),
+            address(ccipTextSample),
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__CCIP_Str_Glacis(string memory val) external {
+        clientTextSample.setRemoteValue__execute{value: 0.1 ether}(
+            block.chainid,
+            address(clientTextSample),
+            CCIP_GMP_ID,
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__Hyperlane_Int_Control(uint256 val) external {
+        hyperlaneSample.setRemoteValue{value: 0.1 ether}(
+            uint16(block.chainid),
+            address(hyperlaneSample),
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__Hyperlane_Int_Glacis(uint256 val) external {
+        clientSample.setRemoteValue__execute{value: 0.1 ether}(
+            block.chainid,
+            address(clientSample),
+            HYPERLANE_GMP_ID,
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__Hyperlane_Str_Control(string memory val) external {
+        hyperlaneSample.setRemoteValue{value: 0.1 ether}(
+            uint16(block.chainid),
+            address(hyperlaneSample),
+            abi.encode(val)
+        );
+    }
+
+    function test_gas__Hyperlane_Str_Glacis(string memory val) external {
+        clientSample.setRemoteValue__execute{value: 0.1 ether}(
+            block.chainid,
+            address(clientSample),
+            HYPERLANE_GMP_ID,
+            abi.encode(val)
+        );
     }
 
     receive() external payable {}

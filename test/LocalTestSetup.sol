@@ -191,8 +191,6 @@ contract LocalTestSetup is Test {
         adapterCounterparts[0] = address(adapter);
         adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
 
-        wormholeRelayer.setGlacisAdapter(address(adapter));
-
         return adapter;
     }
 
@@ -253,7 +251,13 @@ contract LocalTestSetup is Test {
 
     function deployGlacisClientSample(
         GlacisRouter router
-    ) internal returns (GlacisClientSample clientSample) {
+    )
+        internal
+        returns (
+            GlacisClientSample clientSample,
+            GlacisClientTextSample clientTextSample
+        )
+    {
         clientSample = new GlacisClientSample(address(router), address(this));
         GlacisClientSample(clientSample).addAllowedRoute(
             GlacisCommons.GlacisRoute(
@@ -262,11 +266,6 @@ contract LocalTestSetup is Test {
                 0 // fromGmpId
             )
         );
-    }
-
-    function deployGlacisClientTextSample(
-        GlacisRouter router
-    ) internal returns (GlacisClientTextSample clientTextSample) {
         clientTextSample = new GlacisClientTextSample(
             address(router),
             address(this)
@@ -279,6 +278,7 @@ contract LocalTestSetup is Test {
             )
         );
     }
+
 
     function deployGlacisDAOSample(
         address[] memory members,

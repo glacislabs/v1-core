@@ -8,21 +8,10 @@ contract LayerZeroTextSample is NonblockingLzApp {
 
     constructor(address _lzEndpoint) NonblockingLzApp(_lzEndpoint) {}
 
-    function _nonblockingLzReceive(
-        uint16,
-        bytes memory,
-        uint64,
-        bytes memory _payload
-    ) internal override {
-        string memory _value = abi.decode(_payload, (string));
-        value = _value;
-    }
-
     function setRemoteValue(
         uint16 destChainId,
-        string memory val
+        bytes memory payload
     ) external payable {
-        bytes memory payload = abi.encode(val, abi.encode(val));
         _lzSend({
             _dstChainId: destChainId,
             _payload: payload,
@@ -31,5 +20,14 @@ contract LayerZeroTextSample is NonblockingLzApp {
             _adapterParams: bytes(""),
             _nativeFee: msg.value
         });
+    }
+
+    function _nonblockingLzReceive(
+        uint16,
+        bytes memory,
+        uint64,
+        bytes memory _payload
+    ) internal override {
+        value = abi.decode(_payload, (string));
     }
 }
