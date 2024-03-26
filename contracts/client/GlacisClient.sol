@@ -19,7 +19,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     event GlacisClient__MessageRouted(
         bytes32 messageId,
         uint256 toChainId,
-        address to
+        bytes32 to
     );
 
     constructor(
@@ -40,7 +40,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
     function _routeSingle(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8 gmp,
         address refundAddress,
@@ -69,7 +69,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     /// @param gmps Glacis ID of the GMP to be used for the routing
     function _routeRedundant(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -95,7 +95,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
     function _route(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -123,7 +123,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
     function _retryRoute(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -171,7 +171,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     function _receiveMessage(
         uint8[] memory fromGmpIds,
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         bytes memory payload
     ) internal virtual {}
 }

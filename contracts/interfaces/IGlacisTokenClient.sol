@@ -15,7 +15,7 @@ interface IGlacisTokenClient is IGlacisAccessControlClient {
     function receiveMessageWithTokens(
         uint8[] memory fromGmpIds,
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         bytes calldata payload,
         address token,
         uint256 amount
