@@ -61,10 +61,10 @@ abstract contract GlacisAbstractAdapter is
 
     /// @notice Verifies that the source address of the request is an authorized adapter
     /// @param sourceAddress Source address
-    modifier onlyAuthorizedAdapter(uint256 chainId, address sourceAddress) {
+    modifier onlyAuthorizedAdapter(uint256 chainId, bytes32 sourceAddress) {
         if (
             chainId == 0 ||
-            remoteCounterpart[chainId] == address(0) ||
+            remoteCounterpart[chainId] == bytes32(0) ||
             sourceAddress != remoteCounterpart[chainId]
         ) {
             revert GlacisAbstractAdapter__OnlyAdapterAllowed();

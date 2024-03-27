@@ -180,7 +180,7 @@ contract RedundancyReceivingDataTestHarness is GlacisClient {
     function _receiveMessage(
         uint8[] memory _fromGmpIds,
         uint256 _fromChainId,
-        address _fromAddress,
+        bytes32 _fromAddress,
         bytes memory _payload
     ) internal override {
         fromGmpIds = _fromGmpIds;

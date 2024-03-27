@@ -6,6 +6,7 @@ import {IGlacisRouter} from "../../interfaces/IGlacisRouter.sol";
 import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {SimpleNonblockingLzApp} from "./SimpleNonblockingLzApp.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid} from "../GlacisAbstractAdapter.sol";
+import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 
 error GlacisLayerZeroAdapter__LZChainIdNotAccepted(uint256);
 
@@ -18,6 +19,8 @@ contract GlacisLayerZeroAdapter is
     SimpleNonblockingLzApp,
     GlacisAbstractAdapter
 {
+    using AddressBytes32 for bytes32;
+
     constructor(
         address glacisRouter_,
         address lzEndpoint_,
@@ -85,7 +88,7 @@ contract GlacisLayerZeroAdapter is
             revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
         _lzSend({
             _dstChainId: glacisChainIdToAdapterChainId[toChainId],
-            _dstChainAddress: remoteCounterpart[toChainId],
+            _dstChainAddress: remoteCounterpart[toChainId].toAddress(),
             _payload: payload,
             _refundAddress: payable(refundAddress),
             _zroPaymentAddress: address(0x0),
@@ -108,7 +111,7 @@ contract GlacisLayerZeroAdapter is
         override
         onlyAuthorizedAdapter(
             adapterChainIdToGlacisChainId[srcChainId],
-            address(uint160(bytes20(sourceAddress)))
+            bytes32((bytes20(sourceAddress)))
         )
     {
         if (adapterChainIdToGlacisChainId[srcChainId] == 0)
