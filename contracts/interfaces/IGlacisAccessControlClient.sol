@@ -7,7 +7,7 @@ interface IGlacisAccessControlClient {
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         uint8 fromGmpId,
         bytes memory payload
     ) external view returns (bool);

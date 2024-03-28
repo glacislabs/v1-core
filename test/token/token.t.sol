@@ -7,11 +7,14 @@ import {GlacisTokenClientSampleSource} from "../contracts/samples/GlacisTokenCli
 import {GlacisTokenClientSampleDestination} from "../contracts/samples/GlacisTokenClientSampleDestination.sol";
 import {GlacisRouter__ClientDeniedRoute} from "../../contracts/routers/GlacisRouter.sol";
 import {GlacisCommons} from "../../contracts/commons/GlacisCommons.sol";
+import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 
 import {GlacisTokenMediator, GlacisTokenClientSampleSource, GlacisTokenClientSampleDestination, XERC20Sample, ERC20Sample, XERC20LockboxSample, XERC20NativeLockboxSample} from "../LocalTestSetup.sol";
 
 /* solhint-disable contract-name-camelcase */
 contract TokenTests__Axelar is LocalTestSetup {
+    using AddressBytes32 for address;
+
     AxelarGatewayMock internal axelarGatewayMock;
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
@@ -62,7 +65,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             value: 0.1 ether
         }(
             block.chainid,
-            address(glacisTokenClientSampleDestination),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             AXELAR_GMP_ID,
             "", // no message only tokens
             address(xERC20Sample),
@@ -98,7 +101,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             value: 0.1 ether
         }(
             block.chainid,
-            address(glacisTokenClientSampleDestination),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             AXELAR_GMP_ID,
             abi.encode(remoteIncrementValue),
             address(xERC20Sample),
@@ -132,7 +135,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             value: 0.1 ether
         }(
             block.chainid,
-            randomAccount,
+            randomAccount.toBytes32(),
             AXELAR_GMP_ID,
             abi.encode(0),
             address(xERC20Sample),
@@ -157,7 +160,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             value: 0.1 ether
         }(
             block.chainid,
-            address(glacisTokenClientSampleDestination),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             AXELAR_GMP_ID,
             abi.encode(1),
             address(xERC20Sample),
@@ -181,7 +184,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             value: 0.5 ether
         }(
             block.chainid,
-            address(glacisTokenClientSampleDestination),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             gmps,
             createFees(0.5 ether / 2, 2),
             abi.encode(1),
@@ -206,7 +209,7 @@ contract TokenTests__Axelar is LocalTestSetup {
         glacisTokenClientSampleDestination.addAllowedRoute(
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
-                address(glacisTokenClientSampleSource), // from
+                address(glacisTokenClientSampleSource).toBytes32(), // from
                 0 // fromGmpId
             )
         );
@@ -218,7 +221,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             value: 0.1 ether
         }(
             block.chainid,
-            address(glacisTokenClientSampleDestination),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             AXELAR_GMP_ID,
             abi.encode(1),
             address(xERC20Sample),
@@ -234,7 +237,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             value: 0.1 ether
         }(
             block.chainid,
-            address(glacisTokenClientSampleDestination),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             AXELAR_GMP_ID,
             abi.encode(1),
             address(xERC20Sample),
@@ -253,7 +256,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             value: 0.5 ether
         }(
             block.chainid,
-            address(glacisTokenClientSampleDestination),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             gmps,
             createFees(0.5 ether / 2, 2),
             abi.encode(1),
@@ -439,7 +442,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             value: 0.1 ether
         }(
             block.chainid,
-            address(glacisTokenClientSampleDestination),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             AXELAR_GMP_ID,
             abi.encode(remoteIncrementValue),
             address(xERC20Sample),

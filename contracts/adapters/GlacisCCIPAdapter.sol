@@ -8,6 +8,7 @@ import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered} from "./GlacisAbstractAdapter.sol";
+import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 
 error GlacisCCIPAdapter__GlacisFeeExtrapolationFailed(
     uint256 currentBalance,
@@ -21,6 +22,8 @@ error GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
 /// Axelar. Also receives Axelar requests through _execute function and routes them to GlacisRouter
 /// @dev Axelar uses labels for chain IDs so requires mappings to Glacis chain IDs
 contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
+    using AddressBytes32 for address;
+
     mapping(uint256 => uint64) public glacisChainIdToAdapterChainId;
     mapping(uint64 => uint256) public adapterChainIdToGlacisChainId;
 
@@ -150,7 +153,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         override
         onlyAuthorizedAdapter(
             adapterChainIdToGlacisChainId[any2EvmMessage.sourceChainSelector],
-            abi.decode(any2EvmMessage.sender, (address))
+            address(abi.decode(any2EvmMessage.sender, (address))).toBytes32()
         )
     {
         uint256 sourceChainId = adapterChainIdToGlacisChainId[

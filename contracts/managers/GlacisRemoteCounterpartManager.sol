@@ -12,14 +12,14 @@ contract GlacisRemoteCounterpartManager is
     IGlacisRemoteCounterpartManager,
     Ownable
 {
-    mapping(uint256 => address) public remoteCounterpart;
+    mapping(uint256 => bytes32) public remoteCounterpart;
 
     /// @notice Adds an authorized glacis counterpart component in a remote chain that interacts with this component
     /// @param chainIds An array with chains of the glacis remote components
     /// @param counterpart An array of addresses of the glacis components on remote chains
     function addRemoteCounterparts(
         uint256[] calldata chainIds,
-        address[] calldata counterpart
+        bytes32[] calldata counterpart
     ) external onlyOwner {
         if (chainIds.length != counterpart.length)
             revert GlacisRemoteCounterpartManager__MediatorsAndChainIDsMustHaveSameLength();
@@ -42,7 +42,7 @@ contract GlacisRemoteCounterpartManager is
     /// @param chainId The chainId to of the remote component
     function getRemoteCounterpart(
         uint256 chainId
-    ) public view returns (address) {
+    ) public view returns (bytes32) {
         return remoteCounterpart[chainId];
     }
 }

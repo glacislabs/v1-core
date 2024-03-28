@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IGlacisRouterEvents} from "../interfaces/IGlacisRouter.sol";
+import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 error GlacisAbstractRouter__OnlyAdaptersAllowed(); //0x55ff424d
@@ -15,6 +16,8 @@ abstract contract GlacisAbstractRouter is
     IGlacisRouterEvents,
     Ownable
 {
+    using AddressBytes32 for address;
+
     uint256 internal immutable GLACIS_CHAIN_ID;
 
     mapping(uint8 => address) public glacisGMPIdToAdapter;
@@ -70,7 +73,7 @@ abstract contract GlacisAbstractRouter is
     /// if implementing message retrying
     function _createGlacisMessageId(
         uint256 toChainId,
-        address to,
+        bytes32 to,
         bytes memory payload
     ) internal returns (bytes32 messageId, uint256 messageNonce) {
         messageNonce = nonce++;
@@ -86,7 +89,7 @@ abstract contract GlacisAbstractRouter is
         );
         emit GlacisAbstractRouter__MessageIdCreated(
             messageId,
-            msg.sender,
+            msg.sender.toBytes32(),
             messageNonce
         );
     }
@@ -103,7 +106,7 @@ abstract contract GlacisAbstractRouter is
         bytes32 messageId,
         uint256 toChainId,
         uint256 fromChainId,
-        address to,
+        bytes32 to,
         uint256 messageNonce,
         bytes memory payload
     ) public view returns (bool) {
@@ -113,7 +116,7 @@ abstract contract GlacisAbstractRouter is
                 toChainId,
                 fromChainId,
                 to,
-                msg.sender,
+                msg.sender.toBytes32(),
                 messageNonce,
                 payload
             );
@@ -132,8 +135,8 @@ abstract contract GlacisAbstractRouter is
         bytes32 messageId,
         uint256 toChainId,
         uint256 fromChainId,
-        address to,
-        address messageSender,
+        bytes32 to,
+        bytes32 messageSender,
         uint256 messageNonce,
         bytes memory payload
     ) internal pure returns (bool) {

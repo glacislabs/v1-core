@@ -9,6 +9,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {AddressString} from "../libraries/AddressString.sol";
 import {GlacisAbstractAdapter} from "./GlacisAbstractAdapter.sol";
 import {IGlacisRouter} from "../routers/GlacisRouter.sol";
+import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 
 /// @title Glacis Adapter for Axelar GMP
 /// @dev This adapter receives GlacisRouter requests through _sendMessage function and forwards them to
@@ -18,6 +19,8 @@ import {IGlacisRouter} from "../routers/GlacisRouter.sol";
 contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     using Strings for address;
     using AddressString for string;
+    using AddressBytes32 for bytes32;
+    using AddressBytes32 for address;
     IAxelarGasService public immutable GAS_SERVICE;
 
     mapping(uint256 => string) public glacisChainIdToAdapterChainId;
@@ -92,9 +95,10 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
         string memory destinationChain = glacisChainIdToAdapterChainId[
             toChainId
         ];
-        if (remoteCounterpart[toChainId] == address(0))
+        if (remoteCounterpart[toChainId] == bytes32(0))
             revert GlacisAbstractAdapter__NoRemoteAdapterForChainId(toChainId);
         string memory destinationAddress = remoteCounterpart[toChainId]
+            .toAddress()
             .toHexString();
         if (bytes(destinationChain).length == 0)
             revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
@@ -124,7 +128,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
         override
         onlyAuthorizedAdapter(
             adapterChainIdToGlacisChainId[sourceChain],
-            _toLowerCase(string(sourceAddress[2:42])).toAddress()
+            _toLowerCase(string(sourceAddress[2:42])).toAddress().toBytes32()
         )
     {
         uint256 sourceChainId = adapterChainIdToGlacisChainId[sourceChain];

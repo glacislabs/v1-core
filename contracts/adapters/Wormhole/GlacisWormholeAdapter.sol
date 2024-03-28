@@ -6,6 +6,7 @@ import {IWormholeReceiver} from "./IWormholeReceiver.sol";
 import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {IGlacisRouter} from "../../routers/GlacisRouter.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered} from "../GlacisAbstractAdapter.sol";
+import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 
 error GlacisWormholeAdapter__OnlyRelayerAllowed();
 error GlacisWormholeAdapter__AlreadyProcessedVAA();
@@ -17,6 +18,8 @@ error GlacisWormholeAdapter__RefundAddressMustReceiveNativeCurrency();
 /// Wormhole. Also receives Wormhole requests through the receiveWormholeMessages function and routes
 /// them to GlacisRouter
 contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
+    using AddressBytes32 for bytes32;
+
     IWormholeRelayer public immutable WORMHOLE_RELAYER;
     mapping(bytes32 => bool) public seenDeliveryVaaHashes;
 
@@ -61,7 +64,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
 
         WORMHOLE_RELAYER.sendPayloadToEvm{value: nativePriceQuote}(
             destinationChainId,
-            remoteCounterpart[toChainId],
+            remoteCounterpart[toChainId].toAddress(),
             payload,
             RECEIVER_VALUE,
             GAS_LIMIT,
@@ -94,7 +97,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
         payable
         onlyAuthorizedAdapter(
             adapterChainIdToGlacisChainId[sourceChain],
-            address(uint160(bytes20(sourceAddress << 96)))
+            sourceAddress
         )
     {
         if (msg.sender != address(WORMHOLE_RELAYER))

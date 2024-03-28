@@ -3,30 +3,25 @@
 pragma solidity 0.8.18;
 
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
-import {IMessageDispatcher} from "../interfaces/IMessageDispatcher.sol";
-import {IMessageExecutor} from "../interfaces/IMessageExecutor.sol";
 
-abstract contract IGlacisRouterEvents is
-    GlacisCommons,
-    IMessageDispatcher,
-    IMessageExecutor
+abstract contract IGlacisRouterEvents is GlacisCommons
 {
     event GlacisAbstractRouter__MessageIdCreated(
         bytes32 indexed messageId,
-        address indexed sender,
+        bytes32 indexed sender,
         uint256 nonce
     );
     event GlacisRouter__ReceivedMessage(
         bytes32 indexed messageId,
-        address indexed from,
+        bytes32 indexed from,
         uint256 indexed fromChainId,
-        address to
+        bytes32 to
     );
     event GlacisRouter__MessageDispatched(
         bytes32 indexed messageId,
-        address indexed from,
+        bytes32 indexed from,
         uint256 indexed toChainId,
-        address to,
+        bytes32 to,
         bytes data,
         uint8[] gmps,
         uint256[] fees,
@@ -35,9 +30,9 @@ abstract contract IGlacisRouterEvents is
     );
     event GlacisRouter__MessageRetried(
         bytes32 indexed messageId,
-        address indexed from,
+        bytes32 indexed from,
         uint256 indexed toChainId,
-        address to,
+        bytes32 to,
         bytes data,
         uint8[] gmps,
         uint256[] fees,
@@ -48,7 +43,7 @@ abstract contract IGlacisRouterEvents is
 interface IGlacisRouter {
     function route(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -58,7 +53,7 @@ interface IGlacisRouter {
 
     function routeRetry(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmp,
         uint256[] memory fees,

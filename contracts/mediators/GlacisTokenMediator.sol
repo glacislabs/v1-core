@@ -11,12 +11,16 @@ import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpartManager.sol";
 import {GlacisClient__CanOnlyBeCalledByRouter} from "../client/GlacisClient.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 
 error GlacisTokenMediator__OnlyTokenMediatorAllowed();
 error GlacisTokenMediator__IncorrectTokenVariant(address, uint256);
 error GlacisTokenMediator__DestinationChainUnavailable();
 
 contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartManager,  IGlacisClient {
+    using AddressBytes32 for address;
+    using AddressBytes32 for bytes32;
+
     constructor(
         address glacisRouter_,
         uint256 quorum,
@@ -42,7 +46,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
     /// @param tokenAmount Amount of token to send to remote contract
     function route(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -50,8 +54,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
-        address destinationTokenMediator = remoteCounterpart[chainId];
-        if (destinationTokenMediator == address(0))
+        bytes32 destinationTokenMediator = remoteCounterpart[chainId];
+        if (destinationTokenMediator == bytes32(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();
 
         IXERC20(token).burn(msg.sender, tokenAmount);
@@ -88,7 +92,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
     /// @param tokenAmount Amount of token to send to remote contract
     function routeRetry(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -98,8 +102,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
-        address destinationTokenMediator = remoteCounterpart[chainId];
-        if (destinationTokenMediator == address(0))
+        bytes32 destinationTokenMediator = remoteCounterpart[chainId];
+        if (destinationTokenMediator == bytes32(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();
 
         // Pack with a function (otherwise stack too deep)
@@ -132,7 +136,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
     function receiveMessage(
         uint8[] memory fromGmpIds,
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         bytes memory payload
     ) public override {
         // Ensure that the executor is the glacis router and that the source is from an accepted mediator.
@@ -143,15 +147,15 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         }
 
         (
-            address to,
-            address originalFrom,
+            bytes32 to,
+            bytes32 originalFrom,
             address sourceToken,
             address token,
             uint256 tokenAmount,
             bytes memory originalPayload
         ) = abi.decode(
                 payload,
-                (address, address, address, address, uint256, bytes)
+                (bytes32, bytes32, address, address, uint256, bytes)
             );
 
         // Ensure that the destination token accepts the source token.
@@ -166,11 +170,12 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         }
 
         // Mint & execute
-        IXERC20(token).mint(to, tokenAmount);
-        emit GlacisTokenMediator__TokensMinted(to, token, tokenAmount);
-        IGlacisTokenClient client = IGlacisTokenClient(to);
+        address toAddress = to.toAddress();
+        IXERC20(token).mint(toAddress, tokenAmount);
+        emit GlacisTokenMediator__TokensMinted(toAddress, token, tokenAmount);
+        IGlacisTokenClient client = IGlacisTokenClient(toAddress);
 
-        if (to.code.length > 0) {
+        if (toAddress.code.length > 0) {
             client.receiveMessageWithTokens(
                 fromGmpIds,
                 fromChainId,
@@ -191,8 +196,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         bytes memory payload
     ) public view override returns (uint256) {
         (
-            address to,
-            address originalFrom,
+            bytes32 to,
+            bytes32 originalFrom,
             ,
             address token,
             uint256 tokenAmount,
@@ -202,12 +207,13 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         glacisData.originalTo = to;
 
         // If the destination smart contract is an EOA, then we assume "1".
-        if (to.code.length == 0) {
+        address toAddress = to.toAddress();
+        if (toAddress.code.length == 0) {
             return 1;
         }
 
         return
-            IGlacisTokenClient(to).getQuorum(
+            IGlacisTokenClient(toAddress).getQuorum(
                 glacisData,
                 originalPayload,
                 token,
@@ -222,7 +228,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         uint8 fromGmpId,
         bytes memory payload
     ) external view returns (bool) {
@@ -230,8 +236,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         if (fromAddress != remoteCounterpart[fromChainId]) return false;
 
         (
-            address to,
-            address originalFrom,
+            bytes32 to,
+            bytes32 originalFrom,
             ,
             ,
             ,
@@ -239,13 +245,14 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         ) = decodeTokenPayload(payload);
 
         // If the destination smart contract is an EOA, then we allow it.
-        if (to.code.length == 0) {
+        address toAddress = to.toAddress();
+        if (toAddress.code.length == 0) {
             return true;
         }
 
         // Forwards check to the token client
         return
-            IGlacisTokenClient(to).isAllowedRoute(
+            IGlacisTokenClient(toAddress).isAllowedRoute(
                 fromChainId,
                 originalFrom,
                 fromGmpId,
@@ -269,7 +276,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
 
     function packTokenPayload(
         uint256 chainId,
-        address to,
+        bytes32 to,
         address token,
         uint256 tokenAmount,
         bytes memory payload
@@ -277,7 +284,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         return
             abi.encode(
                 to,
-                msg.sender,
+                msg.sender.toBytes32(),
                 token,
                 getTokenVariant(token, chainId),
                 tokenAmount,
@@ -291,8 +298,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         internal
         pure
         returns (
-            address to,
-            address originalFrom,
+            bytes32 to,
+            bytes32 originalFrom,
             address sourceToken,
             address token,
             uint256 tokenAmount,
@@ -308,7 +315,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
             originalPayload
         ) = abi.decode(
             payload,
-            (address, address, address, address, uint256, bytes)
+            (bytes32, bytes32, address, address, uint256, bytes)
         );
     }
 

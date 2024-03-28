@@ -6,6 +6,7 @@ import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {GlacisAbstractAdapter__OnlyAdapterAllowed} from "../../contracts/adapters/GlacisAbstractAdapter.sol";
 import {SimpleNonblockingLzAppEvents} from "../../contracts/adapters/LayerZero/SimpleNonblockingLzApp.sol";
+import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 
 /* solhint-disable contract-name-camelcase */
 contract AdapterTests__Axelar is LocalTestSetup {
@@ -51,6 +52,8 @@ contract AdapterTests__Axelar is LocalTestSetup {
 
 // solhint-disable-next-line
 contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
+    using AddressBytes32 for address;
+
     LayerZeroGMPMock internal lzGatewayMock;
     GlacisLayerZeroAdapter internal lzAdapter;
     GlacisLayerZeroAdapterHarness internal lzAdapterHarness;
@@ -74,7 +77,7 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
         address origin
     ) external {
         vm.expectRevert(GlacisAbstractAdapter__OnlyAdapterAllowed.selector);
-        lzAdapterHarness.harness_onlyAuthorizedAdapter(chainId, origin);
+        lzAdapterHarness.harness_onlyAuthorizedAdapter(chainId, origin.toBytes32());
     }
 
     function test__onlyAuthorizedAdapterFailure_LayerZero() external {
@@ -118,6 +121,6 @@ contract GlacisLayerZeroAdapterHarness is GlacisLayerZeroAdapter {
 
     function harness_onlyAuthorizedAdapter(
         uint256 chainId,
-        address sourceAddress
+        bytes32 sourceAddress
     ) external onlyAuthorizedAdapter(chainId, sourceAddress) {}
 }

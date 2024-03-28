@@ -2,10 +2,7 @@
 
 pragma solidity 0.8.18;
 
-import {IMessageDispatcher} from "../interfaces/IMessageDispatcher.sol";
-import {IMessageExecutor} from "../interfaces/IMessageExecutor.sol";
-
-interface IGlacisTokenMediator is IMessageDispatcher, IMessageExecutor {
+interface IGlacisTokenMediator {
     event GlacisTokenMediator__TokensBurnt(
         address from,
         address token,
@@ -19,7 +16,7 @@ interface IGlacisTokenMediator is IMessageDispatcher, IMessageExecutor {
 
     function route(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -30,7 +27,7 @@ interface IGlacisTokenMediator is IMessageDispatcher, IMessageExecutor {
 
     function routeRetry(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmp,
         uint256[] memory fees,

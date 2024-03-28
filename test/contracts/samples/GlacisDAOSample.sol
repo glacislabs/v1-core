@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 import {GlacisTokenClientOwnable} from "../../../contracts/client/GlacisTokenClientOwnable.sol";
 import {GlacisCommons} from "../../../contracts/commons/GlacisCommons.sol";
 import {XERC20Sample} from "./token/XERC20Sample.sol";
+import {AddressBytes32} from "../../../contracts/libraries/AddressBytes32.sol";
 
 error GlacisDAOSample__MembersOnly();
 error GlacisDAOSample__VoterMustReceiveValue();
@@ -16,6 +17,9 @@ error GlacisDAOSample__FeeArrayMustEqualAmountOfProposals();
 error GlacisDAOSample__NotEnoughMessageValueRemainingForFees();
 
 contract GlacisDAOSample is GlacisTokenClientOwnable {
+    using AddressBytes32 for address;
+    using AddressBytes32 for bytes32;
+
     struct Proposal {
         uint256 toChain;
         bool retriable;
@@ -153,7 +157,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     ) internal returns (bytes32 messageID) {
         if (p.token == address(0)) {
             messageID = _route({
-                to: address(this),
+                to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
                 gmps: p.gmps,
@@ -164,7 +168,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
             });
         } else {
             messageID = _routeWithTokens({
-                to: address(this),
+                to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
                 gmps: p.gmps,
@@ -199,7 +203,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
         Proposal memory p = proposals[proposalId][messageIndex];
         if (p.token == address(0)) {
             _retryRoute({
-                to: address(this),
+                to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
                 gmps: p.gmps,
@@ -211,7 +215,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
             });
         } else {
             _retryRouteWithTokens({
-                to: address(this),
+                to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
                 gmps: p.gmps,
@@ -234,10 +238,10 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     function _receiveMessage(
         uint8[] memory,
         uint256,
-        address fromAddress,
+        bytes32 fromAddress,
         bytes memory payload
     ) internal override {
-        if (fromAddress != address(this))
+        if (fromAddress.toAddress() != address(this))
             revert GlacisDAOSample__CanOnlyBeCalledBySelf();
 
         (address finalTo, uint256 callValue, bytes memory calldataPayload) = abi
@@ -252,12 +256,12 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     function _receiveMessageWithTokens(
         uint8[] memory,
         uint256,
-        address fromAddress,
+        bytes32 fromAddress,
         bytes memory payload,
         address, // token
         uint256 // tokenAmount
     ) internal override {
-        if (fromAddress != address(this))
+        if (fromAddress.toAddress() != address(this))
             revert GlacisDAOSample__CanOnlyBeCalledBySelf();
 
         (address finalTo, uint256 callValue, bytes memory calldataPayload) = abi

@@ -8,7 +8,7 @@ interface IGlacisRemoteCounterpartManager {
     /// @param glacisComponents An array of addresses of the glacis components on remote chains
     function addRemoteCounterparts(
         uint256[] calldata chainIds,
-        address[] calldata glacisComponents
+        bytes32[] calldata glacisComponents
     ) external;
 
     /// @notice Removes an authorized glacis counterpart component on remote chain that this components interacts with
@@ -17,5 +17,5 @@ interface IGlacisRemoteCounterpartManager {
 
     /// @notice Gets an authorized glacis counterpart component on remote chain that this components interacts with
     /// @param chainId The chainId to of the remote component
-    function getRemoteCounterpart(uint256 chainId) external returns (address);
+    function getRemoteCounterpart(uint256 chainId) external returns (bytes32);
 }

@@ -8,8 +8,8 @@ contract GlacisCommons {
     struct GlacisData {
         bytes32 messageId;
         uint256 nonce;
-        address originalFrom;
-        address originalTo;
+        bytes32 originalFrom;
+        bytes32 originalTo;
     }
 
     struct GlacisTokenData {
@@ -19,7 +19,7 @@ contract GlacisCommons {
 
     struct GlacisRoute {
         uint256 fromChainId; // 0 means any chain
-        address fromAddress; // 0x00 means any address
+        bytes32 fromAddress; // 0x00 means any address
         uint8 fromGmpId; // 0 means any GMP
     }
 

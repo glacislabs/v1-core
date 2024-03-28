@@ -68,7 +68,7 @@ abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         uint8 fromGmpId,
         bytes memory // payload
     ) public view override returns (bool) {
@@ -80,7 +80,7 @@ abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
                 (allowedRoute.fromChainId == fromChainId ||
                     allowedRoute.fromChainId == 0) &&
                 (allowedRoute.fromAddress == fromAddress ||
-                    allowedRoute.fromAddress == address(0))
+                    allowedRoute.fromAddress == bytes32(0))
             ) {
                 return true;
             }
