@@ -157,16 +157,20 @@ contract LocalTestSetup is Test {
             address(this)
         );
 
+        // Register lzID <-> glacisID
         uint16[] memory lzIDs = new uint16[](1);
         lzIDs[0] = 1;
         uint256[] memory glacisIDs = new uint256[](1);
         glacisIDs[0] = uint16(block.chainid);
         adapter.setGlacisChainIds(glacisIDs, lzIDs);
 
-        router.registerAdapter(LAYERZERO_GMP_ID, address(adapter));
+        // Add self as a remote counterpart
         bytes32[] memory adapterCounterparts = new bytes32[](1);
         adapterCounterparts[0] = address(adapter).toBytes32();
         adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
+
+        // Register adapter in GlacisRouter
+        router.registerAdapter(LAYERZERO_GMP_ID, address(adapter));
 
         return adapter;
     }

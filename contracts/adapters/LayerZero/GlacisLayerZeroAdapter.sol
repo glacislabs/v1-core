@@ -111,7 +111,7 @@ contract GlacisLayerZeroAdapter is
         override
         onlyAuthorizedAdapter(
             adapterChainIdToGlacisChainId[srcChainId],
-            bytes32((bytes20(sourceAddress)))
+            bytes32(bytes20(sourceAddress)) >> 96
         )
     {
         if (adapterChainIdToGlacisChainId[srcChainId] == 0)
