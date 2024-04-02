@@ -1,5 +1,5 @@
 {
-  "name": "glacis-internal",
+  "name": "glacisv1",
   "scripts": {
     "test": "forge test",
     "test:forge:debug": "forge test -vvv",
