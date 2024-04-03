@@ -41,7 +41,6 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
                 amount,
                 msg.value
             );
-            
     }
 
     function sendMessageAndTokens__redundant(
@@ -56,6 +55,29 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
         return
             _routeWithTokensRedundant(
                 toChainId,
+                to,
+                payload,
+                gmps,
+                fees,
+                msg.sender,
+                token,
+                amount,
+                msg.value
+            );
+    }
+
+    function sendMessageAndTokens__retriable(
+        uint256 chainId,
+        bytes32 to,
+        uint8[] memory gmps,
+        uint256[] memory fees,
+        bytes memory payload,
+        address token,
+        uint256 amount
+    ) external payable returns (bytes32) {
+        return
+            _routeWithTokens(
+                chainId,
                 to,
                 payload,
                 gmps,
