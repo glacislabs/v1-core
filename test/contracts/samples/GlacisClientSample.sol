@@ -13,7 +13,7 @@ contract GlacisClientSample is GlacisClientOwnable {
 
     function setRemoteValue__execute(
         uint256 toChainId,
-        address to,
+        bytes32 to,
         uint8 gmp,
         bytes calldata payload
     ) external payable returns (bytes32) {
@@ -22,7 +22,7 @@ contract GlacisClientSample is GlacisClientOwnable {
 
     function setRemoteValue__redundancy(
         uint256 toChainId,
-        address to,
+        bytes32 to,
         uint8[] memory gmps,
         uint256[] memory fees,
         bytes calldata payload
@@ -41,7 +41,7 @@ contract GlacisClientSample is GlacisClientOwnable {
 
     function setRemoteValue__retriable(
         uint256 chainId,
-        address to,
+        bytes32 to,
         uint8[] memory gmps,
         uint256[] memory fees,
         bytes memory payload
@@ -61,7 +61,7 @@ contract GlacisClientSample is GlacisClientOwnable {
 
     function setRemoteValue(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -84,7 +84,7 @@ contract GlacisClientSample is GlacisClientOwnable {
 
     function setRemoteValue__retry(
         uint256 chainId,
-        address to,
+        bytes32 to,
         uint8[] memory gmps,
         uint256[] memory fees,
         bytes memory payload,
@@ -110,7 +110,7 @@ contract GlacisClientSample is GlacisClientOwnable {
     function _receiveMessage(
         uint8[] memory, // fromGmpId,
         uint256, // fromChainId,
-        address, // fromAddress,
+        bytes32, // fromAddress,
         bytes memory payload
     ) internal override {
         // NOTE: changed += to test for redundant messages

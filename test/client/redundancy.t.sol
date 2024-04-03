@@ -5,8 +5,11 @@ import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, Ax
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisCommons} from "../../contracts/commons/GlacisCommons.sol";
 import {GlacisClient} from "../../contracts/client/GlacisClient.sol";
+import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 
 contract RedundancyTests is LocalTestSetup {
+    using AddressBytes32 for address;
+
     AxelarGatewayMock internal axelarGatewayMock;
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
@@ -37,7 +40,7 @@ contract RedundancyTests is LocalTestSetup {
 
         clientSample.setRemoteValue__redundancy{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             gmps,
             createFees(0.1 ether / gmps.length, gmps.length),
             abi.encode(val)
@@ -54,7 +57,7 @@ contract RedundancyTests is LocalTestSetup {
 
         clientSample.setRemoteValue__redundancy{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             gmps,
             createFees(0.1 ether / gmps.length, gmps.length),
             abi.encode(val)
@@ -76,7 +79,7 @@ contract RedundancyTests is LocalTestSetup {
 
         clientSample.setRemoteValue__redundancy{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             gmps,
             createFees(0.1 ether / gmps.length, gmps.length),
             abi.encode(1000)
@@ -90,6 +93,8 @@ contract RedundancyTests is LocalTestSetup {
 }
 
 contract RedundancyReceivingDataTests is LocalTestSetup {
+    using AddressBytes32 for address;
+
     AxelarGatewayMock internal axelarGatewayMock;
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
@@ -131,7 +136,7 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
         assert(
             harness.isAllowedRoute(
                 block.chainid,
-                address(harness),
+                address(harness).toBytes32(),
                 AXELAR_GMP_ID,
                 ""
             )
@@ -139,7 +144,7 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
 
         harness.route{value: 1 ether}(
             block.chainid,
-            address(harness),
+            address(harness).toBytes32(),
             abi.encode("Hello"),
             gmps,
             fees,
@@ -169,18 +174,18 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
 
 contract RedundancyReceivingDataTestHarness is GlacisClient {
     constructor(address glacisRouter) GlacisClient(glacisRouter, 3) {
-        _addAllowedRoute(GlacisCommons.GlacisRoute(0, address(0), 0));
+        _addAllowedRoute(GlacisCommons.GlacisRoute(0, bytes32(0), 0));
     }
 
     uint8[] public fromGmpIds;
     uint256 public fromChainId;
-    address public fromAddress;
+    bytes32 public fromAddress;
     bytes public payload;
 
     function _receiveMessage(
         uint8[] memory _fromGmpIds,
         uint256 _fromChainId,
-        address _fromAddress,
+        bytes32 _fromAddress,
         bytes memory _payload
     ) internal override {
         fromGmpIds = _fromGmpIds;
@@ -191,7 +196,7 @@ contract RedundancyReceivingDataTestHarness is GlacisClient {
 
     function route(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory _payload,
         uint8[] memory gmps,
         uint256[] memory fees,

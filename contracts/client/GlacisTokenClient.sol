@@ -17,7 +17,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     event GlacisTokenClient__MessageRouted(
         bytes32 messageId,
         uint256 toChainId,
-        address to
+        bytes32 to
     );
 
     constructor(
@@ -39,7 +39,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
     function _routeWithTokensSingle(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8 gmp,
         address refundAddress,
@@ -76,7 +76,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
     function _routeWithTokensRedundant(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -108,7 +108,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @param tokenAmount Amount of token to send to remote contract
     function _routeWithTokens(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -134,7 +134,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
     function _retryRouteWithTokens(
         uint256 chainId,
-        address to,
+        bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
         uint256[] memory fees,
@@ -171,7 +171,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     function receiveMessageWithTokens(
         uint8[] memory fromGmpIds,
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         bytes memory payload,
         address token,
         uint256 tokenAmount
@@ -198,7 +198,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     function _receiveMessageWithTokens(
         uint8[] memory fromGmpIds,
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         bytes memory payload,
         address token,
         uint256 tokenAmount

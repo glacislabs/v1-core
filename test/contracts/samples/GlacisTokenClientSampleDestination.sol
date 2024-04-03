@@ -24,7 +24,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
 
     function sendMessageAndTokens__abstract(
         uint256 toChainId,
-        address to,
+        bytes32 to,
         uint8 gmp,
         bytes memory payload,
         address token,
@@ -45,7 +45,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
 
     function sendMessageAndTokens__redundant(
         uint256 toChainId,
-        address to,
+        bytes32 to,
         uint8[] memory gmps,
         uint256[] memory fees,
         bytes memory payload,
@@ -68,7 +68,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
 
     function sendMessageAndTokens__retriable(
         uint256 chainId,
-        address to,
+        bytes32 to,
         uint8[] memory gmps,
         uint256[] memory fees,
         bytes memory payload,
@@ -91,7 +91,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
 
     function retrySendWithTokens(
         uint256 chainId,
-        address to,
+        bytes32 to,
         uint8[] memory gmps,
         uint256[] memory fees,
         bytes memory payload,
@@ -121,7 +121,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
     function _receiveMessageWithTokens(
         uint8[] memory, // fromGmpId,
         uint256, // fromChainId,
-        address, // fromAddress,
+        bytes32, // fromAddress,
         bytes memory payload,
         address, // token,
         uint256 // amount

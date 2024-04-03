@@ -20,7 +20,7 @@ abstract contract IGlacisClient is IGlacisAccessControlClient {
     function receiveMessage(
         uint8[] calldata fromGmpIds,
         uint256 fromChainId,
-        address fromAddress,
+        bytes32 fromAddress,
         bytes calldata payload
     ) external virtual;
 

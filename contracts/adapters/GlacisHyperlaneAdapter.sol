@@ -20,8 +20,6 @@ error GlacisHyperlaneAdapter__UnconfiguredOrigin();
 // modular. Fortunately the strict requirements of the Mailbox client only requires the handle function.
 
 contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
-    using TypeCasts for address;
-    using TypeCasts for bytes32;
 
     // Required by Hyperlane, if kept as 0 then it will use the default router.
     IInterchainSecurityModule public interchainSecurityModule;
@@ -102,8 +100,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
         );
 
         // Ensure that we have enough of the required fee (will revert if not this value)
-        bytes32 destinationAddress = remoteCounterpart[toChainId]
-            .addressToBytes32();
+        bytes32 destinationAddress = remoteCounterpart[toChainId];
         uint256 nativePriceQuote = MAIL_BOX.quoteDispatch(
             destinationDomain,
             destinationAddress,
@@ -146,7 +143,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
         payable
         onlyAuthorizedAdapter(
             adapterChainIdToGlacisChainId[_origin],
-            _sender.bytes32ToAddress()
+            _sender
         )
     {
         if (msg.sender != address(MAIL_BOX)) {

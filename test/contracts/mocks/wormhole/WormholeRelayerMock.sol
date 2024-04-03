@@ -46,7 +46,7 @@ contract WormholeRelayerMock is IWormholeRelayer, IWormholeReceiver {
             .receiveWormholeMessages(
                 payload,
                 new bytes[](0),
-                bytes32(bytes20(msg.sender)) >> 96,
+                sourceAddress,
                 sourceChain,
                 deliveryHash
             );

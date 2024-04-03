@@ -22,10 +22,13 @@ import {CCIPSample} from "../contracts/samples/control/CCIPSample.sol";
 import {CCIPTextSample} from "../contracts/samples/control/CCIPTextSample.sol";
 import {HyperlaneSample} from "../contracts/samples/control/HyperlaneSample.sol";
 import {HyperlaneTextSample} from "../contracts/samples/control/HyperlaneTextSample.sol";
+import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 import "forge-std/console.sol";
 
 /* solhint-disable contract-name-camelcase */
 contract AbstractionTests__Axelar is LocalTestSetup {
+    using AddressBytes32 for address;
+
     AxelarGatewayMock internal axelarGatewayMock;
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
@@ -46,7 +49,7 @@ contract AbstractionTests__Axelar is LocalTestSetup {
     function test__Abstraction_Axelar(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             AXELAR_GMP_ID,
             abi.encode(val)
         );
@@ -61,7 +64,7 @@ contract AbstractionTests__Axelar is LocalTestSetup {
         gmps[0] = AXELAR_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
             createFees(1 ether, 1),
@@ -77,6 +80,8 @@ contract AbstractionTests__Axelar is LocalTestSetup {
 }
 
 contract AbstractionTests__LayerZero is LocalTestSetup {
+    using AddressBytes32 for address;
+
     LayerZeroGMPMock internal lzGatewayMock;
     GlacisLayerZeroAdapter internal lzAdapter;
     GlacisRouter internal glacisRouter;
@@ -92,7 +97,7 @@ contract AbstractionTests__LayerZero is LocalTestSetup {
     function test__Abstraction_LayerZero(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             LAYERZERO_GMP_ID,
             abi.encode(val)
         );
@@ -108,7 +113,7 @@ contract AbstractionTests__LayerZero is LocalTestSetup {
         gmps[0] = LAYERZERO_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
             createFees(1 ether, 1),
@@ -124,6 +129,8 @@ contract AbstractionTests__LayerZero is LocalTestSetup {
 }
 
 contract AbstractionTests__Wormhole is LocalTestSetup {
+    using AddressBytes32 for address;
+
     WormholeRelayerMock internal wormholeRelayerMock;
     GlacisWormholeAdapter internal wormholeAdapter;
 
@@ -143,7 +150,7 @@ contract AbstractionTests__Wormhole is LocalTestSetup {
     function test__Abstraction_Wormhole(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             WORMHOLE_GMP_ID,
             abi.encode(val)
         );
@@ -159,7 +166,7 @@ contract AbstractionTests__Wormhole is LocalTestSetup {
         gmps[0] = WORMHOLE_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
             createFees(1 ether, 1),
@@ -175,6 +182,8 @@ contract AbstractionTests__Wormhole is LocalTestSetup {
 }
 
 contract AbstractionTests__Hyperlane is LocalTestSetup {
+    using AddressBytes32 for address;
+
     HyperlaneMailboxMock internal hyperlaneMailboxMock;
     GlacisHyperlaneAdapter internal hyperlaneAdapter;
 
@@ -194,7 +203,7 @@ contract AbstractionTests__Hyperlane is LocalTestSetup {
     function test__Abstraction_Hyperlane(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             HYPERLANE_GMP_ID,
             abi.encode(val)
         );
@@ -211,7 +220,7 @@ contract AbstractionTests__Hyperlane is LocalTestSetup {
         gmps[0] = HYPERLANE_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
             createFees(1 ether, 1),
@@ -227,6 +236,8 @@ contract AbstractionTests__Hyperlane is LocalTestSetup {
 }
 
 contract AbstractionTests__CCIP is LocalTestSetup {
+    using AddressBytes32 for address;
+
     CCIPRouterMock internal ccipMock;
     GlacisCCIPAdapter internal ccipAdapter;
 
@@ -243,7 +254,7 @@ contract AbstractionTests__CCIP is LocalTestSetup {
     function test__Abstraction_CCIP(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             CCIP_GMP_ID,
             abi.encode(val)
         );
@@ -259,7 +270,7 @@ contract AbstractionTests__CCIP is LocalTestSetup {
         gmps[0] = CCIP_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
             createFees(1 ether, 1),
@@ -275,6 +286,8 @@ contract AbstractionTests__CCIP is LocalTestSetup {
 }
 
 contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
+    using AddressBytes32 for address;
+
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;
     GlacisClientTextSample internal clientTextSample;
@@ -362,7 +375,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__Axelar_Int_Glacis(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             AXELAR_GMP_ID,
             abi.encode(val)
         );
@@ -371,7 +384,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__Axelar_Str_Glacis(string memory val) external {
         clientTextSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientTextSample),
+            address(clientTextSample).toBytes32(),
             AXELAR_GMP_ID,
             abi.encode(val)
         );
@@ -396,7 +409,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__LayerZero_Int_Glacis(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             LAYERZERO_GMP_ID,
             abi.encode(val)
         );
@@ -405,7 +418,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__LayerZero_Str_Glacis(string memory val) external {
         clientTextSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientTextSample),
+            address(clientTextSample).toBytes32(),
             LAYERZERO_GMP_ID,
             abi.encode(val)
         );
@@ -422,7 +435,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__Wormhole_Int_Glacis(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             WORMHOLE_GMP_ID,
             abi.encode(val)
         );
@@ -431,7 +444,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__Wormhole_Str_Glacis(string memory val) external {
         clientTextSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientTextSample),
+            address(clientTextSample).toBytes32(),
             WORMHOLE_GMP_ID,
             abi.encode(val)
         );
@@ -464,7 +477,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__CCIP_Int_Glacis(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             CCIP_GMP_ID,
             abi.encode(val)
         );
@@ -481,7 +494,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__CCIP_Str_Glacis(string memory val) external {
         clientTextSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientTextSample),
+            address(clientTextSample).toBytes32(),
             CCIP_GMP_ID,
             abi.encode(val)
         );
@@ -498,7 +511,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__Hyperlane_Int_Glacis(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             HYPERLANE_GMP_ID,
             abi.encode(val)
         );
@@ -515,7 +528,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     function test_gas__Hyperlane_Str_Glacis(string memory val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(
             block.chainid,
-            address(clientSample),
+            address(clientSample).toBytes32(),
             HYPERLANE_GMP_ID,
             abi.encode(val)
         );
