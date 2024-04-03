@@ -68,7 +68,7 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
 
     function sendMessageAndTokens__retriable(
         uint256 chainId,
-        address to,
+        bytes32 to,
         uint8[] memory gmps,
         uint256[] memory fees,
         bytes memory payload,
