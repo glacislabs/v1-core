@@ -52,7 +52,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         fees[0] = gasPayment;
         bytes32 messageId = IGlacisRouter(GLACIS_ROUTER).route{
             value: gasPayment
-        }(chainId, to, payload, gmps, fees, refundAddress, false);
+        }(chainId, to, payload, gmps, emptyCustomAdapters(), fees, refundAddress, false);
         emit GlacisClient__MessageRouted(messageId, chainId, to);
         return messageId;
     }
@@ -78,7 +78,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     ) internal returns (bytes32) {
         bytes32 messageId = IGlacisRouter(GLACIS_ROUTER).route{
             value: gasPayment
-        }(chainId, to, payload, gmps, fees, refundAddress, false);
+        }(chainId, to, payload, gmps, emptyCustomAdapters(), fees, refundAddress, false);
         emit GlacisClient__MessageRouted(messageId, chainId, to);
         return messageId;
     }
@@ -98,6 +98,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         bool retriable,
@@ -105,7 +106,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     ) internal returns (bytes32) {
         bytes32 messageId = IGlacisRouter(GLACIS_ROUTER).route{
             value: gasPayment
-        }(chainId, to, payload, gmps, fees, refundAddress, retriable);
+        }(chainId, to, payload, gmps, customAdapters, fees, refundAddress, retriable);
         emit GlacisClient__MessageRouted(messageId, chainId, to);
         return messageId;
     }
@@ -126,6 +127,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,
@@ -137,6 +139,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
             to,
             payload,
             gmps,
+            customAdapters,
             fees,
             refundAddress,
             messageId,
@@ -174,4 +177,9 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 fromAddress,
         bytes memory payload
     ) internal virtual {}
+
+    /// @notice Helper function to create an empty array of custom adapters.
+    function emptyCustomAdapters() internal pure returns(address[] memory) {
+        return new address[](0);
+    }
 }

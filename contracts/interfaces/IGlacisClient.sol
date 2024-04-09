@@ -33,5 +33,9 @@ abstract contract IGlacisClient is IGlacisAccessControlClient {
     }
 
     /// @notice Returns true if this contract recognizes the input adapter as a custom adapter.
-    function isCustomAdapter(address adapter) external virtual returns(bool);
+    function isCustomAdapter(
+        address adapter,
+        GlacisCommons.GlacisData memory glacisData,
+        bytes memory payload
+    ) external virtual returns(bool);
 }

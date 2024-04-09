@@ -49,6 +49,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         address token,
@@ -73,6 +74,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
                 destinationTokenMediator,
                 tokenPayload,
                 gmps,
+                customAdapters,
                 fees,
                 refundAddress,
                 true // Token Mediator always enables retry
@@ -95,6 +97,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,
@@ -121,6 +124,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
                 destinationTokenMediator,
                 tokenPayload,
                 gmps,
+                customAdapters,
                 fees,
                 refundAddress,
                 messageId,
@@ -257,6 +261,28 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
                 originalFrom,
                 fromGmpId,
                 originalPayload
+            );
+    }
+
+    function isCustomAdapter(
+        address adapter,
+        GlacisCommons.GlacisData memory glacisData,
+        bytes memory payload
+    ) external override returns(bool) {
+        (bytes32 to,,,,,) = decodeTokenPayload(payload);
+
+        // If the destination smart contract is an EOA, then it is not.
+        address toAddress = to.toAddress();
+        if (toAddress.code.length == 0) {
+            return false;
+        }
+
+        // Forwards check to the token client
+        return
+            IGlacisTokenClient(toAddress).isCustomAdapter(
+                adapter,
+                glacisData,
+                payload
             );
     }
 
