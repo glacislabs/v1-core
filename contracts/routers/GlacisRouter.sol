@@ -22,12 +22,13 @@ error GlacisRouter__GMPCountMustBeAtLeastOne();
 error GlacisRouter__FeeSumMustBeEqualToValue();
 
 contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
-
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 
     mapping(bytes32 => MessageData) private messageReceipts;
     mapping(bytes32 => address) public messageSenders;
+    mapping(bytes32 => mapping(address => bool))
+        private receivedCustomAdapterMessages;
 
     struct MessageData {
         uint8 uniqueMessagesReceived;
@@ -53,13 +54,13 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         bool retriable
     ) public payable virtual returns (bytes32) {
         // Validate input
-        uint256 gmpsLength = gmps.length;
-        validateInput(gmpsLength, fees);
+        validateFeesInput(gmps.length + customAdapters.length, fees);
 
         (bytes32 messageId, uint256 nonce) = _createGlacisMessageId(
             chainId,
@@ -79,6 +80,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             chainId,
             glacisPackedPayload,
             gmps,
+            customAdapters,
             fees,
             refundAddress
         );
@@ -94,6 +96,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             to,
             payload,
             gmps,
+            customAdapters,
             fees,
             refundAddress,
             retriable
@@ -117,14 +120,14 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
     ) public payable virtual returns (bytes32) {
         // Validate input
-        uint256 gmpLength = gmps.length;
-        validateInput(gmpLength, fees);
+        validateFeesInput(gmps.length + customAdapters.length, fees);
 
         address ownerOfMessageToRetry = messageSenders[messageId];
         if (ownerOfMessageToRetry != msg.sender)
@@ -152,6 +155,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             chainId,
             glacisPackedPayload,
             gmps,
+            customAdapters,
             fees,
             refundAddress
         );
@@ -164,6 +168,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             to,
             payload,
             gmps,
+            customAdapters,
             fees,
             refundAddress
         );
@@ -182,10 +187,12 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         uint256 chainId,
         bytes memory glacisPackedPayload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress
     ) internal {
         uint256 gmpLength = gmps.length;
+        uint256 customAdapterLength = customAdapters.length;
 
         for (uint8 gmp; gmp < gmpLength; ) {
             address adapter = glacisGMPIdToAdapter[gmps[gmp]];
@@ -204,6 +211,20 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
                 ++gmp;
             }
         }
+
+        for (uint8 adapterIndex; adapterIndex < customAdapterLength; ) {
+            address adapter = customAdapters[adapterIndex];
+
+            if (adapter == address(0)) revert GlacisRouter__RouteDoesNotExist();
+
+            IGlacisAdapter(adapter).sendMessage{
+                value: fees[gmpLength + adapterIndex]
+            }(chainId, refundAddress, glacisPackedPayload);
+
+            unchecked {
+                ++adapterIndex;
+            }
+        }
     }
 
     /// @notice Receives a cross chain message from an IGlacisAdapter.
@@ -212,23 +233,28 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     function receiveMessage(
         uint256 fromChainId,
         bytes memory glacisPayload
-    ) public onlyAdapter {
+    ) public {
+        // Decode sent data
         uint8 gmpId = adapterToGlacisGMPId[msg.sender];
         (GlacisData memory glacisData, bytes memory payload) = abi.decode(
             glacisPayload,
             (GlacisData, bytes)
         );
 
-        // Check if the route is allowed
+        // Get the client
         IGlacisClient client = IGlacisClient(glacisData.originalTo.toAddress());
 
+        // Verifies that the sender is an adapter or custom adapter
+        if (adapterToGlacisGMPId[msg.sender] == 0 && !client.isCustomAdapter(msg.sender))
+            revert GlacisRouter__OnlyAdaptersAllowed();
+
+        // Ensures that the adapter is the same time
         bool routeAllowed = client.isAllowedRoute(
             fromChainId,
             glacisData.originalFrom,
             gmpId,
             payload
         );
-
         if (!routeAllowed) revert GlacisRouter__ClientDeniedRoute();
 
         // Get the quorum requirements
@@ -285,22 +311,25 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
                 glacisData.originalFrom,
                 payload
             );
-
         } else {
             messageReceipts[glacisData.messageId] = currentReceipt;
         }
     }
 
     /// @notice Validates that all the fees sum up to the total payment
-    /// @param gmpsLength The length of the gmps array
+    /// @param adaptersLength The length of the gmps array + custom adapters array
     /// @param fees The fees array
-    function validateInput(uint256 gmpsLength, uint256[] memory fees) internal {
-        if (gmpsLength == 0) revert GlacisRouter__GMPCountMustBeAtLeastOne();
-        if (gmpsLength != fees.length)
+    function validateFeesInput(
+        uint256 adaptersLength,
+        uint256[] memory fees
+    ) internal {
+        if (adaptersLength == 0)
+            revert GlacisRouter__GMPCountMustBeAtLeastOne();
+        if (adaptersLength != fees.length)
             revert GlacisRouter__FeeArrayMustEqualGMPArray();
 
         uint256 feeSum;
-        for (uint8 i; i < gmpsLength; ) {
+        for (uint8 i; i < adaptersLength; ) {
             feeSum += fees[i];
             unchecked {
                 ++i;

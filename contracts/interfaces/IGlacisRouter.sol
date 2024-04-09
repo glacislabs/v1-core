@@ -24,6 +24,7 @@ abstract contract IGlacisRouterEvents is GlacisCommons
         bytes32 to,
         bytes data,
         uint8[] gmps,
+        address[] customAdapters,
         uint256[] fees,
         address refundAddress,
         bool retriable
@@ -35,6 +36,7 @@ abstract contract IGlacisRouterEvents is GlacisCommons
         bytes32 to,
         bytes data,
         uint8[] gmps,
+        address[] customAdapters,
         uint256[] fees,
         address refundAddress
     );
@@ -46,6 +48,7 @@ interface IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         bool retry
@@ -56,6 +59,7 @@ interface IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmp,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,

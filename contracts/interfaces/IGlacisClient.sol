@@ -31,4 +31,7 @@ abstract contract IGlacisClient is IGlacisAccessControlClient {
     ) public view virtual returns (uint256) {
         return DEFAULT_QUORUM;
     }
+
+    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter.
+    function isCustomAdapter(address adapter) external virtual returns(bool);
 }
