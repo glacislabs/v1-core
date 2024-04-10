@@ -7,6 +7,7 @@ import {IGlacisAccessControlClient} from "../interfaces/IGlacisAccessControlClie
 /// An interface that defines the GMP modules (adapters) that the GlacisRouter interacts with.
 abstract contract IGlacisClient is IGlacisAccessControlClient {
     uint256 private immutable DEFAULT_QUORUM;
+    mapping(address => bool) public customAdapters;
 
     constructor(uint256 _defaultQuorum) {
         DEFAULT_QUORUM = _defaultQuorum;
@@ -35,7 +36,17 @@ abstract contract IGlacisClient is IGlacisAccessControlClient {
     /// @notice Returns true if this contract recognizes the input adapter as a custom adapter.
     function isCustomAdapter(
         address adapter,
-        GlacisCommons.GlacisData memory glacisData,
-        bytes memory payload
-    ) external virtual returns(bool);
+        GlacisCommons.GlacisData memory, // glacisData,
+        bytes memory // payload
+    ) public virtual returns(bool) {
+        return customAdapters[adapter];
+    }
+
+    function _addCustomAdapter(address adapter) internal virtual {
+        customAdapters[adapter] = true;
+    }
+
+    function _removeCustomAdapter(address adapter) internal virtual {
+        customAdapters[adapter] = false;
+    }
 }

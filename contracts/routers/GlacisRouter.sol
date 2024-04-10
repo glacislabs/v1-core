@@ -245,7 +245,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         IGlacisClient client = IGlacisClient(glacisData.originalTo.toAddress());
 
         // Verifies that the sender is an adapter or custom adapter
-        if (adapterToGlacisGMPId[msg.sender] == 0)
+        if (gmpId == 0)
             if (!client.isCustomAdapter(msg.sender, glacisData, payload))
                 revert GlacisRouter__OnlyAdaptersAllowed();
 

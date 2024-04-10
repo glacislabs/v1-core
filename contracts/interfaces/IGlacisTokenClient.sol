@@ -34,6 +34,8 @@ interface IGlacisTokenClient is IGlacisAccessControlClient {
     function isCustomAdapter(
         address adapter,
         GlacisCommons.GlacisData memory glacisData,
-        bytes memory payload
+        bytes memory payload,
+        address token,
+        uint256 amount
     ) external returns(bool); 
 }

@@ -268,8 +268,8 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         address adapter,
         GlacisCommons.GlacisData memory glacisData,
         bytes memory payload
-    ) external override returns(bool) {
-        (bytes32 to,,,,,) = decodeTokenPayload(payload);
+    ) public override returns(bool) {
+        (bytes32 to,,, address token, uint256 tokenAmount,) = decodeTokenPayload(payload);
 
         // If the destination smart contract is an EOA, then it is not.
         address toAddress = to.toAddress();
@@ -282,7 +282,9 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
             IGlacisTokenClient(toAddress).isCustomAdapter(
                 adapter,
                 glacisData,
-                payload
+                payload,
+                token,
+                tokenAmount
             );
     }
 
