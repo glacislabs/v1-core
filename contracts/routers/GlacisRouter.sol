@@ -244,19 +244,28 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         // Get the client
         IGlacisClient client = IGlacisClient(glacisData.originalTo.toAddress());
 
-        // Verifies that the sender is an adapter or custom adapter
-        if (gmpId == 0)
+        // Verifies that the sender is an adapter or custom adapter & is an allowed route
+        if (gmpId == 0) {
             if (!client.isCustomAdapter(msg.sender, glacisData, payload))
                 revert GlacisRouter__OnlyAdaptersAllowed();
-
-        // Ensures that the adapter is the same time
-        bool routeAllowed = client.isAllowedRoute(
-            fromChainId,
-            glacisData.originalFrom,
-            gmpId,
-            payload
-        );
-        if (!routeAllowed) revert GlacisRouter__ClientDeniedRoute();
+            
+            bool routeAllowed = client.isAllowedRoute(
+                fromChainId,
+                glacisData.originalFrom,
+                uint160(msg.sender),
+                payload
+            );
+            if (!routeAllowed) revert GlacisRouter__ClientDeniedRoute();
+        }
+        else {
+            bool routeAllowed = client.isAllowedRoute(
+                fromChainId,
+                glacisData.originalFrom,
+                gmpId,
+                payload
+            );
+            if (!routeAllowed) revert GlacisRouter__ClientDeniedRoute();
+        }
 
         // Get the quorum requirements
         uint256 quorum = client.getQuorum(glacisData, payload);
