@@ -282,6 +282,9 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
 
         // Ensures that the message hasn't come from the same adapter again
         if (isCustomAdapter) {
+            if(receivedCustomAdapterMessages[glacisData.messageId][msg.sender])
+                revert GlacisRouter__MessageAlreadyReceivedFromGMP();
+
             receivedCustomAdapterMessages[glacisData.messageId][msg.sender] = true;
         } else {
             uint8 adjustedGmpId = gmpId - 1;

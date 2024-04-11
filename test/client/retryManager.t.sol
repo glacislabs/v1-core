@@ -7,6 +7,7 @@ import {IGlacisRouterEvents} from "../../contracts/interfaces/IGlacisRouter.sol"
 import {GlacisRouter__MessageAlreadyReceivedFromGMP} from "../../contracts/routers/GlacisRouter.sol";
 import {AxelarRetryGatewayMock} from "../contracts/mocks/axelar/AxelarRetryGatewayMock.sol";
 import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
+import {CustomAdapterSample} from "../contracts/samples/CustomAdapterSample.sol";
 
 contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
     using AddressBytes32 for address;
@@ -31,7 +32,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         );
         (lzGatewayMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
-        (clientSample,) = deployGlacisClientSample(glacisRouter);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
         clientSample.setQuorum(1);
     }
 
@@ -307,6 +308,53 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
             0
         );
         assertEq(1000, clientSample.value()); // Expect no change, would be 2000 otherwise
+    }
+
+    function test__Retry_CustomAdapter(uint256 val) external {
+        setUpRetryMock();
+
+        // Send initial message
+        bytes32 messageId;
+        uint256 initialValue = clientSample.value();
+        {
+            uint8[] memory gmps = new uint8[](1);
+            gmps[0] = AXELAR_GMP_ID;
+            messageId = clientSample.setRemoteValue__retriable(
+                block.chainid,
+                address(clientSample).toBytes32(),
+                gmps,
+                createFees(0, gmps.length),
+                abi.encode(1000)
+            );
+        }
+
+        // Expect no changes
+        assertEq(initialValue, clientSample.value());
+
+        // Add custom adapter
+        address customAdapter = address(
+            new CustomAdapterSample(address(glacisRouter), address(this))
+        );
+        clientSample.addCustomAdapter(customAdapter);
+
+        // Send retry
+        {
+            uint8[] memory gmps = new uint8[](0);
+            address[] memory customAdapters = new address[](1);
+            customAdapters[0] = customAdapter;
+
+            clientSample.setRemoteValue__retry(
+                block.chainid,
+                address(clientSample).toBytes32(),
+                gmps,
+                customAdapters,
+                createFees(0, customAdapters.length),
+                abi.encode(1000),
+                messageId,
+                0
+            );
+        }
+        assertEq(1000, clientSample.value());
     }
 
     receive() external payable {}

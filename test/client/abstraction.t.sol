@@ -291,50 +291,6 @@ contract AbstractionTests__CCIP is LocalTestSetup {
     receive() external payable {}
 }
 
-contract AbstractionTests__CustomAdapters is LocalTestSetup {
-    using AddressBytes32 for address;
-
-    CCIPRouterMock internal ccipMock;
-    GlacisCCIPAdapter internal ccipAdapter;
-
-    GlacisRouter internal glacisRouter;
-    GlacisClientSample internal clientSample;
-
-    function setUp() public {
-        glacisRouter = deployGlacisRouter();
-        (ccipMock) = deployCCIPFixture();
-        ccipAdapter = deployCCIPAdapter(glacisRouter, ccipMock);
-        (clientSample, ) = deployGlacisClientSample(glacisRouter);
-    }
-
-    function test__Abstraction_CustomAdapter(uint256 val) external {
-        address customAdapter = address(new CustomAdapterSample(address(glacisRouter), address(this)));
-        clientSample.addCustomAdapter(customAdapter);
-
-        uint8[] memory gmps = new uint8[](0);
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 0.1 ether;
-        address[] memory customAdapters = new address[](1);
-        customAdapters[0] = customAdapter; 
-
-        clientSample.setRemoteValue{value: 0.1 ether}(
-            block.chainid, 
-            address(clientSample).toBytes32(), 
-            abi.encode(val), 
-            gmps, 
-            customAdapters, 
-            fees, 
-            address(this), 
-            false, 
-            0.1 ether
-        );
-
-        assertEq(clientSample.value(), val);
-    }
-
-    receive() external payable {}
-}
-
 contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     using AddressBytes32 for address;
 
