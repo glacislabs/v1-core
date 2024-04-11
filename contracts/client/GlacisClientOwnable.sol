@@ -40,4 +40,14 @@ abstract contract GlacisClientOwnable is GlacisClient, Ownable {
     function removeAllAllowedRoutes() external onlyOwner {
         _removeAllAllowedRoutes();
     }
+
+    /// @notice Adds a custom adapter for this client
+    function addCustomAdapter(address adapter) external onlyOwner {
+        _addCustomAdapter(adapter);
+    }
+
+    /// @notice Removes a specific custom adapter for this client
+    function removeCustomAdapter(address adapter) external onlyOwner {
+        _removeCustomAdapter(adapter);
+    }
 }

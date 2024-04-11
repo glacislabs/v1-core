@@ -23,6 +23,7 @@ import {CCIPTextSample} from "../contracts/samples/control/CCIPTextSample.sol";
 import {HyperlaneSample} from "../contracts/samples/control/HyperlaneSample.sol";
 import {HyperlaneTextSample} from "../contracts/samples/control/HyperlaneTextSample.sol";
 import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
+import {CustomAdapterSample} from "../contracts/samples/CustomAdapterSample.sol";
 import "forge-std/console.sol";
 
 /* solhint-disable contract-name-camelcase */
@@ -67,6 +68,7 @@ contract AbstractionTests__Axelar is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -116,6 +118,7 @@ contract AbstractionTests__LayerZero is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -169,6 +172,7 @@ contract AbstractionTests__Wormhole is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -223,6 +227,7 @@ contract AbstractionTests__Hyperlane is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -273,6 +278,7 @@ contract AbstractionTests__CCIP is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -280,6 +286,50 @@ contract AbstractionTests__CCIP is LocalTestSetup {
         );
 
         assertGt(randomRefundAddress.balance, 0);
+    }
+
+    receive() external payable {}
+}
+
+contract AbstractionTests__CustomAdapters is LocalTestSetup {
+    using AddressBytes32 for address;
+
+    CCIPRouterMock internal ccipMock;
+    GlacisCCIPAdapter internal ccipAdapter;
+
+    GlacisRouter internal glacisRouter;
+    GlacisClientSample internal clientSample;
+
+    function setUp() public {
+        glacisRouter = deployGlacisRouter();
+        (ccipMock) = deployCCIPFixture();
+        ccipAdapter = deployCCIPAdapter(glacisRouter, ccipMock);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
+    }
+
+    function test__Abstraction_CustomAdapter(uint256 val) external {
+        address customAdapter = address(new CustomAdapterSample(address(glacisRouter), address(this)));
+        clientSample.addCustomAdapter(customAdapter);
+
+        uint8[] memory gmps = new uint8[](0);
+        uint256[] memory fees = new uint256[](1);
+        fees[0] = 0.1 ether;
+        address[] memory customAdapters = new address[](1);
+        customAdapters[0] = customAdapter; 
+
+        clientSample.setRemoteValue{value: 0.1 ether}(
+            block.chainid, 
+            address(clientSample).toBytes32(), 
+            abi.encode(val), 
+            gmps, 
+            customAdapters, 
+            fees, 
+            address(this), 
+            false, 
+            0.1 ether
+        );
+
+        assertEq(clientSample.value(), val);
     }
 
     receive() external payable {}

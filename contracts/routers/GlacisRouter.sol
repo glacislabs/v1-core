@@ -245,10 +245,14 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         IGlacisClient client = IGlacisClient(glacisData.originalTo.toAddress());
 
         // Verifies that the sender is an adapter or custom adapter & is an allowed route
+        bool isCustomAdapter = client.isCustomAdapter(
+            msg.sender,
+            glacisData,
+            payload
+        );
         if (gmpId == 0) {
-            if (!client.isCustomAdapter(msg.sender, glacisData, payload))
-                revert GlacisRouter__OnlyAdaptersAllowed();
-            
+            if (!isCustomAdapter) revert GlacisRouter__OnlyAdaptersAllowed();
+
             bool routeAllowed = client.isAllowedRoute(
                 fromChainId,
                 glacisData.originalFrom,
@@ -256,8 +260,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
                 payload
             );
             if (!routeAllowed) revert GlacisRouter__ClientDeniedRoute();
-        }
-        else {
+        } else {
             bool routeAllowed = client.isAllowedRoute(
                 fromChainId,
                 glacisData.originalFrom,
@@ -277,15 +280,19 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
 
         if (gmpId > 8) revert GlacisRouter__ImpossibleGMPId(gmpId);
 
-        // Adjusts gmp ID for bitmap index
-        uint8 adjustedGmpId = gmpId - 1;
+        // Ensures that the message hasn't come from the same adapter again
+        if (isCustomAdapter) {
+            receivedCustomAdapterMessages[glacisData.messageId][msg.sender] = true;
+        } else {
+            uint8 adjustedGmpId = gmpId - 1;
 
-        if (_isBitSet(currentReceipt.receivedGMPIdsBitmap, adjustedGmpId))
-            revert GlacisRouter__MessageAlreadyReceivedFromGMP();
-        currentReceipt.receivedGMPIdsBitmap = _setBit(
-            currentReceipt.receivedGMPIdsBitmap,
-            adjustedGmpId
-        );
+            if (_isBitSet(currentReceipt.receivedGMPIdsBitmap, adjustedGmpId))
+                revert GlacisRouter__MessageAlreadyReceivedFromGMP();
+            currentReceipt.receivedGMPIdsBitmap = _setBit(
+                currentReceipt.receivedGMPIdsBitmap,
+                adjustedGmpId
+            );
+        }
         currentReceipt.uniqueMessagesReceived += 1;
 
         emit GlacisRouter__ReceivedMessage(
