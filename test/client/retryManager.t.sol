@@ -310,7 +310,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         assertEq(1000, clientSample.value()); // Expect no change, would be 2000 otherwise
     }
 
-    function test__Retry_CustomAdapter(uint256 val) external {
+    function test__Retry_CustomAdapter() external {
         setUpRetryMock();
 
         // Send initial message

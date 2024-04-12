@@ -19,7 +19,6 @@ contract TokenTests__Axelar is LocalTestSetup {
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
     GlacisRouter internal glacisRouter;
-    GlacisClientSample internal clientSample;
     GlacisTokenMediator internal glacisTokenMediator;
     XERC20Sample internal xERC20Sample;
     ERC20Sample internal erc20Sample;

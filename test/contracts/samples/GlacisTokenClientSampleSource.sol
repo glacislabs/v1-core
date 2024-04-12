@@ -90,16 +90,47 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
             );
     }
 
+    function sendMessageAndTokens(
+        uint256 chainId,
+        bytes32 to,
+        uint8[] calldata gmps,
+        address[] calldata customAdapters,
+        uint256[] calldata fees,
+        bytes calldata payload,
+        address token,
+        uint256 amount
+    ) external payable returns (bytes32) {
+        return
+            _routeWithTokens(
+                chainId,
+                to,
+                payload,
+                gmps,
+                customAdapters,
+                fees,
+                msg.sender,
+                token,
+                amount,
+                msg.value
+            );
+    }
+
+    // @notice Struct for sending tokens as a retry. Required to avoid stack too deep.
+    struct RetrySendWithTokenPackage {
+        address token;
+        uint256 amount;
+        bytes32 messageId;
+        uint256 nonce;
+    }
+
     function retrySendWithTokens(
         uint256 chainId,
         bytes32 to,
         uint8[] calldata gmps,
+        address[] calldata customAdapters,
         uint256[] calldata fees,
         bytes calldata payload,
-        address token,
-        uint256 amount,
-        bytes32 messageId,
-        uint256 nonce
+        RetrySendWithTokenPackage calldata package
     ) external payable returns (bytes32) {
         return
             _retryRouteWithTokens(
@@ -107,13 +138,13 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
                 to,
                 payload,
                 gmps,
-                emptyCustomAdapters(),
+                customAdapters,
                 fees,
                 msg.sender,
-                messageId,
-                nonce,
-                token,
-                amount,
+                package.messageId,
+                package.nonce,
+                package.token,
+                package.amount,
                 msg.value
             );
     }
