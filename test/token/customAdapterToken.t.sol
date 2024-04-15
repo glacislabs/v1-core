@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter} from "../LocalTestSetup.sol";
 import {GlacisTokenMediator, GlacisTokenClientSampleSource, GlacisTokenClientSampleDestination, XERC20Sample, ERC20Sample, XERC20LockboxSample, XERC20NativeLockboxSample} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisClientTextSample} from "../contracts/samples/GlacisClientTextSample.sol";
@@ -44,6 +44,8 @@ contract CustomAdapterTokenTests is LocalTestSetup {
     AxelarGatewayMock internal axelarGatewayMock;
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
+    LayerZeroGMPMock internal lzGatewayMock;
+    GlacisLayerZeroAdapter internal lzAdapter;
 
     address internal customAdapter;
 
@@ -64,6 +66,8 @@ contract CustomAdapterTokenTests is LocalTestSetup {
             axelarGatewayMock,
             axelarGasServiceMock
         );
+        (lzGatewayMock) = deployLayerZeroFixture();
+        lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
         customAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
@@ -98,7 +102,10 @@ contract CustomAdapterTokenTests is LocalTestSetup {
             amount
         );
 
-        assertEq(glacisTokenClientSampleDestination.value(), preDestinationValue + amount);
+        assertEq(
+            glacisTokenClientSampleDestination.value(),
+            preDestinationValue + amount
+        );
         assertEq(
             xERC20Sample.balanceOf(address(glacisTokenClientSampleSource)),
             preSourceBalance - amount
@@ -109,199 +116,251 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         );
     }
 
-    /*
+    function test__FeeArrayFailureWithCustomAdapterToken(
+        uint256 amount
+    ) external {
+        vm.assume(amount < 10e15);
+        xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
 
-    function test__FeeArrayFailureWithCustomAdapter(uint256 val) external {
         uint8[] memory gmps = new uint8[](1);
         gmps[0] = 1;
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 0.2 ether;
         address[] memory customAdapters = new address[](1);
         customAdapters[0] = customAdapter;
+        uint256[] memory fees = new uint256[](1);
+        fees[0] = 0.1 ether;
 
         vm.expectRevert(GlacisRouter__FeeArrayMustEqualGMPArray.selector);
-        clientSample.setRemoteValue{value: 0.2 ether}(
+        glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.1 ether}(
             block.chainid,
-            address(clientSample).toBytes32(),
-            abi.encode(val),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             gmps,
             customAdapters,
             fees,
-            address(this),
-            false,
-            0.1 ether
+            abi.encode(amount),
+            address(xERC20Sample),
+            amount
         );
     }
 
-    function test__Redundancy_CustomAdapterAndGMP(uint256 val) external {
+    function test__Redundancy_CustomAdapterAndGMPToken(
+        uint256 amount
+    ) external {
+        vm.assume(amount < 10e15);
+        xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
+        uint256 preSourceBalance = xERC20Sample.balanceOf(
+            address(glacisTokenClientSampleSource)
+        );
+        uint256 preDestinationBalance = xERC20Sample.balanceOf(
+            address(glacisTokenClientSampleDestination)
+        );
+        uint256 preDestinationValue = glacisTokenClientSampleDestination
+            .value();
+
         uint8[] memory gmps = new uint8[](1);
         gmps[0] = 1;
         address[] memory customAdapters = new address[](1);
         customAdapters[0] = customAdapter;
-        uint256[] memory fees = new uint256[](2);
-        fees[0] = 0.2 ether;
-        fees[1] = 0.2 ether;
 
-        clientSample.setQuorum(2);
-
-        clientSample.setRemoteValue{value: 0.4 ether}(
+        glacisTokenClientSampleDestination.setQuorum(2);
+        glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.4 ether}(
             block.chainid,
-            address(clientSample).toBytes32(),
-            abi.encode(val),
-            gmps,
-            customAdapters,
-            fees,
-            address(this),
-            false,
-            0.4 ether
-        );
-
-        assertEq(clientSample.value(), val);
-    }
-
-    function test__Redundancy_TwoCustomAdapters(uint256 val) external {
-        address notAddedCustomAdapter = address(
-            new CustomAdapterSample(address(glacisRouter), address(this))
-        );
-        clientSample.addCustomAdapter(notAddedCustomAdapter);
-
-        uint8[] memory gmps = new uint8[](0);
-        address[] memory customAdapters = new address[](2);
-        customAdapters[0] = customAdapter;
-        customAdapters[1] = notAddedCustomAdapter;
-
-        clientSample.setQuorum(2);
-
-        clientSample.setRemoteValue{value: 0.4 ether}(
-            block.chainid,
-            address(clientSample).toBytes32(),
-            abi.encode(val),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             gmps,
             customAdapters,
             createFees(0.2 ether, 2),
-            address(this),
-            false,
-            0.4 ether
+            abi.encode(amount),
+            address(xERC20Sample),
+            amount
         );
 
-        assertEq(clientSample.value(), val);
+        assertEq(
+            glacisTokenClientSampleDestination.value(),
+            preDestinationValue + amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleSource)),
+            preSourceBalance - amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleDestination)),
+            preDestinationBalance + amount
+        );
     }
 
-    function test__Redundancy_TwoCustomAdaptersTwoGMPs(uint256 val) external {
-        address notAddedCustomAdapter = address(
-            new CustomAdapterSample(address(glacisRouter), address(this))
+    function test__Redundancy_TwoCustomAdaptersToken(uint256 amount) external {
+        vm.assume(amount < 10e15);
+        xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
+        uint256 preSourceBalance = xERC20Sample.balanceOf(
+            address(glacisTokenClientSampleSource)
         );
-        clientSample.addCustomAdapter(notAddedCustomAdapter);
+        uint256 preDestinationBalance = xERC20Sample.balanceOf(
+            address(glacisTokenClientSampleDestination)
+        );
+        uint256 preDestinationValue = glacisTokenClientSampleDestination
+            .value();
 
+        // Create second adapter & pack it
+        address[] memory customAdapters = new address[](2);
+        {
+            customAdapters[0] = customAdapter;
+
+            address notAddedCustomAdapter = address(
+                new CustomAdapterSample(address(glacisRouter), address(this))
+            );
+            customAdapters[1] = notAddedCustomAdapter;
+            glacisTokenClientSampleSource.addCustomAdapter(
+                notAddedCustomAdapter
+            );
+            glacisTokenClientSampleDestination.addCustomAdapter(
+                notAddedCustomAdapter
+            );
+        }
+
+        glacisTokenClientSampleDestination.setQuorum(2);
+        glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.4 ether}(
+            block.chainid,
+            address(glacisTokenClientSampleDestination).toBytes32(),
+            new uint8[](0),
+            customAdapters,
+            createFees(0.2 ether, 2),
+            abi.encode(amount),
+            address(xERC20Sample),
+            amount
+        );
+
+        assertEq(
+            glacisTokenClientSampleDestination.value(),
+            preDestinationValue + amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleSource)),
+            preSourceBalance - amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleDestination)),
+            preDestinationBalance + amount
+        );
+    }
+
+    function test__Redundancy_TwoCustomAdaptersTwoGMPsToken(
+        uint256 amount
+    ) external {
+        vm.assume(amount < 10e15);
+        xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
+        uint256 preSourceBalance = xERC20Sample.balanceOf(
+            address(glacisTokenClientSampleSource)
+        );
+        uint256 preDestinationBalance = xERC20Sample.balanceOf(
+            address(glacisTokenClientSampleDestination)
+        );
+        uint256 preDestinationValue = glacisTokenClientSampleDestination
+            .value();
+
+        // Create gmps + customAdapters
         uint8[] memory gmps = new uint8[](2);
         gmps[0] = 1;
         gmps[1] = 2;
         address[] memory customAdapters = new address[](2);
-        customAdapters[0] = customAdapter;
-        customAdapters[1] = notAddedCustomAdapter;
+        {
+            customAdapters[0] = customAdapter;
 
-        clientSample.setQuorum(4);
+            address notAddedCustomAdapter = address(
+                new CustomAdapterSample(address(glacisRouter), address(this))
+            );
+            customAdapters[1] = notAddedCustomAdapter;
+            glacisTokenClientSampleSource.addCustomAdapter(
+                notAddedCustomAdapter
+            );
+            glacisTokenClientSampleDestination.addCustomAdapter(
+                notAddedCustomAdapter
+            );
+            customAdapters[1] = notAddedCustomAdapter;
+        }
 
-        clientSample.setRemoteValue{value: 0.8 ether}(
+        glacisTokenClientSampleDestination.setQuorum(4);
+        glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.8 ether}(
             block.chainid,
-            address(clientSample).toBytes32(),
-            abi.encode(val),
+            address(glacisTokenClientSampleDestination).toBytes32(),
             gmps,
             customAdapters,
             createFees(0.2 ether, 4),
-            address(this),
-            false,
-            0.8 ether
+            abi.encode(amount),
+            address(xERC20Sample),
+            amount
         );
 
-        assertEq(clientSample.value(), val);
-    }
-
-    function test__Quorum_SameCustomAdapter(uint256 val) external {
-        vm.assume(clientSample.value() != val);
-
-        uint8[] memory gmps = new uint8[](0);
-        address[] memory customAdapters = new address[](2);
-        customAdapters[0] = customAdapter;
-        customAdapters[1] = customAdapter;
-
-        clientSample.setQuorum(2);
-
-        vm.expectRevert(GlacisRouter__MessageAlreadyReceivedFromGMP.selector);
-        clientSample.setRemoteValue{value: 0.4 ether}(
-            block.chainid,
-            address(clientSample).toBytes32(),
-            abi.encode(val),
-            gmps,
-            customAdapters,
-            createFees(0.2 ether, 2),
-            address(this),
-            false,
-            0.4 ether
+        assertEq(
+            glacisTokenClientSampleDestination.value(),
+            preDestinationValue + amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleSource)),
+            preSourceBalance - amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleDestination)),
+            preDestinationBalance + amount
         );
     }
 
     function test__Quorum_ShouldStopFinalExecutionWithCustomAdapter(
-        uint256 val
+        uint256 amount
     ) external {
-        vm.assume(clientSample.value() != val);
+        vm.assume(glacisTokenClientSampleDestination.value() != amount);
+        vm.assume(amount < 10e15);
+
+        xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
 
         address notAddedCustomAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
-        clientSample.addCustomAdapter(notAddedCustomAdapter);
+        glacisTokenClientSampleDestination.addCustomAdapter(notAddedCustomAdapter);
 
-        uint8[] memory gmps = new uint8[](0);
         address[] memory customAdapters = new address[](2);
         customAdapters[0] = customAdapter;
-        customAdapters[1] = notAddedCustomAdapter;
+        customAdapters[1] = customAdapter;
 
-        clientSample.setQuorum(2);
+        glacisTokenClientSampleDestination.setQuorum(2);
 
-        clientSample.setRemoteValue{value: 0.4 ether}(
+        vm.expectRevert(GlacisRouter__MessageAlreadyReceivedFromGMP.selector);
+        glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.4 ether}(
             block.chainid,
-            address(clientSample).toBytes32(),
-            abi.encode(val),
-            gmps,
+            address(glacisTokenClientSampleDestination).toBytes32(),
+            new uint8[](0),
             customAdapters,
             createFees(0.2 ether, 2),
-            address(this),
-            false,
-            0.4 ether
+            abi.encode(amount),
+            address(xERC20Sample),
+            amount
         );
-
-        assertEq(clientSample.value(), val);
     }
 
-    function test__FailureToReceiveWithoutAddingCustomAdapter(
-        uint256 val
+    function test__FailureToReceiveWithoutAddingCustomAdapterToken(
+        uint256 amount
     ) external {
+        vm.assume(amount < 10e15);
+        xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
+
         address notAddedCustomAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
-
-        uint8[] memory gmps = new uint8[](1);
-        gmps[0] = 1;
         address[] memory customAdapters = new address[](1);
         customAdapters[0] = notAddedCustomAdapter;
 
-        clientSample.setQuorum(2);
+        glacisTokenClientSampleDestination.setQuorum(1);
 
         vm.expectRevert(GlacisRouter__OnlyAdaptersAllowed.selector);
-        clientSample.setRemoteValue{value: 0.4 ether}(
+        glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.4 ether}(
             block.chainid,
-            address(clientSample).toBytes32(),
-            abi.encode(val),
-            gmps,
+            address(glacisTokenClientSampleDestination).toBytes32(),
+            new uint8[](0),
             customAdapters,
-            createFees(0.2 ether, 2),
-            address(this),
-            false,
-            0.4 ether
+            createFees(0.4 ether, 1),
+            abi.encode(amount),
+            address(xERC20Sample),
+            amount
         );
     }
-
-    */
 
     receive() external payable {}
 }
