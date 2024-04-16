@@ -52,7 +52,7 @@ interface IGlacisRouter {
         uint256[] memory fees,
         address refundAddress,
         bool retry
-    ) external payable returns (bytes32);
+    ) external payable returns (bytes32, uint256);
 
     function routeRetry(
         uint256 chainId,

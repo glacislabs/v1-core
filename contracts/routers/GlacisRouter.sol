@@ -58,27 +58,21 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         uint256[] memory fees,
         address refundAddress,
         bool retriable
-    ) public payable virtual returns (bytes32) {
+    ) public payable virtual returns (bytes32 messageId, uint256 nonce) {
         // Validate input
         validateFeesInput(gmps.length + customAdapters.length, fees);
 
-        (bytes32 messageId, uint256 nonce) = _createGlacisMessageId(
+        bytes32 from = msg.sender.toBytes32();
+        (messageId, nonce) = _createGlacisMessageId(
             chainId,
             to,
             payload
         );
-        bytes32 from = msg.sender.toBytes32();
-        // @notice This follows GlacisData stored within GlacisCommons
-        bytes memory glacisPackedPayload = abi.encode(
-            messageId,
-            nonce,
-            from,
-            to,
-            payload
-        );
+        
         _processRouting(
             chainId,
-            glacisPackedPayload,
+            // @notice This follows GlacisData stored within GlacisCommons
+            abi.encode(messageId, nonce, from, to, payload),
             gmps,
             customAdapters,
             fees,
@@ -102,7 +96,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             retriable
         );
 
-        return messageId;
+        return (messageId, nonce);
     }
 
     /// @notice Retries routing the payload to the specific address on destination chain
@@ -282,10 +276,12 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
 
         // Ensures that the message hasn't come from the same adapter again
         if (isCustomAdapter) {
-            if(receivedCustomAdapterMessages[glacisData.messageId][msg.sender])
+            if (receivedCustomAdapterMessages[glacisData.messageId][msg.sender])
                 revert GlacisRouter__MessageAlreadyReceivedFromGMP();
 
-            receivedCustomAdapterMessages[glacisData.messageId][msg.sender] = true;
+            receivedCustomAdapterMessages[glacisData.messageId][
+                msg.sender
+            ] = true;
         } else {
             uint8 adjustedGmpId = gmpId - 1;
 

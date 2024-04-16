@@ -57,7 +57,7 @@ contract GlacisTokenMediator is
         address refundAddress,
         address token,
         uint256 tokenAmount
-    ) public payable virtual returns (bytes32) {
+    ) public payable virtual returns (bytes32, uint256) {
         bytes32 destinationTokenMediator = remoteCounterpart[chainId];
         if (destinationTokenMediator == bytes32(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();

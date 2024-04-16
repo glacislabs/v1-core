@@ -24,7 +24,7 @@ interface IGlacisTokenMediator {
         address refundAddress,
         address token,
         uint256 tokenAmount
-    ) external payable returns (bytes32);
+    ) external payable returns (bytes32, uint256);
 
     function routeRetry(
         uint256 chainId,
