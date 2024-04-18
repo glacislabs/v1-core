@@ -17,7 +17,11 @@ error GlacisTokenMediator__OnlyTokenMediatorAllowed();
 error GlacisTokenMediator__IncorrectTokenVariant(address, uint256);
 error GlacisTokenMediator__DestinationChainUnavailable();
 
-contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartManager,  IGlacisClient {
+contract GlacisTokenMediator is
+    IGlacisTokenMediator,
+    GlacisRemoteCounterpartManager,
+    IGlacisClient
+{
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 
@@ -32,7 +36,6 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
     }
 
     address public immutable GLACIS_ROUTER;
-
 
     /// @notice Routes the payload to the specific address on destination chain through GlacisRouter using GMPs
     /// specified in gmps array
@@ -49,11 +52,12 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         address token,
         uint256 tokenAmount
-    ) public payable virtual returns (bytes32) {
+    ) public payable virtual returns (bytes32, uint256) {
         bytes32 destinationTokenMediator = remoteCounterpart[chainId];
         if (destinationTokenMediator == bytes32(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();
@@ -73,6 +77,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
                 destinationTokenMediator,
                 tokenPayload,
                 gmps,
+                customAdapters,
                 fees,
                 refundAddress,
                 true // Token Mediator always enables retry
@@ -95,6 +100,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,
@@ -102,10 +108,6 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
         address token,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32) {
-        bytes32 destinationTokenMediator = remoteCounterpart[chainId];
-        if (destinationTokenMediator == bytes32(0))
-            revert GlacisTokenMediator__DestinationChainUnavailable();
-
         // Pack with a function (otherwise stack too deep)
         bytes memory tokenPayload = packTokenPayload(
             chainId,
@@ -115,12 +117,40 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
             payload
         );
 
+        // Use helper function (otherwise stack too deep)
+        return _routeRetry(
+            chainId,
+            tokenPayload,
+            gmps,
+            customAdapters,
+            fees,
+            refundAddress,
+            messageId,
+            nonce
+        );
+    }
+
+    function _routeRetry(
+        uint256 chainId,
+        bytes memory tokenPayload,
+        uint8[] memory gmps,
+        address[] memory customAdapters,
+        uint256[] memory fees,
+        address refundAddress,
+        bytes32 messageId,
+        uint256 nonce
+    ) private returns(bytes32) {
+        bytes32 destinationTokenMediator = remoteCounterpart[chainId];
+        if (destinationTokenMediator == bytes32(0))
+            revert GlacisTokenMediator__DestinationChainUnavailable();
+
         return
             IGlacisRouter(GLACIS_ROUTER).routeRetry{value: msg.value}(
                 chainId,
                 destinationTokenMediator,
                 tokenPayload,
                 gmps,
+                customAdapters,
                 fees,
                 refundAddress,
                 messageId,
@@ -229,7 +259,7 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
     function isAllowedRoute(
         uint256 fromChainId,
         bytes32 fromAddress,
-        uint8 fromGmpId,
+        uint160 fromGmpId,
         bytes memory payload
     ) external view returns (bool) {
         // First checks to ensure that the GlacisTokenMediator is speaking to a registered remote version
@@ -257,6 +287,37 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
                 originalFrom,
                 fromGmpId,
                 originalPayload
+            );
+    }
+
+    function isCustomAdapter(
+        address adapter,
+        GlacisCommons.GlacisData memory glacisData,
+        bytes memory payload
+    ) public override returns (bool) {
+        (
+            bytes32 to,
+            ,
+            ,
+            address token,
+            uint256 tokenAmount,
+
+        ) = decodeTokenPayload(payload);
+
+        // If the destination smart contract is an EOA, then it is not.
+        address toAddress = to.toAddress();
+        if (toAddress.code.length == 0) {
+            return false;
+        }
+
+        // Forwards check to the token client
+        return
+            IGlacisTokenClient(toAddress).isCustomAdapter(
+                adapter,
+                glacisData,
+                payload,
+                token,
+                tokenAmount
             );
     }
 
@@ -318,6 +379,4 @@ contract GlacisTokenMediator is IGlacisTokenMediator, GlacisRemoteCounterpartMan
             (bytes32, bytes32, address, address, uint256, bytes)
         );
     }
-
-
 }

@@ -69,7 +69,7 @@ abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
     function isAllowedRoute(
         uint256 fromChainId,
         bytes32 fromAddress,
-        uint8 fromGmpId,
+        uint160 fromGmpId,
         bytes memory // payload
     ) public view override returns (bool) {
         for (uint256 i = 0; i < allowedRoutes.length; i++) {

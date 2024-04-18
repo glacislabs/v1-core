@@ -29,4 +29,13 @@ interface IGlacisTokenClient is IGlacisAccessControlClient {
         address,
         uint256
     ) external view returns (uint256);
+
+    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter.
+    function isCustomAdapter(
+        address adapter,
+        GlacisCommons.GlacisData memory glacisData,
+        bytes memory payload,
+        address token,
+        uint256 amount
+    ) external returns(bool); 
 }

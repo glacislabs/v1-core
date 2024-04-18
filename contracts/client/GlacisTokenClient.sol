@@ -57,6 +57,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
                 to,
                 payload,
                 gmps,
+                emptyCustomAdapters(),
                 fees,
                 refundAddress,
                 token,
@@ -91,6 +92,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
                 to,
                 payload,
                 gmps,
+                emptyCustomAdapters(),
                 fees,
                 refundAddress,
                 token,
@@ -111,15 +113,16 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         address token,
         uint256 tokenAmount,
         uint256 gasPayment
     ) internal returns (bytes32) {
-        bytes32 messageId = IGlacisTokenMediator(GLACIS_TOKEN_ROUTER).route{
+        (bytes32 messageId,) = IGlacisTokenMediator(GLACIS_TOKEN_ROUTER).route{
             value: gasPayment
-        }(chainId, to, payload, gmps, fees, refundAddress, token, tokenAmount);
+        }(chainId, to, payload, gmps, customAdapters, fees, refundAddress, token, tokenAmount);
         emit GlacisTokenClient__MessageRouted(messageId, chainId, to);
         return messageId;
     }
@@ -137,6 +140,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         bytes32 to,
         bytes memory payload,
         uint8[] memory gmps,
+        address[] memory customAdapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,
@@ -150,6 +154,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
             to,
             payload,
             gmps,
+            customAdapters,
             fees,
             refundAddress,
             messageId,
@@ -215,5 +220,15 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         uint256 // tokenAmount
     ) external view virtual override returns (uint256) {
         return getQuorum(glacisData, payload);
+    }
+
+    function isCustomAdapter(
+        address adapter,
+        GlacisCommons.GlacisData memory glacisData,
+        bytes memory payload,
+        address, // token,
+        uint256 // tokenAmount
+    ) public virtual override returns(bool) {
+        return isCustomAdapter(adapter, glacisData, payload);
     }
 }

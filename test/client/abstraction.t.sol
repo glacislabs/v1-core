@@ -23,6 +23,7 @@ import {CCIPTextSample} from "../contracts/samples/control/CCIPTextSample.sol";
 import {HyperlaneSample} from "../contracts/samples/control/HyperlaneSample.sol";
 import {HyperlaneTextSample} from "../contracts/samples/control/HyperlaneTextSample.sol";
 import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
+import {CustomAdapterSample} from "../contracts/samples/CustomAdapterSample.sol";
 import "forge-std/console.sol";
 
 /* solhint-disable contract-name-camelcase */
@@ -67,6 +68,7 @@ contract AbstractionTests__Axelar is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -116,6 +118,7 @@ contract AbstractionTests__LayerZero is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -169,6 +172,7 @@ contract AbstractionTests__Wormhole is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -223,6 +227,7 @@ contract AbstractionTests__Hyperlane is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -273,6 +278,7 @@ contract AbstractionTests__CCIP is LocalTestSetup {
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
+            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,

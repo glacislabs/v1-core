@@ -7,7 +7,6 @@ import {IGlacisRouterEvents} from "../interfaces/IGlacisRouter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-error GlacisAbstractRouter__OnlyAdaptersAllowed(); //0x55ff424d
 error GlacisAbstractRouter__InvalidAdapterAddress(); //0xa46f71e2
 error GlacisAbstractRouter__GMPIDCannotBeZero(); //0x4332f55b
 
@@ -152,12 +151,5 @@ abstract contract GlacisAbstractRouter is
         );
 
         return id == messageId;
-    }
-
-    /// @notice Verifies that the sender address is one of the adapters
-    modifier onlyAdapter() {
-        if (adapterToGlacisGMPId[msg.sender] == 0)
-            revert GlacisAbstractRouter__OnlyAdaptersAllowed();
-        _;
     }
 }
