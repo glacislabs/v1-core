@@ -5,6 +5,7 @@ import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 
 error XERC20__OnlyBridge();
 
@@ -344,7 +345,7 @@ contract XERC20 is XERC20Basic, IXERC20GlacisExtension {
         address _factory
     ) XERC20Basic(_name, _symbol, _factory) {}
 
-    mapping(uint256 => address) private chainIdToTokenVariant;
+    mapping(uint256 => bytes32) private chainIdToTokenVariant;
 
     /**
      * @notice Returns a token variant for a specific chainId if it exists.
@@ -353,7 +354,7 @@ contract XERC20 is XERC20Basic, IXERC20GlacisExtension {
      */
     function getTokenVariant(
         uint256 chainId
-    ) external view override returns (address) {
+    ) external view override returns (bytes32) {
         return chainIdToTokenVariant[chainId];
     }
 
@@ -365,7 +366,7 @@ contract XERC20 is XERC20Basic, IXERC20GlacisExtension {
      */
     function setTokenVariant(
         uint256 chainId,
-        address variant
+        bytes32 variant
     ) external onlyOwner {
         chainIdToTokenVariant[chainId] = variant;
     }
