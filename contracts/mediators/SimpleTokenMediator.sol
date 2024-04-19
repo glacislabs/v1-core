@@ -16,11 +16,9 @@ error GlacisTokenMediator__OnlyTokenMediatorAllowed();
 error GlacisTokenMediator__IncorrectTokenVariant(address, uint256);
 error GlacisTokenMediator__DestinationChainUnavailable();
 
-/** 
- * This contract is initialized in the same way that the GlacisTokenMediator is. It allows
- * developers to deploy their own mediator without any extra Glacis interfaces. Developers
- * using this must ensure that their token has the same address on each chain.
- */
+/// This contract is initialized in the same way that the GlacisTokenMediator is. It allows
+/// developers to deploy their own mediator without any extra Glacis interfaces. Developers
+/// using this must ensure that their token has the same address on each chain.
 contract GlacisTokenMediator is
     IGlacisTokenMediator,
     GlacisRemoteCounterpartManager,
