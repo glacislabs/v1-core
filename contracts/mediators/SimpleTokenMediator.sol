@@ -6,16 +6,19 @@ import {IGlacisTokenClient} from "../interfaces/IGlacisTokenClient.sol";
 import {IGlacisRouter} from "../interfaces/IGlacisRouter.sol";
 import {IGlacisTokenMediator} from "../interfaces/IGlacisTokenMediator.sol";
 import {IGlacisClient} from "../interfaces/IGlacisClient.sol";
-import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
+import {IXERC20} from "../interfaces/IXERC20.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpartManager.sol";
 import {GlacisClient__CanOnlyBeCalledByRouter} from "../client/GlacisClient.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 
 error GlacisTokenMediator__OnlyTokenMediatorAllowed();
-error GlacisTokenMediator__IncorrectTokenVariant(bytes32, uint256);
+error GlacisTokenMediator__IncorrectTokenVariant(address, uint256);
 error GlacisTokenMediator__DestinationChainUnavailable();
 
+/// This contract is initialized in the same way that the GlacisTokenMediator is. It allows
+/// developers to deploy their own mediator without any extra Glacis interfaces. Developers
+/// using this must ensure that their token has the same address on each chain.
 contract GlacisTokenMediator is
     IGlacisTokenMediator,
     GlacisRemoteCounterpartManager,
@@ -63,7 +66,6 @@ contract GlacisTokenMediator is
 
         IXERC20(token).burn(msg.sender, tokenAmount);
         bytes memory tokenPayload = packTokenPayload(
-            chainId,
             to,
             token,
             tokenAmount,
@@ -109,7 +111,6 @@ contract GlacisTokenMediator is
     ) public payable virtual returns (bytes32) {
         // Pack with a function (otherwise stack too deep)
         bytes memory tokenPayload = packTokenPayload(
-            chainId,
             to,
             token,
             tokenAmount,
@@ -178,20 +179,17 @@ contract GlacisTokenMediator is
         (
             bytes32 to,
             bytes32 originalFrom,
-            bytes32 sourceToken,
-            bytes32 token,
+            address sourceToken,
+            address token,
             uint256 tokenAmount,
             bytes memory originalPayload
         ) = abi.decode(
                 payload,
-                (bytes32, bytes32, bytes32, bytes32, uint256, bytes)
+                (bytes32, bytes32, address, address, uint256, bytes)
             );
 
         // Ensure that the destination token accepts the source token.
-        if (
-            sourceToken != token &&
-            sourceToken != getTokenVariant(token.toAddress(), fromChainId)
-        ) {
+        if (sourceToken != token) {
             revert GlacisTokenMediator__IncorrectTokenVariant(
                 sourceToken,
                 fromChainId
@@ -200,8 +198,8 @@ contract GlacisTokenMediator is
 
         // Mint & execute
         address toAddress = to.toAddress();
-        IXERC20(token.toAddress()).mint(toAddress, tokenAmount);
-        emit GlacisTokenMediator__TokensMinted(toAddress, token.toAddress(), tokenAmount);
+        IXERC20(token).mint(toAddress, tokenAmount);
+        emit GlacisTokenMediator__TokensMinted(toAddress, token, tokenAmount);
         IGlacisTokenClient client = IGlacisTokenClient(toAddress);
 
         if (toAddress.code.length > 0) {
@@ -210,7 +208,7 @@ contract GlacisTokenMediator is
                 fromChainId,
                 originalFrom,
                 originalPayload,
-                token.toAddress(),
+                token,
                 tokenAmount
             );
         }
@@ -227,8 +225,7 @@ contract GlacisTokenMediator is
         (
             bytes32 to,
             bytes32 originalFrom,
-            ,
-            bytes32 token,
+            address token,
             uint256 tokenAmount,
             bytes memory originalPayload
         ) = decodeTokenPayload(payload);
@@ -245,7 +242,7 @@ contract GlacisTokenMediator is
             IGlacisTokenClient(toAddress).getQuorum(
                 glacisData,
                 originalPayload,
-                token.toAddress(),
+                token,
                 tokenAmount
             );
     }
@@ -267,7 +264,6 @@ contract GlacisTokenMediator is
         (
             bytes32 to,
             bytes32 originalFrom,
-            ,
             ,
             ,
             bytes memory originalPayload
@@ -297,8 +293,7 @@ contract GlacisTokenMediator is
         (
             bytes32 to,
             ,
-            ,
-            bytes32 token,
+            address token,
             uint256 tokenAmount,
 
         ) = decodeTokenPayload(payload);
@@ -315,27 +310,12 @@ contract GlacisTokenMediator is
                 adapter,
                 glacisData,
                 payload,
-                token.toAddress(),
+                token,
                 tokenAmount
             );
     }
 
-    function getTokenVariant(
-        address token,
-        uint256 chainId
-    ) internal view returns (bytes32 destinationToken) {
-        try IXERC20GlacisExtension(token).getTokenVariant(chainId) returns (
-            bytes32 variant
-        ) {
-            if (variant == bytes32(0)) destinationToken = token.toBytes32();
-            else destinationToken = variant;
-        } catch {
-            destinationToken = token.toBytes32();
-        }
-    }
-
     function packTokenPayload(
-        uint256 chainId,
         bytes32 to,
         address token,
         uint256 tokenAmount,
@@ -345,8 +325,7 @@ contract GlacisTokenMediator is
             abi.encode(
                 to,
                 msg.sender.toBytes32(),
-                token.toBytes32(),
-                getTokenVariant(token, chainId),
+                token,
                 tokenAmount,
                 payload
             );
@@ -360,8 +339,7 @@ contract GlacisTokenMediator is
         returns (
             bytes32 to,
             bytes32 originalFrom,
-            bytes32 sourceToken,
-            bytes32 token,
+            address sourceToken,
             uint256 tokenAmount,
             bytes memory originalPayload
         )
@@ -370,12 +348,11 @@ contract GlacisTokenMediator is
             to,
             originalFrom,
             sourceToken,
-            token,
             tokenAmount,
             originalPayload
         ) = abi.decode(
             payload,
-            (bytes32, bytes32, bytes32, bytes32, uint256, bytes)
+            (bytes32, bytes32, address, uint256, bytes)
         );
     }
 }

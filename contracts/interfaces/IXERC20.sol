@@ -32,7 +32,6 @@ interface IXERC20 {
     /**
      * @notice Reverts when caller is not the factory
      */
-
     error IXERC20_NotFactory();
 
     struct Bridge {
@@ -130,13 +129,18 @@ interface IXERC20 {
     function burn(address _user, uint256 _amount) external;
 }
 
+/**
+ * An optional extension to IXERC20 that the GlacisTokenMediator will query for. 
+ * It allows developers to have XERC20 tokens that have different addresses on
+ * different chains.
+ */
 interface IXERC20GlacisExtension {
     /**
      * @notice Returns a token variant for a specific chainId if it exists.
      *
      * @param chainId The chainId of the token variant.
      */
-    function getTokenVariant(uint256 chainId) external view returns (address);
+    function getTokenVariant(uint256 chainId) external view returns (bytes32);
 
     /**
      * @notice Sets a token variant for a specific chainId.
@@ -144,5 +148,5 @@ interface IXERC20GlacisExtension {
      * @param chainId The chainId of the token variant.
      * @param variant The address of the token variant.
      */
-    function setTokenVariant(uint256 chainId, address variant) external;
+    function setTokenVariant(uint256 chainId, bytes32 variant) external;
 }
