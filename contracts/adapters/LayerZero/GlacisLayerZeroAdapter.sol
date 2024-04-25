@@ -10,11 +10,9 @@ import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 
 error GlacisLayerZeroAdapter__LZChainIdNotAccepted(uint256);
 
-/// @title Glacis Adapter for Layer Zero GMP
-/// @notice This adapter receives GlacisRouter requests through the _sendMessage function and forwards them to
-/// LayerZero. Also receives LayerZero requests through the _nonblockingLzReceive function and routes
-/// them to GlacisRouter
-/// @dev Layer Zero uses its own chain ID system, which is uint16 and requires a mapping to Glacis chain IDs
+/// @title Glacis Adapter for Layer Zero  
+/// @notice A Glacis Adapter for the LayerZero V1. Sends messages through _lzSend() and receives
+/// messages via _nonblockingLzReceive()  
 contract GlacisLayerZeroAdapter is
     SimpleNonblockingLzApp,
     GlacisAbstractAdapter
@@ -22,12 +20,12 @@ contract GlacisLayerZeroAdapter is
     using AddressBytes32 for bytes32;
 
     constructor(
-        address glacisRouter_,
-        address lzEndpoint_,
-        address owner_
+        address _glacisRouter,
+        address _lzEndpoint,
+        address _owner
     )
-        SimpleNonblockingLzApp(lzEndpoint_)
-        GlacisAbstractAdapter(IGlacisRouter(glacisRouter_), owner_)
+        SimpleNonblockingLzApp(_lzEndpoint)
+        GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner)
     {}
 
     mapping(uint256 => uint16) public glacisChainIdToAdapterChainId;

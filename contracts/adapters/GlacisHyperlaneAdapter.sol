@@ -30,9 +30,9 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     mapping(uint256 => uint32) public glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;
 
-    /// @param _glacisRouter This chain's glacis router
-    /// @param _hyperlaneMailbox This chain's hyperlane router
-    /// @param _owner This adapter's owner
+    /// @param _glacisRouter This chain's glacis router  
+    /// @param _hyperlaneMailbox This chain's hyperlane router  
+    /// @param _owner This adapter's owner  
     constructor(
         address _glacisRouter,
         address _hyperlaneMailbox,

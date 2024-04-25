@@ -11,10 +11,9 @@ import {GlacisAbstractAdapter} from "./GlacisAbstractAdapter.sol";
 import {IGlacisRouter} from "../routers/GlacisRouter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 
-/// @title Glacis Adapter for Axelar GMP
-/// @dev This adapter receives GlacisRouter requests through _sendMessage function and forwards them to
-/// Axelar. Also receives Axelar requests through _execute function and routes them to GlacisRouter
-/// @dev Axelar uses labels for chain IDs so requires mappings to Glacis chain IDs
+/// @title Glacis Adapter for Axelar  
+/// @notice A Glacis Adapter for the Axelar network. Sends messages through the Axelar Gateway's callContract() and
+/// receives Axelar requests through _execute()  
 contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     using Strings for address;
     using AddressString for string;
@@ -25,16 +24,20 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     mapping(uint256 => string) public glacisChainIdToAdapterChainId;
     mapping(string => uint256) public adapterChainIdToGlacisChainId;
 
+    /// @param _glacisRouter This chain's glacis router
+    /// @param _axelarGateway This chain's axelar gateway
+    /// @param _axelarGasReceiver This chain's axelar gas receiver
+    /// @param _owner This adapter's owner
     constructor(
-        address glacisRouter_,
-        address axelarGateway_,
-        address axelarGasReceiver_,
-        address owner_
+        address _glacisRouter,
+        address _axelarGateway,
+        address _axelarGasReceiver,
+        address _owner
     )
-        AxelarExecutable(axelarGateway_)
-        GlacisAbstractAdapter(IGlacisRouter(glacisRouter_), owner_)
+        AxelarExecutable(_axelarGateway)
+        GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner)
     {
-        GAS_SERVICE = IAxelarGasService(axelarGasReceiver_);
+        GAS_SERVICE = IAxelarGasService(_axelarGasReceiver);
     }
 
     /// @notice Sets the corresponding Axelar chain label for the specified Glacis chain ID
@@ -82,7 +85,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
         return bytes(glacisChainIdToAdapterChainId[chainId]).length > 0;
     }
 
-    /// @notice Dispatch payload to specified Glacis chain ID and address through Axelar GMP
+    /// @notice Dispatches payload to specified Glacis chain ID and address through Axelar GMP
     /// @param toChainId Destination chain (Glacis ID)
     /// @param refundAddress The address to refund native asset surplus
     /// @param payload Payload to send
