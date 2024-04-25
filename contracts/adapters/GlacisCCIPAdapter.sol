@@ -17,10 +17,9 @@ error GlacisCCIPAdapter__GlacisFeeExtrapolationFailed(
 error GlacisCCIPAdapter__RefundAddressMustReceiveNativeCurrency();
 error GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
 
-/// @title Glacis Adapter for Axelar GMP
-/// @dev This adapter receives GlacisRouter requests through _sendMessage function and forwards them to
-/// Axelar. Also receives Axelar requests through _execute function and routes them to GlacisRouter
-/// @dev Axelar uses labels for chain IDs so requires mappings to Glacis chain IDs
+/// @title Glacis Adapter for CCIP GMP  
+/// @notice A Glacis Adapter for CCIP. Sends messages through the CCIP router's ccipSend() and receives
+/// messages via _ccipReceive()
 contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     using AddressBytes32 for address;
 
@@ -32,13 +31,16 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         uint256 messageValue
     );
 
+    /// @param _glacisRouter This chain's glacis router
+    /// @param _ccipRouter This chain's CCIP router
+    /// @param _owner This adapter's owner
     constructor(
-        address glacisRouter_,
-        address ccipRouter_,
-        address owner_
+        address _glacisRouter,
+        address _ccipRouter,
+        address _owner
     )
-        GlacisAbstractAdapter(IGlacisRouter(glacisRouter_), owner_)
-        CCIPReceiver(ccipRouter_)
+        GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner)
+        CCIPReceiver(_ccipRouter)
     {}
 
     /// @notice Sets the corresponding CCIP selectors for the specified Glacis chain ID

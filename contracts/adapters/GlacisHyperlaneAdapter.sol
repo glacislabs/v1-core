@@ -16,9 +16,10 @@ error GlacisHyperlaneAdapter__FeeNotEnough();
 error GlacisHyperlaneAdapter__RefundAddressMustReceiveNativeCurrency();
 error GlacisHyperlaneAdapter__UnconfiguredOrigin();
 
-// Created our own Mailbox client because it couldn't be overriden in such a way that the refund address was
-// modular. Fortunately the strict requirements of the Mailbox client only requires the handle function.
-
+/// @title Glacis Adapter for Hyperlane  
+/// @notice A Glacis Adapter for the cannonical Hyperlane network. Sends messages through dispatch() and receives
+/// messages via handle()  
+/// @notice Opted to create our own mailbox client because Hyperlane's base Mailbox refund address was static
 contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
 
     // Required by Hyperlane, if kept as 0 then it will use the default router.
@@ -29,12 +30,15 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     mapping(uint256 => uint32) public glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;
 
+    /// @param _glacisRouter This chain's glacis router
+    /// @param _hyperlaneMailbox This chain's hyperlane router
+    /// @param _owner This adapter's owner
     constructor(
-        address glacisRouter_,
-        address hyperlaneMailbox_,
-        address owner_
-    ) GlacisAbstractAdapter(IGlacisRouter(glacisRouter_), owner_) {
-        MAIL_BOX = IMailbox(hyperlaneMailbox_);
+        address _glacisRouter,
+        address _hyperlaneMailbox,
+        address _owner
+    ) GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner) {
+        MAIL_BOX = IMailbox(_hyperlaneMailbox);
         LOCAL_DOMAIN = MAIL_BOX.localDomain();
     }
 
@@ -65,9 +69,9 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
         }
     }
 
-    /// @notice Gets the corresponding Axelar chain label for the specified Glacis chain ID
+    /// @notice Gets the corresponding Hyperlane domain ID for the specified Glacis chain ID
     /// @param chainId Glacis chain ID
-    /// @return The corresponding Axelar label
+    /// @return The corresponding Hyperlane domain ID
     function adapterChainID(uint256 chainId) external view returns (uint32) {
         return glacisChainIdToAdapterChainId[chainId];
     }

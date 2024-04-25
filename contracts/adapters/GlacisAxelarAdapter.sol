@@ -15,7 +15,6 @@ import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 /// @dev This adapter receives GlacisRouter requests through _sendMessage function and forwards them to
 /// Axelar. Also receives Axelar requests through _execute function and routes them to GlacisRouter
 /// @dev Axelar uses labels for chain IDs so requires mappings to Glacis chain IDs
-
 contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     using Strings for address;
     using AddressString for string;
