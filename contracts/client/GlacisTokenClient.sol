@@ -10,7 +10,7 @@ import {GlacisCommons} from "../commons/GlacisCommons.sol";
 error GlacisTokenClient__CanOnlyBeCalledByTokenRouter();
 
 /// @title Glacis Token Client
-/// @dev This contract encapsulates Glacis Token PAssing client logic, contracts inheriting this will have access to all
+/// @dev This contract encapsulates Glacis Token Passing client logic, contracts inheriting this will have access to all
 /// Glacis Token Passing and Message Passing features
 abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     address public immutable GLACIS_TOKEN_ROUTER;
@@ -104,10 +104,14 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @notice Routes message and tokens to destination through GlacisTokenMediator using any feature
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
+    /// @param payload The bytes payload to send across chains
     /// @param gmps Glacis ID of the GMP to be used for the routing
-    /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
+    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param fees An array of values to send to the gmps & custom adapters. Should sum to the gasPayment
+    /// @param refundAddress Address to refund excess gas payment
     /// @param token A token address inheriting GlacisToken or GlacisTokenProxy standard (xERC-20)
     /// @param tokenAmount Amount of token to send to remote contract
+    /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
     function _routeWithTokens(
         uint256 chainId,
         bytes32 to,
@@ -131,9 +135,15 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// specified in gmps array
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
+    /// @param payload The bytes payload to send across chains
     /// @param gmps Array of GMPs to be used for the routing
+    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param fees An array of values to send to the gmps & custom adapters. Should sum to the gasPayment
+    /// @param refundAddress Address to refund excess gas payment
     /// @param messageId The message ID of the message to retry
     /// @param nonce The nonce emitted by the original sent message
+    /// @param token A token address inheriting GlacisToken or GlacisTokenProxy standard (xERC-20)
+    /// @param tokenAmount Amount of token to send to remote contract
     /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
     function _retryRouteWithTokens(
         uint256 chainId,
@@ -212,7 +222,6 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @notice The quorum of messages that the contract expects with a specific message from the
     ///         token router
     /// @param glacisData The glacis config data that comes with the message
-    /// @param payload The payload that comes with the message
     function getQuorum(
         GlacisCommons.GlacisData memory glacisData,
         bytes memory payload,
@@ -222,6 +231,10 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         return getQuorum(glacisData, payload);
     }
 
+    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter  
+    /// @param adapter The address of the custom adapter in question  
+    /// @param glacisData The glacis data of the message   
+    /// @param payload The abstract payload of the message  
     function isCustomAdapter(
         address adapter,
         GlacisCommons.GlacisData memory glacisData,

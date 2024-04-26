@@ -4,6 +4,8 @@ pragma solidity 0.8.18;
 
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
+/// @title IGlacisRouterEvents
+/// @notice An interface that defines a GlacisRouter's events
 abstract contract IGlacisRouterEvents is GlacisCommons
 {
     event GlacisAbstractRouter__MessageIdCreated(
@@ -42,6 +44,8 @@ abstract contract IGlacisRouterEvents is GlacisCommons
     );
 }
 
+/// @title IGlacisRouter
+/// @notice An interface that defines an interface that sends and receives messages across chains
 interface IGlacisRouter {
     function route(
         uint256 chainId,

@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.18;
 
+/// @title IGlacisTokenMediator
+/// @notice An interface of a mediator that sends XERC20s with a payload across chains  
 interface IGlacisTokenMediator {
     event GlacisTokenMediator__TokensBurnt(
         address from,

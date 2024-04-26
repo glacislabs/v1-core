@@ -4,8 +4,9 @@ pragma solidity 0.8.18;
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IGlacisAccessControlClient} from "./IGlacisAccessControlClient.sol";
 
-/// An interface that defines the GMP modules (adapters) that the GlacisRouter interacts with.
-/// Should be paired with the IGlacisClient abstract smart contract.
+/// @title IGlacisTokenClient
+/// @notice An interface that defines the GMP modules (adapters) that the GlacisRouter interacts with.
+/// @notice Should be paired with the IGlacisClient abstract smart contract.
 interface IGlacisTokenClient is IGlacisAccessControlClient {
     /// @notice Receives message from GMP(s) through GlacisRouter
     /// @param fromGmpIds ID of the GMP that sent this message (that reached quorum requirements)

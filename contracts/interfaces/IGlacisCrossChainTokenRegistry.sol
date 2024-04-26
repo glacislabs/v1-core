@@ -5,6 +5,7 @@ pragma solidity 0.8.18;
 error GlacisRemoteCounterpartManager__RemoteCounterpartCannotHaveChainIdZero();
 error GlacisRemoteCounterpartManager__RemoteCounterpartsAndChainIDsMustHaveSameLength();
 
+/// @title IGlacisCrossChainTokenRegistry
 interface IGlacisCrossChainTokenRegistry {
     /// @notice Adds an authorized glacis counterpart cross chain token in a remote chain that interacts with this component
     /// @param chainIds An array with chains of the glacis remote components
