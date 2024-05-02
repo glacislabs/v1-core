@@ -7,12 +7,12 @@ import {IGlacisAccessControlClient} from "../interfaces/IGlacisAccessControlClie
 error GlacisAccessControlClient__RouteAlreadyAdded();
 
 /// @title Glacis Access Control Client
-/// @dev This contract encapsulates Glacis Access Control client logic, contracts inheriting this will have access to
-/// Glacis Access control freatures
+/// @dev This contract encapsulates Glacis Access Control client logic. Contracts inheriting this will have access to
+/// Glacis Access control features  
 abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
     GlacisCommons.GlacisRoute[] private allowedRoutes;
 
-    /// @notice Add an allowed route for this client
+    /// @notice Adds an allowed route for this client
     /// @param allowedRoute Route to be added
     function _addAllowedRoute(
         GlacisCommons.GlacisRoute memory allowedRoute
@@ -29,7 +29,7 @@ abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
     }
 
     /// @notice Get all allowed routes for this client
-    /// @return allowed routes array
+    /// @return Complete allowed routes array
     function getAllowedRoutes()
         external
         view

@@ -17,10 +17,9 @@ error GlacisCCIPAdapter__GlacisFeeExtrapolationFailed(
 error GlacisCCIPAdapter__RefundAddressMustReceiveNativeCurrency();
 error GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
 
-/// @title Glacis Adapter for Axelar GMP
-/// @dev This adapter receives GlacisRouter requests through _sendMessage function and forwards them to
-/// Axelar. Also receives Axelar requests through _execute function and routes them to GlacisRouter
-/// @dev Axelar uses labels for chain IDs so requires mappings to Glacis chain IDs
+/// @title Glacis Adapter for CCIP GMP  
+/// @notice A Glacis Adapter for CCIP. Sends messages through the CCIP router's ccipSend() and receives
+/// messages via _ccipReceive()
 contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     using AddressBytes32 for address;
 
@@ -32,13 +31,16 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         uint256 messageValue
     );
 
+    /// @param _glacisRouter This chain's glacis router
+    /// @param _ccipRouter This chain's CCIP router
+    /// @param _owner This adapter's owner
     constructor(
-        address glacisRouter_,
-        address ccipRouter_,
-        address owner_
+        address _glacisRouter,
+        address _ccipRouter,
+        address _owner
     )
-        GlacisAbstractAdapter(IGlacisRouter(glacisRouter_), owner_)
-        CCIPReceiver(ccipRouter_)
+        GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner)
+        CCIPReceiver(_ccipRouter)
     {}
 
     /// @notice Sets the corresponding CCIP selectors for the specified Glacis chain ID
@@ -70,7 +72,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
 
     /// @notice Gets the corresponding CCIP chain selector for the specified Glacis chain ID
     /// @param chainId Glacis chain ID
-    /// @return The corresponding Axelar label
+    /// @return The corresponding CCIP chain ID
     function adapterChainID(uint256 chainId) external view returns (uint64) {
         return glacisChainIdToAdapterChainId[chainId];
     }
@@ -84,7 +86,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         return glacisChainIdToAdapterChainId[chainId] != 0;
     }
 
-    /// @notice Dispatch payload to specified Glacis chain ID and address through Axelar GMP
+    /// @notice Dispatch payload to specified Glacis chain ID and address through CCIP
     /// @param toChainId Destination chain (Glacis ID)
     /// @param payload Payload to send
     function _sendMessage(
@@ -145,7 +147,8 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         }
     }
 
-    /// Handles a received message
+    /// @notice Handles a received message from CCIP
+    /// @param any2EvmMessage The CCIP formatted message
     function _ccipReceive(
         Client.Any2EVMMessage memory any2EvmMessage
     )
@@ -166,9 +169,13 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         GLACIS_ROUTER.receiveMessage(sourceChainId, any2EvmMessage.data);
     }
 
-    /// Noticed that the fees are linearly calculated, so we can calculate the amount given.
-    /// Unfortunately we have to assume that the fee calculations stay the same forever. This may not
-    /// be the case.
+    /// @notice Extrapolates destination chain's gas limit from an amount of the origin chain's gas token 
+    /// for a specific cross-chain transaction  
+    /// @param value The amount of the origin chain's gas token to use to pay for destination gas fees 
+    /// @param destinationChain The destination chain's CCIP chain ID  
+    /// @param payload The bytes payload to send across chains in this message  
+    /// @notice The CCIP fees are linearly calculated, so we can calculate the amount given. Unfortunately, 
+    /// we have to assume that the fee formula stay the same forever. This may not be the case  
     function extrapolateGasLimitFromValue(
         uint256 value,
         uint64 destinationChain,

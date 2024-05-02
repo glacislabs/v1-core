@@ -16,6 +16,8 @@ error GlacisTokenMediator__OnlyTokenMediatorAllowed();
 error GlacisTokenMediator__IncorrectTokenVariant(bytes32, uint256);
 error GlacisTokenMediator__DestinationChainUnavailable();
 
+/// @title Glacis Token Mediator
+/// @notice A middleware contract that formats Glacis messages to include XERC20 support
 contract GlacisTokenMediator is
     IGlacisTokenMediator,
     GlacisRemoteCounterpartManager,
@@ -24,14 +26,18 @@ contract GlacisTokenMediator is
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 
+    /// @param _glacisRouter This chain's deployment of the GlacisRouter  
+    /// @param _quorum The default quorum that you would like. If you implement dynamic quorum, this value can be ignored and 
+    /// set to 0  
+    /// @param _owner The owner of this contract
     constructor(
-        address glacisRouter_,
-        uint256 quorum,
-        address owner
-    ) IGlacisClient(quorum) {
+        address _glacisRouter,
+        uint256 _quorum,
+        address _owner
+    ) IGlacisClient(_quorum) {
         // Approve conversation between token routers in all chains through all GMPs
-        GLACIS_ROUTER = glacisRouter_;
-        transferOwnership(owner);
+        GLACIS_ROUTER = _glacisRouter;
+        transferOwnership(_owner);
     }
 
     address public immutable GLACIS_ROUTER;
@@ -42,7 +48,8 @@ contract GlacisTokenMediator is
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
     /// @param gmps The GMP Ids to use for routing
-    /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
+    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param fees Payment for each GMP & custom adapter to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param token Token (implementing XERC20 standard) to be sent to remote contract
     /// @param tokenAmount Amount of token to send to remote contract
@@ -88,6 +95,7 @@ contract GlacisTokenMediator is
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
     /// @param gmps The GMP Ids to use for routing
+    /// @param customAdapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param messageId The message ID of the message to retry
@@ -129,6 +137,15 @@ contract GlacisTokenMediator is
         );
     }
 
+    /// @notice An internal routing function that helps with stack too deep
+    /// @param chainId Destination chain (Glacis chain ID)
+    /// @param tokenPayload Formatted payload to be routed
+    /// @param gmps The GMP Ids to use for routing
+    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
+    /// @param refundAddress Address to refund excess gas payment
+    /// @param messageId The message ID of the message to retry
+    /// @param nonce The nonce emitted by the original message routing
     function _routeRetry(
         uint256 chainId,
         bytes memory tokenPayload,
@@ -289,6 +306,10 @@ contract GlacisTokenMediator is
             );
     }
 
+    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter  
+    /// @param adapter The address of the custom adapter in question  
+    /// @param glacisData The glacis data of the message   
+    /// @param payload The abstract payload of the message  
     function isCustomAdapter(
         address adapter,
         GlacisCommons.GlacisData memory glacisData,
@@ -320,6 +341,9 @@ contract GlacisTokenMediator is
             );
     }
 
+    /// @notice Determines if a token from a chain ID is a token variant for this chain's token
+    /// @param token The address of the token in question  
+    /// @param chainId The chain ID that the token in question is deployed
     function getTokenVariant(
         address token,
         uint256 chainId
@@ -334,6 +358,12 @@ contract GlacisTokenMediator is
         }
     }
 
+    /// @notice Packs a token payload (helps with stack too deep)
+    /// @param chainId Destination chain (Glacis chain ID)
+    /// @param to Destination address on remote chain
+    /// @param token Token (implementing XERC20 standard) to be sent to remote contract
+    /// @param tokenAmount Amount of token to send to remote contract
+    /// @param payload Payload to be routed
     function packTokenPayload(
         uint256 chainId,
         bytes32 to,
@@ -352,6 +382,8 @@ contract GlacisTokenMediator is
             );
     }
 
+    /// @notice Decodes a received token payload 
+    /// @param payload The payload
     function decodeTokenPayload(
         bytes memory payload
     )

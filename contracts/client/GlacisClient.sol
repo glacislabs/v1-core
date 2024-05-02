@@ -22,13 +22,16 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 to
     );
 
+    /// @param _glacisRouter This chain's deployment of the GlacisRouter  
+    /// @param _quorum The default quorum that you would like. If you implement dynamic quorum, this value can be ignored and 
+    /// set to 0  
     constructor(
-        address glacisRouter_,
-        uint256 quorum
-    ) GlacisAccessControlClient() IGlacisClient(quorum) {
-        if (glacisRouter_ == address(0))
+        address _glacisRouter,
+        uint256 _quorum
+    ) GlacisAccessControlClient() IGlacisClient(_quorum) {
+        if (_glacisRouter == address(0))
             revert GlacisClient__InvalidRouterAddress();
-        GLACIS_ROUTER = glacisRouter_;
+        GLACIS_ROUTER = _glacisRouter;
     }
 
     /// @notice Routes the payload to the specific address on destination chain through GlacisRouter using a single specified GMP
@@ -66,7 +69,6 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
-    /// @param gmps Glacis ID of the GMP to be used for the routing
     function _routeRedundant(
         uint256 chainId,
         bytes32 to,
@@ -89,6 +91,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
     /// @param gmps The GMP Ids to use for routing
+    /// @param customAdapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param retriable True to enable retry feature for this message
@@ -117,6 +120,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
     /// @param gmps The GMP Ids to use for routing
+    /// @param customAdapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param messageId The message ID of the message to retry

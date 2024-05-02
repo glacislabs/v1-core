@@ -16,9 +16,10 @@ error SimpleTokenMediator__IncorrectTokenVariant(address, uint256);
 error SimpleTokenMediator__DestinationChainUnavailable();
 error SimpleTokenMediator__TokenMapInitializationIncorrect();
 
-/// This contract is initialized in the same way that the SimpleTokenMediator is. It allows
+/// @title Simple Token Mediator
+/// @notice This contract is initialized in the same way that the GlacisTokenMediator is. It allows
 /// developers to deploy their own mediator without any extra Glacis interfaces. Developers
-/// using this must ensure that their token has the same address on each chain.
+/// using this must ensure that their token has the same address on each chain  
 contract SimpleTokenMediator is
     GlacisRemoteCounterpartManager,
     IGlacisClient

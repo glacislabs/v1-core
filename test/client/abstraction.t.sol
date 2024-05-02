@@ -212,7 +212,6 @@ contract AbstractionTests__Hyperlane is LocalTestSetup {
             abi.encode(val)
         );
 
-        hyperlaneMailboxMock.execute();
         assertEq(clientSample.value(), val);
     }
 

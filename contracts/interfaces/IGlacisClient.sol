@@ -4,11 +4,14 @@ pragma solidity 0.8.18;
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IGlacisAccessControlClient} from "../interfaces/IGlacisAccessControlClient.sol";
 
-/// An interface that defines the GMP modules (adapters) that the GlacisRouter interacts with.
+/// @title IGlacisClient
+/// @notice An interface that defines the GMP modules (adapters) that the GlacisRouter interacts with.
 abstract contract IGlacisClient is IGlacisAccessControlClient {
     uint256 private immutable DEFAULT_QUORUM;
     mapping(address => bool) public customAdapters;
 
+    /// @param _defaultQuorum The default quorum that you would like. If you implement dynamic quorum, this value can be ignored 
+    /// and set to 0  
     constructor(uint256 _defaultQuorum) {
         DEFAULT_QUORUM = _defaultQuorum;
     }
@@ -33,7 +36,8 @@ abstract contract IGlacisClient is IGlacisAccessControlClient {
         return DEFAULT_QUORUM;
     }
 
-    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter.
+    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter  
+    /// @param adapter The address of the custom adapter in question  
     function isCustomAdapter(
         address adapter,
         GlacisCommons.GlacisData memory, // glacisData,

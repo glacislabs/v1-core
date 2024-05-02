@@ -13,10 +13,9 @@ error GlacisWormholeAdapter__AlreadyProcessedVAA();
 error GlacisWormholeAdapter__NotEnoughValueForCrossChainTransaction();
 error GlacisWormholeAdapter__RefundAddressMustReceiveNativeCurrency();
 
-/// @title Glacis Adapter for Wormhole GMP
-/// @notice This adapter receives GlacisRouter requests through the _sendMessage function and forwards them to
-/// Wormhole. Also receives Wormhole requests through the receiveWormholeMessages function and routes
-/// them to GlacisRouter
+/// @title Glacis Adapter for Wormhole  
+/// @notice A Glacis Adapter for the Wormhole network. Sends messages through the Wormhole Relayer's 
+/// sendPayloadToEvm() and receives messages via receiveWormholeMessages()
 contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     using AddressBytes32 for bytes32;
 
@@ -88,7 +87,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     /// @param deliveryHash Wormhole delivery hash
     function receiveWormholeMessages(
         bytes memory payload,
-        bytes[] memory, // TODO: figure out the use of the additional VAAs
+        bytes[] memory, // Not using additional VAAs
         bytes32 sourceAddress,
         uint16 sourceChain,
         bytes32 deliveryHash
@@ -142,9 +141,9 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
         }
     }
 
-    /// @notice Gets the corresponding Axelar chain label for the specified Glacis chain ID
-    /// @param chainId Glacis chain ID
-    /// @return The corresponding Axelar label
+    /// @notice Gets the corresponding Wormhole chain ID for the specified Glacis chain ID
+    /// @param chainId Glacis chain ID  
+    /// @return The corresponding Wormhole chain ID  
     function adapterChainID(uint256 chainId) external view returns (uint16) {
         return glacisChainIdToAdapterChainId[chainId];
     }

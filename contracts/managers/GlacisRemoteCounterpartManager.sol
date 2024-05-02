@@ -8,6 +8,9 @@ import {IGlacisRemoteCounterpartManager} from "../interfaces/IGlacisRemoteCounte
 error GlacisRemoteCounterpartManager__RemoteCounterpartCannotHaveChainIdZero();
 error GlacisRemoteCounterpartManager__MediatorsAndChainIDsMustHaveSameLength();
 
+/// @title Glacis Remote Counterpart Manager
+/// @notice An inheritable contract that allows an owner to add and remove remote counterparts
+/// @notice Is an ownable contract
 contract GlacisRemoteCounterpartManager is
     IGlacisRemoteCounterpartManager,
     Ownable

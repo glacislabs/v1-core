@@ -9,6 +9,9 @@ import "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroEn
 import "@layerzerolabs/solidity-examples/contracts/libraries/BytesLib.sol";
 import "@layerzerolabs/solidity-examples/contracts/libraries/ExcessivelySafeCall.sol";
 
+/// @title Nonblocking LzApp Events  
+/// @notice The events interface for LayerZero nonblocking apps, which are necessary to listen for 
+/// in forge failure tests  
 interface SimpleNonblockingLzAppEvents {
     event MessageFailed(
         uint16 _srcChainId,
@@ -25,9 +28,8 @@ interface SimpleNonblockingLzAppEvents {
     );
 }
 
-/*
- * a generic LzReceiver implementation
- */
+/// @title Simple Nonblocking LzApp  
+/// @notice A generic LzReceiver implementation that removes the base reference to the blocking LzApp  
 abstract contract SimpleNonblockingLzApp is
     Ownable,
     ILayerZeroReceiver,
