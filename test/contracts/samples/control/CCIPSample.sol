@@ -37,6 +37,7 @@ contract CCIPSample is CCIPReceiver {
     function _ccipReceive(
         Client.Any2EVMMessage memory any2EvmMessage
     ) internal override {
-        value = abi.decode(any2EvmMessage.data, (uint256));
+        if (any2EvmMessage.data.length > 0)
+            (value) += abi.decode(any2EvmMessage.data, (uint256));
     }
 }

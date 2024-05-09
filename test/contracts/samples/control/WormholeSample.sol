@@ -45,6 +45,6 @@ contract WormholeSample is IWormholeReceiver {
         uint16, // sourceChain,
         bytes32 // deliveryHash
     ) public payable {
-        value = abi.decode(payload, (uint256));
+        if (payload.length > 0) (value) += abi.decode(payload, (uint256));
     }
 }

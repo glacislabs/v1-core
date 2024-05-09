@@ -348,9 +348,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
         (lzEndpointMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzEndpointMock);
         lzSample = new LayerZeroSample(address(lzEndpointMock));
-        lzSample.setTrustedRemoteAddress(1, abi.encodePacked(lzSample));
         lzTextSample = new LayerZeroTextSample(address(lzEndpointMock));
-        lzTextSample.setTrustedRemoteAddress(1, abi.encodePacked(lzTextSample));
 
         (wormholeRelayerMock) = deployWormholeFixture();
         wormholeAdapter = deployWormholeAdapter(
@@ -430,11 +428,11 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     }
 
     function test_gas__LayerZero_Int_Control(uint256 val) external {
-        lzSample.setRemoteValue{value: 0.1 ether}(1, abi.encode(val));
+        lzSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample), abi.encode(val));
     }
 
     function test_gas__LayerZero_Str_Control(string memory val) external {
-        lzTextSample.setRemoteValue{value: 0.1 ether}(1, abi.encode(val));
+        lzTextSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample),abi.encode(val));
     }
 
     function test_gas__Wormhole_Int_Glacis(uint256 val) external {
