@@ -2,13 +2,15 @@
 
 pragma solidity 0.8.18;
 
+/// @title String to Address Library
+/// @notice A library that a string to addresses
 library AddressString {
     /// @notice Converts an hex string to address
-    /// @param hexString_ The hex string to be converted
+    /// @param _hexString The hex string to be converted
     function toAddress(
-        string memory hexString_
+        string memory _hexString
     ) internal pure returns (address) {
-        bytes memory byte_sString = bytes(hexString_);
+        bytes memory byte_sString = bytes(_hexString);
         uint160 _parsedBytes = 0;
         for (uint256 i = 0; i < byte_sString.length; i += 2) {
             _parsedBytes *= 256;
@@ -21,16 +23,16 @@ library AddressString {
     }
 
     /// @notice Converts a bytes1 to uint8
-    /// @param byte_ The byte value to convert
-    function parseByteToUint8(bytes1 byte_) internal pure returns (uint8) {
-        if (uint8(byte_) >= 48 && uint8(byte_) <= 57) {
-            return uint8(byte_) - 48;
-        } else if (uint8(byte_) >= 65 && uint8(byte_) <= 70) {
-            return uint8(byte_) - 55;
-        } else if (uint8(byte_) >= 97 && uint8(byte_) <= 102) {
-            return uint8(byte_) - 87;
+    /// @param _byte The byte value to convert
+    function parseByteToUint8(bytes1 _byte) internal pure returns (uint8) {
+        if (uint8(_byte) >= 48 && uint8(_byte) <= 57) {
+            return uint8(_byte) - 48;
+        } else if (uint8(_byte) >= 65 && uint8(_byte) <= 70) {
+            return uint8(_byte) - 55;
+        } else if (uint8(_byte) >= 97 && uint8(_byte) <= 102) {
+            return uint8(_byte) - 87;
         } else {
-            revert(string(abi.encode("Invalid byte value: ", byte_)));
+            revert(string(abi.encode("Invalid byte value: ", _byte)));
         }
     }
 }

@@ -21,6 +21,8 @@ error GlacisRouter__FeeArrayMustEqualGMPArray();
 error GlacisRouter__GMPCountMustBeAtLeastOne();
 error GlacisRouter__FeeSumMustBeEqualToValue();
 
+/// @title Glacis Router
+/// @notice A central router to send and receive cross-chain messages
 contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
@@ -36,8 +38,9 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         uint8 receivedGMPIdsBitmap;
     }
 
-    constructor(address owner_) GlacisAbstractRouter(block.chainid) {
-        _transferOwnership(owner_);
+    /// @param _owner The owner of this contract
+    constructor(address _owner) GlacisAbstractRouter(block.chainid) {
+        _transferOwnership(_owner);
     }
 
     /// @notice Routes the payload to the specific address on the destination chain
@@ -46,7 +49,8 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
     /// @param gmps Array of GMPs to be used for the routing
-    /// @param fees Array of fees to be sent to each GMP for routing (must be same length as gmps)
+    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param fees Array of fees to be sent to each GMP & custom adapter for routing (must be same length as gmps)
     /// @param refundAddress An (ideally EOA) address for native currency to be sent to that are greater than fees charged
     /// @param retriable True if this message could be retried
     function route(
@@ -105,6 +109,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
     /// @param gmps Array of GMPs to be used for the routing
+    /// @param customAdapters An array of custom adapters to be used for the routing
     /// @param fees Array of fees to be sent to each GMP for routing (must be same length as gmps)
     /// @param refundAddress An (ideally EOA) address for native currency to be sent to that are greater than fees charged
     /// @param messageId The messageId to retry
@@ -175,6 +180,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param glacisPackedPayload Payload with embedded glacis data to be routed
     /// @param gmps Array of GMPs to be used for the routing
+    /// @param customAdapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     function _processRouting(

@@ -8,16 +8,20 @@ import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
 /// @title Glacis Ownable Client
 /// @dev This contract encapsulates Glacis client side logic, contracts inheriting this will have access to all
-/// Glacis features
-/// Addtionally, this contract is Ownable
-
+/// Glacis features  
+/// @notice This contract is ownable  
 abstract contract GlacisClientOwnable is GlacisClient, Ownable {
+
+    /// @param _glacisRouter This chain's deployment of the GlacisRouter  
+    /// @param _quorum The default quorum that you would like. If you implement dynamic quorum, this value can be ignored and 
+    /// set to 0  
+    /// @param _owner The owner of this contract  
     constructor(
-        address glacisRouter_,
-        uint256 quorum,
-        address owner_
-    ) GlacisClient(glacisRouter_, quorum) {
-        _transferOwnership(owner_);
+        address _glacisRouter,
+        uint256 _quorum,
+        address _owner
+    ) GlacisClient(_glacisRouter, _quorum) {
+        _transferOwnership(_owner);
     }
 
     /// @notice Add an allowed route for this client

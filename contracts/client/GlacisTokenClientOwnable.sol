@@ -9,7 +9,7 @@ import {GlacisCommons} from "../commons/GlacisCommons.sol";
 /// @title Glacis Ownable Token Client
 /// @dev This contract encapsulates Glacis Token PAssing client logic, contracts inheriting this will have access to all
 /// Glacis Token Passing and Message Passing features
-/// Addtionally, this contract is Ownable
+/// @notice This contract is Ownable
 abstract contract GlacisTokenClientOwnable is GlacisTokenClient, Ownable {
     constructor(
         address glacisTokenMediator_,
