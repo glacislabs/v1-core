@@ -14,16 +14,16 @@ contract GlacisClientSample is GlacisClientOwnable {
     function setRemoteValue__execute(
         uint256 toChainId,
         bytes32 to,
-        uint8 gmp,
+        address adapter,
         bytes calldata payload
     ) external payable returns (bytes32) {
-        return _routeSingle(toChainId, to, payload, gmp, msg.sender, msg.value);
+        return _routeSingle(toChainId, to, payload, adapter, msg.sender, msg.value);
     }
 
     function setRemoteValue__redundancy(
         uint256 toChainId,
         bytes32 to,
-        uint8[] memory gmps,
+        uint8[] memory adapters,
         uint256[] memory fees,
         bytes calldata payload
     ) external payable returns (bytes32) {
@@ -32,7 +32,7 @@ contract GlacisClientSample is GlacisClientOwnable {
                 toChainId,
                 to,
                 payload,
-                gmps,
+                adapters,
                 fees,
                 msg.sender,
                 msg.value

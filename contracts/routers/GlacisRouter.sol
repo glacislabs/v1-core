@@ -48,8 +48,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
-    /// @param gmps Array of GMPs to be used for the routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of adapters to be used for the routing
     /// @param fees Array of fees to be sent to each GMP & custom adapter for routing (must be same length as gmps)
     /// @param refundAddress An (ideally EOA) address for native currency to be sent to that are greater than fees charged
     /// @param retriable True if this message could be retried
@@ -57,14 +56,13 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress,
         bool retriable
     ) public payable virtual returns (bytes32 messageId, uint256 nonce) {
         // Validate input
-        validateFeesInput(gmps.length + customAdapters.length, fees);
+        validateFeesInput(adapters.length, fees);
 
         bytes32 from = msg.sender.toBytes32();
         (messageId, nonce) = _createGlacisMessageId(
@@ -77,8 +75,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             chainId,
             // @notice This follows GlacisData stored within GlacisCommons
             abi.encode(messageId, nonce, from, to, payload),
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             refundAddress
         );
@@ -93,8 +90,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             chainId,
             to,
             payload,
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             refundAddress,
             retriable
@@ -108,8 +104,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
-    /// @param gmps Array of GMPs to be used for the routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of custom adapters to be used for the routing
     /// @param fees Array of fees to be sent to each GMP for routing (must be same length as gmps)
     /// @param refundAddress An (ideally EOA) address for native currency to be sent to that are greater than fees charged
     /// @param messageId The messageId to retry
@@ -118,15 +113,14 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
     ) public payable virtual returns (bytes32) {
         // Validate input
-        validateFeesInput(gmps.length + customAdapters.length, fees);
+        validateFeesInput(adapters.length, fees);
 
         address ownerOfMessageToRetry = messageSenders[messageId];
         if (ownerOfMessageToRetry != msg.sender)
@@ -153,8 +147,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         _processRouting(
             chainId,
             glacisPackedPayload,
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             refundAddress
         );
@@ -166,8 +159,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             chainId,
             to,
             payload,
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             refundAddress
         );
@@ -179,48 +171,35 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @notice Performs actual message dispatching to all the required adapters
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param glacisPackedPayload Payload with embedded glacis data to be routed
-    /// @param gmps Array of GMPs to be used for the routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     function _processRouting(
         uint256 chainId,
         bytes memory glacisPackedPayload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress
     ) internal {
-        uint256 gmpLength = gmps.length;
-        uint256 customAdapterLength = customAdapters.length;
+        uint256 adaptersLength = adapters.length;
 
-        for (uint8 gmp; gmp < gmpLength; ) {
-            address adapter = glacisGMPIdToAdapter[gmps[gmp]];
+        for (uint8 adapterIndex; adapterIndex < adaptersLength; ) {
+            address adapter = adapters[adapterIndex];
 
-            if (gmps[gmp] == 0) revert GlacisRouter__GMPNotSupported();
+            // If adapter address is less than 255, we override it with a Glacis default adapter
+            if (uint160(adapter) <= 255) {
+                adapter = glacisGMPIdToAdapter[uint8(uint160(adapter))];
+                revert GlacisRouter__GMPNotSupported();
+            }
             if (adapter == address(0)) revert GlacisRouter__RouteDoesNotExist();
 
-            IGlacisAdapter(adapter).sendMessage{value: fees[gmp]}(
+            IGlacisAdapter(adapter).sendMessage{value: fees[adapterIndex]}(
                 chainId,
                 refundAddress,
                 glacisPackedPayload
             );
 
             // This is acceptable, as there is no "continue" within the for loop
-            unchecked {
-                ++gmp;
-            }
-        }
-
-        for (uint8 adapterIndex; adapterIndex < customAdapterLength; ) {
-            address adapter = customAdapters[adapterIndex];
-
-            if (adapter == address(0)) revert GlacisRouter__RouteDoesNotExist();
-
-            IGlacisAdapter(adapter).sendMessage{
-                value: fees[gmpLength + adapterIndex]
-            }(chainId, refundAddress, glacisPackedPayload);
-
             unchecked {
                 ++adapterIndex;
             }
@@ -244,6 +223,9 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         // Get the client
         IGlacisClient client = IGlacisClient(glacisData.originalTo.toAddress());
 
+        // TODO: replace isCustomAdapter with modified isAllowedRoute (that includes address instead of gmp)
+        // TODO: 1. ask if the adapter address is accepted. 2. if not, ask if the gmp number is accepted (if it is a gmp)
+        
         // Verifies that the sender is an adapter or custom adapter & is an allowed route
         bool isCustomAdapter = client.isCustomAdapter(
             msg.sender,

@@ -47,8 +47,7 @@ contract GlacisTokenMediator is
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
-    /// @param gmps The GMP Ids to use for routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP & custom adapter to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param token Token (implementing XERC20 standard) to be sent to remote contract
@@ -57,8 +56,7 @@ contract GlacisTokenMediator is
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress,
         address token,
@@ -82,8 +80,7 @@ contract GlacisTokenMediator is
                 chainId,
                 destinationTokenMediator,
                 tokenPayload,
-                gmps,
-                customAdapters,
+                adapters,
                 fees,
                 refundAddress,
                 true // Token Mediator always enables retry
@@ -94,8 +91,7 @@ contract GlacisTokenMediator is
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
-    /// @param gmps The GMP Ids to use for routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param messageId The message ID of the message to retry
@@ -106,8 +102,7 @@ contract GlacisTokenMediator is
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,
@@ -128,8 +123,7 @@ contract GlacisTokenMediator is
         return _routeRetry(
             chainId,
             tokenPayload,
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             refundAddress,
             messageId,
@@ -140,8 +134,7 @@ contract GlacisTokenMediator is
     /// @notice An internal routing function that helps with stack too deep
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param tokenPayload Formatted payload to be routed
-    /// @param gmps The GMP Ids to use for routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param messageId The message ID of the message to retry
@@ -149,8 +142,7 @@ contract GlacisTokenMediator is
     function _routeRetry(
         uint256 chainId,
         bytes memory tokenPayload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,
@@ -165,8 +157,7 @@ contract GlacisTokenMediator is
                 chainId,
                 destinationTokenMediator,
                 tokenPayload,
-                gmps,
-                customAdapters,
+                adapters,
                 fees,
                 refundAddress,
                 messageId,

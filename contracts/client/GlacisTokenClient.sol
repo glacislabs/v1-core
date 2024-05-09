@@ -32,7 +32,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
-    /// @param gmp Glacis ID of the GMP to be used for the routing
+    /// @param adapter Glacis ID or address of the adapter of the GMP to be used for the routing
     /// @param refundAddress Address to refund excess gas payment
     /// @param token Token (implementing XERC20 standard) to be sent to remote contract
     /// @param tokenAmount Amount of token to send to remote contract
@@ -41,14 +41,14 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8 gmp,
+        address adapter,
         address refundAddress,
         address token,
         uint256 tokenAmount,
         uint256 gasPayment
     ) internal returns (bytes32) {
-        uint8[] memory gmps = new uint8[](1);
-        gmps[0] = gmp;
+        address[] memory adapters = new address[](1);
+        adapters[0] = adapter;
         uint256[] memory fees = new uint256[](1);
         fees[0] = gasPayment;
         return
@@ -56,8 +56,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
                 chainId,
                 to,
                 payload,
-                gmps,
-                emptyCustomAdapters(),
+                adapters,
                 fees,
                 refundAddress,
                 token,
@@ -69,7 +68,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @notice Convenient method - Routes message and tokens to destination through GlacisTokenMediator using specified GMPs with redundancy feature
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
-    /// @param gmps The GMP Ids to use for routing
+    /// @param adapters The GMP Ids to use for routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param token A token address inheriting GlacisToken or GlacisTokenProxy standard (xERC-20)
@@ -79,7 +78,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress,
         address token,
@@ -91,8 +90,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
                 chainId,
                 to,
                 payload,
-                gmps,
-                emptyCustomAdapters(),
+                adapters,
                 fees,
                 refundAddress,
                 token,
@@ -105,8 +103,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
     /// @param payload The bytes payload to send across chains
-    /// @param gmps Glacis ID of the GMP to be used for the routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of adapters to be used for the routing
     /// @param fees An array of values to send to the gmps & custom adapters. Should sum to the gasPayment
     /// @param refundAddress Address to refund excess gas payment
     /// @param token A token address inheriting GlacisToken or GlacisTokenProxy standard (xERC-20)
@@ -116,8 +113,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress,
         address token,
@@ -126,7 +122,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     ) internal returns (bytes32) {
         (bytes32 messageId,) = IGlacisTokenMediator(GLACIS_TOKEN_ROUTER).route{
             value: gasPayment
-        }(chainId, to, payload, gmps, customAdapters, fees, refundAddress, token, tokenAmount);
+        }(chainId, to, payload, adapters, fees, refundAddress, token, tokenAmount);
         emit GlacisTokenClient__MessageRouted(messageId, chainId, to);
         return messageId;
     }
@@ -136,8 +132,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
     /// @param payload The bytes payload to send across chains
-    /// @param gmps Array of GMPs to be used for the routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of custom adapters to be used for the routing
     /// @param fees An array of values to send to the gmps & custom adapters. Should sum to the gasPayment
     /// @param refundAddress Address to refund excess gas payment
     /// @param messageId The message ID of the message to retry
@@ -149,8 +144,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress,
         bytes32 messageId,
@@ -163,8 +157,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
             chainId,
             to,
             payload,
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             refundAddress,
             messageId,
