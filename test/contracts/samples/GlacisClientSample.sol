@@ -120,7 +120,6 @@ contract GlacisClientSample is GlacisClientOwnable {
     ) internal override {
         // NOTE: changed += to test for redundant messages
         if (payload.length > 0) (value) += abi.decode(payload, (uint256));
-        emit ValueChanged(value);
     }
 
     // Setup of custom quorum (for testing purposes)

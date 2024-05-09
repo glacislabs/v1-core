@@ -42,7 +42,7 @@ contract HyperlaneSample {
         external
         payable
     {
-        value = abi.decode(_message, (uint256));
+        if (_message.length > 0) (value) += abi.decode(_message, (uint256));
     }
 
 }

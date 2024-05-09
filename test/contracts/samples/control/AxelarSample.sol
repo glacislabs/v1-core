@@ -49,8 +49,8 @@ contract AxelarSample is AxelarExecutable {
     function _execute(
         string calldata,
         string calldata,
-        bytes calldata payload_
+        bytes calldata payload
     ) internal override {
-        value = abi.decode(payload_, (uint256));
+        if (payload.length > 0) (value) += abi.decode(payload, (uint256));
     }
 }

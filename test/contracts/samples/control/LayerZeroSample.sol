@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
 
-import {NonblockingLzApp} from "@layerzerolabs/solidity-examples/contracts/lzApp/NonblockingLzApp.sol";
+import {SimpleNonblockingLzApp} from "contracts/adapters/LayerZero/SimpleNonblockingLzApp.sol";
 
-contract LayerZeroSample is NonblockingLzApp {
+contract LayerZeroSample is SimpleNonblockingLzApp {
     uint256 public value;
 
-    constructor(address _lzEndpoint) NonblockingLzApp(_lzEndpoint) {}
+    constructor(address _lzEndpoint) SimpleNonblockingLzApp(_lzEndpoint) {}
 
     function setRemoteValue(
         uint16 destChainId,
+        address destChainAddress,
         bytes memory payload
     ) external payable {
         _lzSend({
             _dstChainId: destChainId,
+            _dstChainAddress: destChainAddress,
             _payload: payload,
             _refundAddress: payable(msg.sender),
             _zroPaymentAddress: address(0x0),
@@ -26,8 +28,8 @@ contract LayerZeroSample is NonblockingLzApp {
         uint16,
         bytes memory,
         uint64,
-        bytes memory _payload
+        bytes memory payload
     ) internal override {
-        value = abi.decode(_payload, (uint256));
+        if (payload.length > 0) (value) += abi.decode(payload, (uint256));
     }
 }
