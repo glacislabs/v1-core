@@ -14,7 +14,7 @@ interface IGlacisAccessControlClient {
     function isAllowedRoute(
         uint256 fromChainId,
         bytes32 fromAddress,
-        bytes32 fromAdapter, // Could be bytes32 address, Ethereum address, or GMP ID
+        address fromAdapter, // Could ethereum address, or GMP ID
         bytes memory payload
     ) external view returns (bool);
 }

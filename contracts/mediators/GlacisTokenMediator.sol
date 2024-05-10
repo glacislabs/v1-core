@@ -166,12 +166,12 @@ contract GlacisTokenMediator is
     }
 
     /// @notice Receives a cross chain message from an IGlacisAdapter.
-    /// @param fromGmpIds Used GMP Ids for routing
+    /// @param fromAdapters Used adapter addresses for routing
     /// @param fromChainId Source chain (Glacis chain ID)
     /// @param fromChainId Source address
     /// @param payload Received payload from Glacis Router
     function receiveMessage(
-        uint8[] memory fromGmpIds,
+        address[] memory fromAdapters,
         uint256 fromChainId,
         bytes32 fromAddress,
         bytes memory payload
@@ -214,7 +214,7 @@ contract GlacisTokenMediator is
 
         if (toAddress.code.length > 0) {
             client.receiveMessageWithTokens(
-                fromGmpIds,
+                fromAdapters,
                 fromChainId,
                 originalFrom,
                 originalPayload,
@@ -266,7 +266,7 @@ contract GlacisTokenMediator is
     function isAllowedRoute(
         uint256 fromChainId,
         bytes32 fromAddress,
-        bytes32 fromAdapter,
+        address fromAdapter,
         bytes memory payload
     ) external view returns (bool) {
         // First checks to ensure that the GlacisTokenMediator is speaking to a registered remote version

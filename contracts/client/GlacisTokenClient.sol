@@ -170,14 +170,14 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     }
 
     /// @notice Receives message from GMP(s) through GlacisTokenMediator
-    /// @param fromGmpIds IDs of the GMPs that sent this message (that reached quorum requirements)
+    /// @param fromAdapters Addresses that sent this message (that reached quorum requirements)
     /// @param fromChainId Source chain (Glacis chain ID)
     /// @param fromAddress Source address on source chain
     /// @param payload Routed payload
     /// @param token The address of the token being sent across chains
     /// @param tokenAmount The amount of the token being sent across chains
     function receiveMessageWithTokens(
-        uint8[] memory fromGmpIds,
+        address[] memory fromAdapters,
         uint256 fromChainId,
         bytes32 fromAddress,
         bytes memory payload,
@@ -187,7 +187,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         if (msg.sender != GLACIS_TOKEN_ROUTER)
             revert GlacisTokenClient__CanOnlyBeCalledByTokenRouter();
         _receiveMessageWithTokens(
-            fromGmpIds,
+            fromAdapters,
             fromChainId,
             fromAddress,
             payload,
@@ -197,14 +197,14 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     }
 
     /// @notice Receives message from GMP(s) through GlacisTokenMediator
-    /// @param fromGmpIds GMP Ids
+    /// @param fromAdapters Adapter addresses
     /// @param fromChainId Source chain (Glacis chain ID)
     /// @param fromAddress Source address on source chain
     /// @param payload Routed payload
     /// @param token The address of the token being sent across chains
     /// @param tokenAmount The amount of the token being sent across chains
     function _receiveMessageWithTokens(
-        uint8[] memory fromGmpIds,
+        address[] memory fromAdapters,
         uint256 fromChainId,
         bytes32 fromAddress,
         bytes memory payload,

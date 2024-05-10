@@ -149,12 +149,12 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     }
 
     /// @notice Receives message from GMP(s) through GlacisRouter
-    /// @param fromGmpIds ID of the GMP that sent this message (that reached quorum requirements)
+    /// @param fromAdapters addresses of the adapters sent this message (that reached quorum requirements)
     /// @param fromChainId Source chain (Glacis chain ID)
     /// @param fromAddress Source address on source chain
     /// @param payload Routed payload
     function receiveMessage(
-        uint8[] memory fromGmpIds,
+        address[] memory fromAdapters,
         uint256 fromChainId,
         bytes32 fromAddress,
         bytes memory payload
@@ -162,16 +162,16 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         if (msg.sender != GLACIS_ROUTER)
             revert GlacisClient__CanOnlyBeCalledByRouter();
 
-        _receiveMessage(fromGmpIds, fromChainId, fromAddress, payload);
+        _receiveMessage(fromAdapters, fromChainId, fromAddress, payload);
     }
 
     /// @notice Receives message from GMP(s) through GlacisRouter
-    /// @param fromGmpIds GMP Id
+    /// @param fromAdapters Adapter addresses
     /// @param fromChainId Source chain (Glacis chain ID)
     /// @param fromAddress Source address on source chain
     /// @param payload Routed payload
     function _receiveMessage(
-        uint8[] memory fromGmpIds,
+        address[] memory fromAdapters,
         uint256 fromChainId,
         bytes32 fromAddress,
         bytes memory payload

@@ -240,7 +240,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
 
     /// Receives a message from other chains' DAO deployments.
     function _receiveMessage(
-        uint8[] memory,
+        address[] memory,
         uint256,
         bytes32 fromAddress,
         bytes memory payload
@@ -258,7 +258,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
 
     /// Receives a message from other chains' DAO deployments. (Same as _receiveMessage)
     function _receiveMessageWithTokens(
-        uint8[] memory,
+        address[] memory,
         uint256,
         bytes32 fromAddress,
         bytes memory payload,

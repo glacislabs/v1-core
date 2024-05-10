@@ -27,15 +27,18 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 
-    mapping(bytes32 => MessageData) private messageReceipts;
+    // Sending messages
     mapping(bytes32 => address) public messageSenders;
+
+    // Receiving messages
+    mapping(bytes32 => MessageData) private messageReceipts;
     mapping(bytes32 => mapping(address => bool))
         private receivedCustomAdapterMessages;
+    mapping(bytes32 => address[]) receivedAdaptersList;
 
     struct MessageData {
-        uint8 uniqueMessagesReceived;
+        uint248 uniqueMessagesReceived;
         bool executed;
-        uint8 receivedGMPIdsBitmap;
     }
 
     /// @param _owner The owner of this contract
@@ -65,12 +68,8 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         validateFeesInput(adapters.length, fees);
 
         bytes32 from = msg.sender.toBytes32();
-        (messageId, nonce) = _createGlacisMessageId(
-            chainId,
-            to,
-            payload
-        );
-        
+        (messageId, nonce) = _createGlacisMessageId(chainId, to, payload);
+
         _processRouting(
             chainId,
             // @notice This follows GlacisData stored within GlacisCommons
@@ -227,14 +226,14 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bool routeAllowed = client.isAllowedRoute(
             fromChainId,
             glacisData.originalFrom,
-            bytes32(uint(uint160(msg.sender))),
+            msg.sender,
             payload
         );
         if (!routeAllowed && gmpId != 0) {
-                routeAllowed = client.isAllowedRoute(
+            routeAllowed = client.isAllowedRoute(
                 fromChainId,
                 glacisData.originalFrom,
-                bytes32(uint(gmpId)),
+                address(uint160(gmpId)),
                 payload
             );
         }
@@ -249,24 +248,13 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         ];
 
         // Ensures that the message hasn't come from the same adapter again
-        if (gmpId == 0) {
-            if (receivedCustomAdapterMessages[glacisData.messageId][msg.sender])
-                revert GlacisRouter__MessageAlreadyReceivedFromGMP();
+        if (receivedCustomAdapterMessages[glacisData.messageId][msg.sender])
+            revert GlacisRouter__MessageAlreadyReceivedFromGMP();
 
-            receivedCustomAdapterMessages[glacisData.messageId][
-                msg.sender
-            ] = true;
-        } else {
-            uint8 adjustedGmpId = gmpId - 1;
+        receivedCustomAdapterMessages[glacisData.messageId][msg.sender] = true;
 
-            if (_isBitSet(currentReceipt.receivedGMPIdsBitmap, adjustedGmpId))
-                revert GlacisRouter__MessageAlreadyReceivedFromGMP();
-            currentReceipt.receivedGMPIdsBitmap = _setBit(
-                currentReceipt.receivedGMPIdsBitmap,
-                adjustedGmpId
-            );
-        }
         currentReceipt.uniqueMessagesReceived += 1;
+        receivedAdaptersList[glacisData.messageId].push(msg.sender);
 
         emit GlacisRouter__ReceivedMessage(
             glacisData.messageId,
@@ -296,7 +284,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             messageReceipts[glacisData.messageId] = currentReceipt;
 
             client.receiveMessage(
-                _uint8ToUint8Array(currentReceipt.receivedGMPIdsBitmap),
+                receivedAdaptersList[glacisData.messageId],
                 fromChainId,
                 glacisData.originalFrom,
                 payload

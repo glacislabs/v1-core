@@ -113,7 +113,7 @@ contract GlacisClientSample is GlacisClientOwnable {
     event ValueChanged(uint256 indexed value);
 
     function _receiveMessage(
-        uint8[] memory, // fromGmpId,
+        address[] memory, // fromGmpId,
         uint256, // fromChainId,
         bytes32, // fromAddress,
         bytes memory payload

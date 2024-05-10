@@ -147,7 +147,7 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
     event ValueChanged(uint256 indexed value);
 
     function _receiveMessageWithTokens(
-        uint8[] memory, // fromGmpId,
+        address[] memory, // fromAdapters,
         uint256, // fromChainId,
         bytes32, // fromAddress,
         bytes memory payload,

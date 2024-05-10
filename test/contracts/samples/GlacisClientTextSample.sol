@@ -106,7 +106,7 @@ contract GlacisClientTextSample is GlacisClientOwnable {
     }
 
     function _receiveMessage(
-        uint8[] memory, // fromGmpId,
+        address[] memory, // fromGmpId,
         uint256, // fromChainId,
         bytes32, // fromAddress,
         bytes memory payload

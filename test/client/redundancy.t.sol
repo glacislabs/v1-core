@@ -183,7 +183,7 @@ contract RedundancyReceivingDataTestHarness is GlacisClient {
     bytes public payload;
 
     function _receiveMessage(
-        uint8[] memory _fromGmpIds,
+        address[] memory _fromGmpIds,
         uint256 _fromChainId,
         bytes32 _fromAddress,
         bytes memory _payload

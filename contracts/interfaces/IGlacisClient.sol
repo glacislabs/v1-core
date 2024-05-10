@@ -16,15 +16,13 @@ abstract contract IGlacisClient is IGlacisAccessControlClient {
         DEFAULT_QUORUM = _defaultQuorum;
     }
 
-    // TODO: replace uint8[] calldata fromGmpIds with address[] calldata fromAdapters
-
     /// @notice Receives message from GMP(s) through GlacisRouter
-    /// @param fromGmpIds IDs of the GMPs that sent this message (that reached quorum requirements)
+    /// @param fromAdapters Used adapters that sent this message (that reached quorum requirements)
     /// @param fromChainId Source chain (Glacis chain ID)
     /// @param fromAddress Source address on source chain
     /// @param payload Routed payload
     function receiveMessage(
-        uint8[] calldata fromGmpIds,
+        address[] calldata fromAdapters,
         uint256 fromChainId,
         bytes32 fromAddress,
         bytes calldata payload
