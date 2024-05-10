@@ -61,14 +61,13 @@ contract AbstractionTests__Axelar is LocalTestSetup {
         address randomRefundAddress = 0xc0ffee254729296a45a3885639AC7E10F9d54979;
         assertEq(randomRefundAddress.balance, 0);
 
-        uint8[] memory gmps = new uint8[](1);
+        address[] memory gmps = new address[](1);
         gmps[0] = AXELAR_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
-            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -111,14 +110,13 @@ contract AbstractionTests__LayerZero is LocalTestSetup {
         address randomRefundAddress = 0xc0ffee254729296a45a3885639AC7E10F9d54979;
         assertEq(randomRefundAddress.balance, 0);
 
-        uint8[] memory gmps = new uint8[](1);
+        address[] memory gmps = new address[](1);
         gmps[0] = LAYERZERO_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
-            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -165,14 +163,13 @@ contract AbstractionTests__Wormhole is LocalTestSetup {
         address randomRefundAddress = 0xc0ffee254729296a45a3885639AC7E10F9d54979;
         assertEq(randomRefundAddress.balance, 0);
 
-        uint8[] memory gmps = new uint8[](1);
+        address[] memory gmps = new address[](1);
         gmps[0] = WORMHOLE_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
-            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -219,14 +216,13 @@ contract AbstractionTests__Hyperlane is LocalTestSetup {
         address randomRefundAddress = 0xc0ffee254729296a45a3885639AC7E10F9d54979;
         assertEq(randomRefundAddress.balance, 0);
 
-        uint8[] memory gmps = new uint8[](1);
+        address[] memory gmps = new address[](1);
         gmps[0] = HYPERLANE_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
-            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,
@@ -270,14 +266,13 @@ contract AbstractionTests__CCIP is LocalTestSetup {
         address randomRefundAddress = 0xc0ffee254729296a45a3885639AC7E10F9d54979;
         assertEq(randomRefundAddress.balance, 0);
 
-        uint8[] memory gmps = new uint8[](1);
+        address[] memory gmps = new address[](1);
         gmps[0] = CCIP_GMP_ID;
         clientSample.setRemoteValue{value: 1 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(0),
             gmps,
-            new address[](0),
             createFees(1 ether, 1),
             randomRefundAddress,
             false,

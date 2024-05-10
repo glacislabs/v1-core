@@ -188,9 +188,9 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             // If adapter address is a reserved ID, we override it with a Glacis default adapter
             if (uint160(adapter) <= GLACIS_RESERVED_IDS) {
                 adapter = glacisGMPIdToAdapter[uint8(uint160(adapter))];
-                revert GlacisRouter__GMPNotSupported();
+                if (adapter == address(0)) revert GlacisRouter__GMPNotSupported();
             }
-            if (adapter == address(0)) revert GlacisRouter__RouteDoesNotExist();
+            else if (adapter == address(0)) revert GlacisRouter__RouteDoesNotExist();
 
             IGlacisAdapter(adapter).sendMessage{value: fees[adapterIndex]}(
                 chainId,

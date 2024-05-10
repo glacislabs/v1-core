@@ -176,9 +176,4 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 fromAddress,
         bytes memory payload
     ) internal virtual {}
-
-    /// @notice Helper function to create an empty array of custom adapters.
-    function emptyCustomAdapters() internal pure returns(address[] memory) {
-        return new address[](0);
-    }
 }

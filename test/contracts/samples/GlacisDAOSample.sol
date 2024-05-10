@@ -23,7 +23,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     struct Proposal {
         uint256 toChain;
         bool retriable;
-        uint8[] gmps;
+        address[] gmps;
         address token;
         uint256 tokenAmount;
         // Will be interpreted as address + calldata
@@ -160,8 +160,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
-                gmps: p.gmps,
-                customAdapters: emptyCustomAdapters(),
+                adapters: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
                 retriable: p.retriable,
@@ -172,8 +171,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
-                gmps: p.gmps,
-                customAdapters: emptyCustomAdapters(),
+                adapters: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
                 gasPayment: gasPayment,
@@ -208,8 +206,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
-                gmps: p.gmps,
-                customAdapters: emptyCustomAdapters(),
+                adapters: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
                 nonce: nonce,
@@ -221,8 +218,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
-                gmps: p.gmps,
-                customAdapters: emptyCustomAdapters(),
+                adapters: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
                 token: p.token,

@@ -353,7 +353,7 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.4 ether}(
             block.chainid,
             address(glacisTokenClientSampleDestination).toBytes32(),
-            new uint8[](0),
+            new address[](0),
             customAdapters,
             createFees(0.4 ether, 1),
             abi.encode(amount),

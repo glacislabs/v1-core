@@ -25,7 +25,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
     function sendMessageAndTokens__abstract(
         uint256 toChainId,
         bytes32 to,
-        uint8 gmp,
+        address adapter,
         bytes memory payload,
         address token,
         uint256 amount
@@ -35,7 +35,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
                 toChainId,
                 to,
                 payload,
-                gmp,
+                adapter,
                 msg.sender,
                 token,
                 amount,
@@ -46,7 +46,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
     function sendMessageAndTokens__redundant(
         uint256 toChainId,
         bytes32 to,
-        uint8[] memory gmps,
+        address[] memory gmps,
         uint256[] memory fees,
         bytes memory payload,
         address token,
@@ -69,7 +69,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
     function sendMessageAndTokens__retriable(
         uint256 chainId,
         bytes32 to,
-        uint8[] memory gmps,
+        address[] memory gmps,
         uint256[] memory fees,
         bytes memory payload,
         address token,
@@ -81,7 +81,6 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
                 to,
                 payload,
                 gmps,
-                emptyCustomAdapters(),
                 fees,
                 msg.sender,
                 token,
@@ -93,7 +92,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
     function retrySendWithTokens(
         uint256 chainId,
         bytes32 to,
-        uint8[] memory gmps,
+        address[] memory gmps,
         uint256[] memory fees,
         bytes memory payload,
         address token,
@@ -107,7 +106,6 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
                 to,
                 payload,
                 gmps,
-                emptyCustomAdapters(),
                 fees,
                 msg.sender,
                 messageId,

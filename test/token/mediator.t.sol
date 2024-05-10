@@ -92,8 +92,8 @@ contract TokenMediatorTests is LocalTestSetup {
         // Message is being received by the router
         vm.startPrank(address(glacisRouter));
 
-        uint8[] memory gmpArray = new uint8[](1);
-        gmpArray[0] = 1;
+        address[] memory gmpArray = new address[](1);
+        gmpArray[0] = AXELAR_GMP_ID;
 
         vm.expectRevert(GlacisTokenMediator__OnlyTokenMediatorAllowed.selector);
         glacisTokenMediator.receiveMessage(
@@ -115,8 +115,8 @@ contract TokenMediatorTests is LocalTestSetup {
         // Message is being received by the router
         vm.startPrank(address(glacisRouter));
 
-        uint8[] memory gmpArray = new uint8[](1);
-        gmpArray[0] = 1;
+        address[] memory gmpArray = new address[](1);
+        gmpArray[0] = AXELAR_GMP_ID;
 
         glacisTokenMediator.receiveMessage(
             gmpArray,
@@ -149,7 +149,7 @@ contract TokenMediatorTests is LocalTestSetup {
         bool isAllowed = glacisTokenMediator.isAllowedRoute(
             chainId,
             address(0x456).toBytes32(), // wrong mediator address (what we're testing)
-            1,
+            AXELAR_GMP_ID,
             payload
         );
         assertFalse(isAllowed);
@@ -173,7 +173,7 @@ contract TokenMediatorTests is LocalTestSetup {
         bool isAllowed = glacisTokenMediator.isAllowedRoute(
             chainId,
             addr.toBytes32(), // correct mediator address (what we're testing)
-            1,
+            AXELAR_GMP_ID,
             payload
         );
         assertTrue(isAllowed);

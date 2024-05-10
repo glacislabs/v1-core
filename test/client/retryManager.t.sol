@@ -45,7 +45,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
             address(axelarGasServiceMock),
             address(this)
         );
-        glacisRouter.registerAdapter(AXELAR_GMP_ID, address(adapter));
+        glacisRouter.registerAdapter(uint8(uint160(AXELAR_GMP_ID)), address(adapter));
 
         // Add chain IDs
         uint256[] memory glacisIDs = new uint256[](1);
@@ -57,14 +57,14 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         adapterCounterparts[0] = address(adapter).toBytes32();
         adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
         assertEq(
-            glacisRouter.glacisGMPIdToAdapter(AXELAR_GMP_ID),
+            glacisRouter.glacisGMPIdToAdapter(uint8(uint160(AXELAR_GMP_ID))),
             address(adapter)
         );
     }
 
     function test__Retry_MessageIdsAreNotEqualWithSameParameters() external {
         clientSample.setQuorum(2);
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
 
@@ -88,7 +88,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
 
     function test__Retry_MessageIdEventsEmit() external {
         clientSample.setQuorum(2);
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
 
@@ -110,7 +110,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
 
     function test__Retry_IncrementingNonceForMessageId() external {
         clientSample.setQuorum(2);
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
 
@@ -134,7 +134,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
 
     function test__Retry_ButFirstSucceeded() external {
         clientSample.setQuorum(2);
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
 
@@ -147,7 +147,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         );
 
         // This should fail. Note that this failure is on the "destination" chain.
-        uint8[] memory gmp = new uint8[](1);
+        address[] memory gmp = new address[](1);
         gmp[0] = AXELAR_GMP_ID;
 
         vm.expectRevert(GlacisRouter__MessageAlreadyReceivedFromGMP.selector);
@@ -155,7 +155,6 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
             block.chainid,
             address(clientSample).toBytes32(),
             gmp,
-            new address[](0),
             createFees(0, gmp.length),
             abi.encode(1000),
             messageId,
@@ -168,7 +167,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
 
         // Send initial message
         uint256 initialValue = clientSample.value();
-        uint8[] memory gmps = new uint8[](1);
+        address[] memory gmps = new address[](1);
         gmps[0] = AXELAR_GMP_ID;
         bytes32 messageId = clientSample.setRemoteValue__retriable(
             block.chainid,
@@ -186,7 +185,6 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
             block.chainid,
             address(clientSample).toBytes32(),
             gmps,
-            new address[](0),
             createFees(0, gmps.length),
             abi.encode(1000),
             messageId,
@@ -201,7 +199,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
 
         // Send initial message
         uint256 initialValue = clientSample.value();
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
         bytes32 messageId = clientSample.setRemoteValue__retriable(
@@ -216,13 +214,12 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         assertEq(initialValue, clientSample.value());
 
         // Send retry
-        uint8[] memory gmpsOnlyAxelar = new uint8[](1);
+        address[] memory gmpsOnlyAxelar = new address[](1);
         gmpsOnlyAxelar[0] = AXELAR_GMP_ID;
         clientSample.setRemoteValue__retry(
             block.chainid,
             address(clientSample).toBytes32(),
             gmpsOnlyAxelar,
-            new address[](0),
             createFees(0, gmpsOnlyAxelar.length),
             abi.encode(1000),
             messageId,
@@ -235,14 +232,14 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         clientSample.setQuorum(2);
 
         // Send message
-        uint8[] memory gmps = new uint8[](2);
-        gmps[0] = AXELAR_GMP_ID;
-        gmps[1] = LAYERZERO_GMP_ID;
+        address[] memory adapters = new address[](2);
+        adapters[0] = AXELAR_GMP_ID;
+        adapters[1] = LAYERZERO_GMP_ID;
         bytes32 messageId = clientSample.setRemoteValue__retriable(
             block.chainid,
             address(clientSample).toBytes32(),
-            gmps,
-            createFees(0, gmps.length),
+            adapters,
+            createFees(0, adapters.length),
             abi.encode(1000)
         );
 
@@ -254,9 +251,8 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         clientSample.setRemoteValue__retry(
             block.chainid,
             address(clientSample).toBytes32(),
-            gmps,
-            new address[](0),
-            createFees(0, gmps.length),
+            adapters,
+            createFees(0, adapters.length),
             abi.encode(1000),
             messageId,
             0
@@ -268,7 +264,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
 
         // Send initial message
         uint256 initialValue = clientSample.value();
-        uint8[] memory gmps = new uint8[](1);
+        address[] memory gmps = new address[](1);
         gmps[0] = AXELAR_GMP_ID;
         bytes32 messageId = clientSample.setRemoteValue__retriable(
             block.chainid,
@@ -287,7 +283,6 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
             block.chainid,
             address(clientSample).toBytes32(),
             gmps,
-            new address[](0),
             createFees(0, gmps.length),
             abi.encode(1000),
             messageId,
@@ -301,7 +296,6 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
             block.chainid,
             address(clientSample).toBytes32(),
             gmps,
-            new address[](0),
             createFees(0, gmps.length),
             abi.encode(1000),
             messageId,
@@ -317,7 +311,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         bytes32 messageId;
         uint256 initialValue = clientSample.value();
         {
-            uint8[] memory gmps = new uint8[](1);
+            address[] memory gmps = new address[](1);
             gmps[0] = AXELAR_GMP_ID;
             messageId = clientSample.setRemoteValue__retriable(
                 block.chainid,
@@ -339,14 +333,12 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
 
         // Send retry
         {
-            uint8[] memory gmps = new uint8[](0);
             address[] memory customAdapters = new address[](1);
             customAdapters[0] = customAdapter;
 
             clientSample.setRemoteValue__retry(
                 block.chainid,
                 address(clientSample).toBytes32(),
-                gmps,
                 customAdapters,
                 createFees(0, customAdapters.length),
                 abi.encode(1000),

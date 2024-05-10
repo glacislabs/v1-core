@@ -130,7 +130,7 @@ contract LocalTestSetup is Test {
         );
 
         // Add adapter to the router
-        router.registerAdapter(AXELAR_GMP_ID, address(adapter));
+        router.registerAdapter(uint8(uint160(AXELAR_GMP_ID)), address(adapter));
 
         // Adds a glacisId => axelar chain string configuration to the adapter
         uint256[] memory glacisIDs = new uint256[](1);
@@ -170,7 +170,7 @@ contract LocalTestSetup is Test {
         adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
 
         // Register adapter in GlacisRouter
-        router.registerAdapter(LAYERZERO_GMP_ID, address(adapter));
+        router.registerAdapter(uint8(uint160(LAYERZERO_GMP_ID)), address(adapter));
 
         return adapter;
     }
@@ -194,7 +194,7 @@ contract LocalTestSetup is Test {
 
         adapter.setGlacisChainIds(glacisIDs, wormholeIDs);
 
-        router.registerAdapter(WORMHOLE_GMP_ID, address(adapter));
+        router.registerAdapter(uint8(uint160(WORMHOLE_GMP_ID)), address(adapter));
         bytes32[] memory adapterCounterparts = new bytes32[](1);
         adapterCounterparts[0] = address(adapter).toBytes32();
         adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
@@ -219,7 +219,7 @@ contract LocalTestSetup is Test {
         chainSelectors[0] = uint64(block.chainid);
 
         adapter.setGlacisChainIds(glacisIDs, chainSelectors);
-        router.registerAdapter(CCIP_GMP_ID, address(adapter));
+        router.registerAdapter(uint8(uint160(CCIP_GMP_ID)), address(adapter));
         bytes32[] memory adapterCounterparts = new bytes32[](1);
         adapterCounterparts[0] = address(adapter).toBytes32();
         adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
@@ -245,7 +245,7 @@ contract LocalTestSetup is Test {
 
         adapter.setGlacisChainIds(glacisIDs, hyperlaneDomains);
 
-        router.registerAdapter(HYPERLANE_GMP_ID, address(adapter));
+        router.registerAdapter(uint8(uint160(HYPERLANE_GMP_ID)), address(adapter));
         bytes32[] memory adapterCounterparts = new bytes32[](1);
         adapterCounterparts[0] = address(adapter).toBytes32();
         adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
@@ -271,7 +271,7 @@ contract LocalTestSetup is Test {
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
                 address(clientSample).toBytes32(), // from
-                0 // fromGmpId
+                address(0) // fromGmpId
             )
         );
         clientTextSample = new GlacisClientTextSample(
@@ -282,7 +282,7 @@ contract LocalTestSetup is Test {
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
                 address(clientTextSample).toBytes32(), // from
-                0 // fromGmpId
+                address(0) // fromGmpId
             )
         );
     }
@@ -303,7 +303,7 @@ contract LocalTestSetup is Test {
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
                 address(clientSample).toBytes32(), // from
-                0 // fromGmpId
+                address(0) // fromGmpId
             )
         );
     }
@@ -364,7 +364,7 @@ contract LocalTestSetup is Test {
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
                 address(glacisTokenClientSampleSource).toBytes32(), // from
-                0 // fromGmpId
+                address(0) // fromGmpId
             )
         );
         xERC20Sample.setLimits(address(glacisTokenMediator), 10e18, 10e18);

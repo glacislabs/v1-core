@@ -23,7 +23,7 @@ contract GlacisClientSample is GlacisClientOwnable {
     function setRemoteValue__redundancy(
         uint256 toChainId,
         bytes32 to,
-        uint8[] memory adapters,
+        address[] memory adapters,
         uint256[] memory fees,
         bytes calldata payload
     ) external payable returns (bytes32) {
@@ -42,7 +42,7 @@ contract GlacisClientSample is GlacisClientOwnable {
     function setRemoteValue__retriable(
         uint256 chainId,
         bytes32 to,
-        uint8[] memory gmps,
+        address[] memory adapters,
         uint256[] memory fees,
         bytes memory payload
     ) external payable returns (bytes32) {
@@ -51,8 +51,7 @@ contract GlacisClientSample is GlacisClientOwnable {
                 chainId,
                 to,
                 payload,
-                gmps,
-                emptyCustomAdapters(),
+                adapters,
                 fees,
                 msg.sender,
                 true,
@@ -64,8 +63,7 @@ contract GlacisClientSample is GlacisClientOwnable {
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         address refundAddress,
         bool retriable,
@@ -76,8 +74,7 @@ contract GlacisClientSample is GlacisClientOwnable {
                 chainId,
                 to,
                 payload,
-                gmps,
-                customAdapters,
+                adapters,
                 fees,
                 refundAddress,
                 retriable,
@@ -88,8 +85,7 @@ contract GlacisClientSample is GlacisClientOwnable {
     function setRemoteValue__retry(
         uint256 chainId,
         bytes32 to,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
+        address[] memory adapters,
         uint256[] memory fees,
         bytes memory payload,
         bytes32 messageId,
@@ -100,8 +96,7 @@ contract GlacisClientSample is GlacisClientOwnable {
                 chainId,
                 to,
                 payload,
-                gmps,
-                customAdapters,
+                adapters,
                 fees,
                 msg.sender,
                 messageId,

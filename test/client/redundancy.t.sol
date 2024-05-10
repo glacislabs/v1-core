@@ -34,7 +34,7 @@ contract RedundancyTests is LocalTestSetup {
     }
 
     function test__Redundancy_Quorum1_AxelarLayerZero(uint256 val) external {
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
 
@@ -50,7 +50,7 @@ contract RedundancyTests is LocalTestSetup {
     }
 
     function test__Redundancy_Quorum2_AxelarLayerZero(uint256 val) external {
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
         clientSample.setQuorum(2);
@@ -73,7 +73,7 @@ contract RedundancyTests is LocalTestSetup {
         vm.assume(quorum >= 3);
         clientSample.setQuorum(quorum);
 
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
 
@@ -124,7 +124,7 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
     }
 
     function test_Redundancy_ReceivingGMPData() public {
-        uint8[] memory gmps = new uint8[](3);
+        address[] memory gmps = new address[](3);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
         gmps[2] = WORMHOLE_GMP_ID;
@@ -151,19 +151,19 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
             0.3 ether
         );
 
-        uint8[] memory gmps_received = new uint8[](3);
+        address[] memory gmps_received = new address[](3);
         gmps_received[0] = harness.fromGmpIds(0);
         gmps_received[1] = harness.fromGmpIds(1);
         gmps_received[2] = harness.fromGmpIds(2);
 
-        assert(uint8Contains(gmps_received, AXELAR_GMP_ID));
-        assert(uint8Contains(gmps_received, LAYERZERO_GMP_ID));
-        assert(uint8Contains(gmps_received, WORMHOLE_GMP_ID));
+        assert(addressArrContains(gmps_received, AXELAR_GMP_ID));
+        assert(addressArrContains(gmps_received, LAYERZERO_GMP_ID));
+        assert(addressArrContains(gmps_received, WORMHOLE_GMP_ID));
     }
 
-    function uint8Contains(
-        uint8[] memory gmps_received,
-        uint8 key
+    function addressArrContains(
+        address[] memory gmps_received,
+        address key
     ) internal pure returns (bool) {
         for (uint256 i; i < gmps_received.length; ++i) {
             if (gmps_received[i] == key) return true;
@@ -174,10 +174,10 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
 
 contract RedundancyReceivingDataTestHarness is GlacisClient {
     constructor(address glacisRouter) GlacisClient(glacisRouter, 3) {
-        _addAllowedRoute(GlacisCommons.GlacisRoute(0, bytes32(0), 0));
+        _addAllowedRoute(GlacisCommons.GlacisRoute(0, bytes32(0), address(0)));
     }
 
-    uint8[] public fromGmpIds;
+    address[] public fromGmpIds;
     uint256 public fromChainId;
     bytes32 public fromAddress;
     bytes public payload;
@@ -198,7 +198,7 @@ contract RedundancyReceivingDataTestHarness is GlacisClient {
         uint256 chainId,
         bytes32 to,
         bytes memory _payload,
-        uint8[] memory gmps,
+        address[] memory gmps,
         uint256[] memory fees,
         uint256 gasPayment
     ) external payable {
