@@ -36,11 +36,11 @@ contract LocalTestSetup is Test {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 
-    uint8 internal constant AXELAR_GMP_ID = 1;
-    uint8 internal constant LAYERZERO_GMP_ID = 2;
-    uint8 internal constant WORMHOLE_GMP_ID = 3;
-    uint8 internal constant CCIP_GMP_ID = 4;
-    uint8 internal constant HYPERLANE_GMP_ID = 5;
+    bytes32 internal constant AXELAR_GMP_ID = 1;
+    bytes32 internal constant LAYERZERO_GMP_ID = 2;
+    bytes32 internal constant WORMHOLE_GMP_ID = 3;
+    bytes32 internal constant CCIP_GMP_ID = 4;
+    bytes32 internal constant HYPERLANE_GMP_ID = 5;
 
     constructor() {}
 

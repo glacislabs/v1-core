@@ -261,12 +261,12 @@ contract GlacisTokenMediator is
     /// @notice Queries if a route from path GMP+Chain+Address is allowed for this client
     /// @param fromChainId Source chain Id
     /// @param fromAddress Source address
-    /// @param fromGmpId source GMP Id
+    /// @param fromAdapter source GMP Id
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
         uint256 fromChainId,
         bytes32 fromAddress,
-        uint160 fromGmpId,
+        bytes32 fromAdapter,
         bytes memory payload
     ) external view returns (bool) {
         // First checks to ensure that the GlacisTokenMediator is speaking to a registered remote version
@@ -292,43 +292,8 @@ contract GlacisTokenMediator is
             IGlacisTokenClient(toAddress).isAllowedRoute(
                 fromChainId,
                 originalFrom,
-                fromGmpId,
+                fromAdapter,
                 originalPayload
-            );
-    }
-
-    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter  
-    /// @param adapter The address of the custom adapter in question  
-    /// @param glacisData The glacis data of the message   
-    /// @param payload The abstract payload of the message  
-    function isCustomAdapter(
-        address adapter,
-        GlacisCommons.GlacisData memory glacisData,
-        bytes memory payload
-    ) public override returns (bool) {
-        (
-            bytes32 to,
-            ,
-            ,
-            bytes32 token,
-            uint256 tokenAmount,
-
-        ) = decodeTokenPayload(payload);
-
-        // If the destination smart contract is an EOA, then it is not.
-        address toAddress = to.toAddress();
-        if (toAddress.code.length == 0) {
-            return false;
-        }
-
-        // Forwards check to the token client
-        return
-            IGlacisTokenClient(toAddress).isCustomAdapter(
-                adapter,
-                glacisData,
-                payload,
-                token.toAddress(),
-                tokenAmount
             );
     }
 

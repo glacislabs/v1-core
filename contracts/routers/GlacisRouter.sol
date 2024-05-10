@@ -186,8 +186,8 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         for (uint8 adapterIndex; adapterIndex < adaptersLength; ) {
             address adapter = adapters[adapterIndex];
 
-            // If adapter address is less than 255, we override it with a Glacis default adapter
-            if (uint160(adapter) <= 255) {
+            // If adapter address is a reserved ID, we override it with a Glacis default adapter
+            if (uint160(adapter) <= GLACIS_RESERVED_IDS) {
                 adapter = glacisGMPIdToAdapter[uint8(uint160(adapter))];
                 revert GlacisRouter__GMPNotSupported();
             }
@@ -214,7 +214,6 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes memory glacisPayload
     ) public {
         // Decode sent data
-        uint8 gmpId = adapterToGlacisGMPId[msg.sender];
         (GlacisData memory glacisData, bytes memory payload) = abi.decode(
             glacisPayload,
             (GlacisData, bytes)
@@ -223,34 +222,23 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         // Get the client
         IGlacisClient client = IGlacisClient(glacisData.originalTo.toAddress());
 
-        // TODO: replace isCustomAdapter with modified isAllowedRoute (that includes address instead of gmp)
-        // TODO: 1. ask if the adapter address is accepted. 2. if not, ask if the gmp number is accepted (if it is a gmp)
-        
-        // Verifies that the sender is an adapter or custom adapter & is an allowed route
-        bool isCustomAdapter = client.isCustomAdapter(
-            msg.sender,
-            glacisData,
+        // Verifies that the sender is an allowed route
+        uint8 gmpId = adapterToGlacisGMPId[msg.sender];
+        bool routeAllowed = client.isAllowedRoute(
+            fromChainId,
+            glacisData.originalFrom,
+            bytes32(uint(uint160(msg.sender))),
             payload
         );
-        if (gmpId == 0) {
-            if (!isCustomAdapter) revert GlacisRouter__OnlyAdaptersAllowed();
-
-            bool routeAllowed = client.isAllowedRoute(
+        if (!routeAllowed && gmpId != 0) {
+                routeAllowed = client.isAllowedRoute(
                 fromChainId,
                 glacisData.originalFrom,
-                uint160(msg.sender),
+                bytes32(uint(gmpId)),
                 payload
             );
-            if (!routeAllowed) revert GlacisRouter__ClientDeniedRoute();
-        } else {
-            bool routeAllowed = client.isAllowedRoute(
-                fromChainId,
-                glacisData.originalFrom,
-                gmpId,
-                payload
-            );
-            if (!routeAllowed) revert GlacisRouter__ClientDeniedRoute();
         }
+        if (!routeAllowed) revert GlacisRouter__ClientDeniedRoute();
 
         // Get the quorum requirements
         uint256 quorum = client.getQuorum(glacisData, payload);
@@ -260,10 +248,8 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             glacisData.messageId
         ];
 
-        if (gmpId > 8) revert GlacisRouter__ImpossibleGMPId(gmpId);
-
         // Ensures that the message hasn't come from the same adapter again
-        if (isCustomAdapter) {
+        if (gmpId == 0) {
             if (receivedCustomAdapterMessages[glacisData.messageId][msg.sender])
                 revert GlacisRouter__MessageAlreadyReceivedFromGMP();
 

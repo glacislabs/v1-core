@@ -16,6 +16,8 @@ abstract contract IGlacisClient is IGlacisAccessControlClient {
         DEFAULT_QUORUM = _defaultQuorum;
     }
 
+    // TODO: replace uint8[] calldata fromGmpIds with address[] calldata fromAdapters
+
     /// @notice Receives message from GMP(s) through GlacisRouter
     /// @param fromGmpIds IDs of the GMPs that sent this message (that reached quorum requirements)
     /// @param fromChainId Source chain (Glacis chain ID)
@@ -34,16 +36,6 @@ abstract contract IGlacisClient is IGlacisAccessControlClient {
         bytes memory
     ) public view virtual returns (uint256) {
         return DEFAULT_QUORUM;
-    }
-
-    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter  
-    /// @param adapter The address of the custom adapter in question  
-    function isCustomAdapter(
-        address adapter,
-        GlacisCommons.GlacisData memory, // glacisData,
-        bytes memory // payload
-    ) public virtual returns(bool) {
-        return customAdapters[adapter];
     }
 
     function _addCustomAdapter(address adapter) internal virtual {

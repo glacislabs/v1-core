@@ -248,12 +248,12 @@ contract SimpleTokenMediator is
     /// @notice Queries if a route from path GMP+Chain+Address is allowed for this client
     /// @param fromChainId Source chain Id
     /// @param fromAddress Source address
-    /// @param fromGmpId source GMP Id
+    /// @param fromAdapter Source adapter
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
         uint256 fromChainId,
         bytes32 fromAddress,
-        uint160 fromGmpId,
+        bytes32 fromAdapter,
         bytes memory payload
     ) external view returns (bool) {
         // First checks to ensure that the SimpleTokenMediator is speaking to a registered remote version
@@ -277,37 +277,8 @@ contract SimpleTokenMediator is
             IGlacisTokenClient(toAddress).isAllowedRoute(
                 fromChainId,
                 originalFrom,
-                fromGmpId,
+                fromAdapter,
                 originalPayload
-            );
-    }
-
-    function isCustomAdapter(
-        address adapter,
-        GlacisCommons.GlacisData memory glacisData,
-        bytes memory payload
-    ) public override returns (bool) {
-        (
-            bytes32 to,
-            ,
-            uint256 tokenAmount,
-
-        ) = decodeTokenPayload(payload);
-
-        // If the destination smart contract is an EOA, then it is not.
-        address toAddress = to.toAddress();
-        if (toAddress.code.length == 0) {
-            return false;
-        }
-
-        // Forwards check to the token client
-        return
-            IGlacisTokenClient(toAddress).isCustomAdapter(
-                adapter,
-                glacisData,
-                payload,
-                xERC20Token,
-                tokenAmount
             );
     }
 

@@ -223,18 +223,4 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     ) external view virtual override returns (uint256) {
         return getQuorum(glacisData, payload);
     }
-
-    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter  
-    /// @param adapter The address of the custom adapter in question  
-    /// @param glacisData The glacis data of the message   
-    /// @param payload The abstract payload of the message  
-    function isCustomAdapter(
-        address adapter,
-        GlacisCommons.GlacisData memory glacisData,
-        bytes memory payload,
-        address, // token,
-        uint256 // tokenAmount
-    ) public virtual override returns(bool) {
-        return isCustomAdapter(adapter, glacisData, payload);
-    }
 }
