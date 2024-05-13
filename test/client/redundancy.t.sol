@@ -156,9 +156,9 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
         gmps_received[1] = harness.fromGmpIds(1);
         gmps_received[2] = harness.fromGmpIds(2);
 
-        assert(addressArrContains(gmps_received, AXELAR_GMP_ID));
-        assert(addressArrContains(gmps_received, LAYERZERO_GMP_ID));
-        assert(addressArrContains(gmps_received, WORMHOLE_GMP_ID));
+        assert(addressArrContains(gmps_received, address(axelarAdapter)));
+        assert(addressArrContains(gmps_received, address(lzAdapter)));
+        assert(addressArrContains(gmps_received, address(whAdapter)));
     }
 
     function addressArrContains(

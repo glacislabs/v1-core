@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, GlacisAxelarAdapter, LayerZeroGMPMock, GlacisLayerZeroAdapter} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, GlacisAxelarAdapter, LayerZeroGMPMock, GlacisLayerZeroAdapter, GlacisCommons} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {IGlacisRouterEvents} from "../../contracts/interfaces/IGlacisRouter.sol";
 import {GlacisRouter__MessageAlreadyReceivedFromGMP} from "../../contracts/routers/GlacisRouter.sol";
@@ -329,18 +329,24 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
         address customAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
-        clientSample.addCustomAdapter(customAdapter);
+        clientSample.addAllowedRoute(
+            GlacisCommons.GlacisRoute(
+                block.chainid, // fromChainId
+                address(clientSample).toBytes32(), // from
+                customAdapter // custom adapter
+            )
+        );
 
         // Send retry
         {
-            address[] memory customAdapters = new address[](1);
-            customAdapters[0] = customAdapter;
+            address[] memory adapters = new address[](1);
+            adapters[0] = customAdapter;
 
             clientSample.setRemoteValue__retry(
                 block.chainid,
                 address(clientSample).toBytes32(),
-                customAdapters,
-                createFees(0, customAdapters.length),
+                adapters,
+                createFees(0, adapters.length),
                 abi.encode(1000),
                 messageId,
                 0
