@@ -22,13 +22,13 @@ contract HyperlaneSample {
     }
 
     function setRemoteValue(
-        uint16, // destinationChainId,
+        uint16 destinationChainId,
         address destinationAddress,
         bytes calldata payload
     ) external payable {
         // Send message across chains
         MAIL_BOX.dispatch{value: 1}(
-            LOCAL_DOMAIN,
+            destinationChainId,
             bytes32(uint256(uint160(destinationAddress))),
             payload
         );
