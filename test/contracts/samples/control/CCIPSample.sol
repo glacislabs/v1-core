@@ -11,7 +11,7 @@ contract CCIPSample is CCIPReceiver {
     constructor(address ccipRouter_) CCIPReceiver(ccipRouter_) {}
 
     function setRemoteValue(
-        uint16 destinationChainId,
+        uint64 destinationChainId,
         address destinationAddress,
         bytes memory payload
     ) external payable {
