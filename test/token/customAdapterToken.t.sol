@@ -333,10 +333,6 @@ contract CustomAdapterTokenTests is LocalTestSetup {
 
         xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
 
-        address notAddedCustomAdapter = address(
-            new CustomAdapterSample(address(glacisRouter), address(this))
-        );
-
         address[] memory adapters = new address[](2);
         adapters[0] = customAdapter;
         adapters[1] = customAdapter;
