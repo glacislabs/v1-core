@@ -10,7 +10,6 @@ import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 
 error GlacisRouter__GMPNotSupported(); //0xed2e8008
 error GlacisRouter__RouteDoesNotExist(); //0xeb470cd2
-error GlacisRouter__OnlyAdaptersAllowed(); //0xb519c5ed
 error GlacisRouter__ClientDeniedRoute();
 error GlacisRouter__NotOwnerOfMessageToRetry();
 error GlacisRouter__MessageInputNotIdenticalForRetry();
