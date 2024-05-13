@@ -20,7 +20,7 @@ contract CCIPSample is CCIPReceiver {
             data: payload,
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: Client._argsToBytes(
-                Client.EVMExtraArgsV1({gasLimit: 0})
+                Client.EVMExtraArgsV1({gasLimit: 1_000_000})
             ),
             feeToken: address(0)
         });
