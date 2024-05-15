@@ -29,9 +29,13 @@ contract TokenMediatorTests is LocalTestSetup {
         LayerZeroGMPMock lzEndpoint = deployLayerZeroFixture();
         deployLayerZeroAdapters(glacisRouter, lzEndpoint);
 
+        setUpSimpleTokenMediator(1);
+    }
+
+    function setUpSimpleTokenMediator(uint256 quorum) internal {
         simpleTokenMediator = new SimpleTokenMediator(
             address(glacisRouter),
-            1,
+            quorum,
             address(this)
         );
         simpleTokenMediator.setXERC20(address(xERC20Sample));
@@ -173,7 +177,105 @@ contract TokenMediatorTests is LocalTestSetup {
         );
     }
 
-    // TODO: quorum test, attempt retry
+    function test__SimpleTokenMediator_SendsCrossChainRedundantQuorum(
+        address targetAddr,
+        uint256 amount
+    ) external {
+        vm.assume(amount < xERC20Sample.balanceOf(address(this)));
+        vm.assume(targetAddr != address(0));
+        vm.assume(targetAddr != address(this));
+
+        setUpSimpleTokenMediator(2);
+
+        address[] memory adapters = new address[](2);
+        adapters[0] = AXELAR_GMP_ID;
+        adapters[1] = LAYERZERO_GMP_ID;
+        uint256[] memory fees = new uint256[](2);
+        fees[0] = 0.5 ether;
+        fees[1] = 0.5 ether;
+
+        xERC20Sample.approve(address(simpleTokenMediator), amount);
+        simpleTokenMediator.sendCrossChain{value: 1 ether}(
+            block.chainid,
+            targetAddr.toBytes32(),
+            adapters,
+            fees,
+            address(this),
+            amount
+        );
+
+        assertEq(xERC20Sample.balanceOf(targetAddr), amount);
+    }
+
+    function test__SimpleTokenMediator_SendsCrossChainQuorumLimits(
+        address targetAddr,
+        uint256 amount
+    ) external {
+        vm.assume(amount < xERC20Sample.balanceOf(address(this)));
+        vm.assume(targetAddr != address(0));
+        vm.assume(targetAddr != address(this));
+
+        setUpSimpleTokenMediator(2);
+
+        address[] memory adapters = new address[](1);
+        adapters[0] = AXELAR_GMP_ID;
+        uint256[] memory fees = new uint256[](1);
+        fees[0] = 1 ether;
+
+        xERC20Sample.approve(address(simpleTokenMediator), amount);
+        simpleTokenMediator.sendCrossChain{value: 1 ether}(
+            block.chainid,
+            targetAddr.toBytes32(),
+            adapters,
+            fees,
+            address(this),
+            amount
+        );
+
+        assertEq(xERC20Sample.balanceOf(targetAddr), 0);
+    }
+
+    function test__SimpleTokenMediator_SendsCrossChainRetry(
+        address targetAddr,
+        uint256 amount
+    ) external {
+        vm.assume(amount < xERC20Sample.balanceOf(address(this)));
+        vm.assume(targetAddr != address(0));
+        vm.assume(targetAddr != address(this));
+
+        setUpSimpleTokenMediator(2);
+
+        address[] memory adapters = new address[](1);
+        adapters[0] = AXELAR_GMP_ID;
+        uint256[] memory fees = new uint256[](1);
+        fees[0] = 1 ether;
+
+        xERC20Sample.approve(address(simpleTokenMediator), amount);
+        (bytes32 messageId, uint256 nonce) = simpleTokenMediator.sendCrossChain{value: 1 ether}(
+            block.chainid,
+            targetAddr.toBytes32(),
+            adapters,
+            fees,
+            address(this),
+            amount
+        );
+
+        assertEq(xERC20Sample.balanceOf(targetAddr), 0);
+
+        adapters[0] = LAYERZERO_GMP_ID;
+        simpleTokenMediator.sendCrossChainRetry{value: 1 ether}(
+            block.chainid,
+            targetAddr.toBytes32(),
+            adapters,
+            fees,
+            address(this),
+            messageId,
+            nonce,
+            amount
+        );
+
+        assertEq(xERC20Sample.balanceOf(targetAddr), amount);
+    }
 
     receive() external payable {}
 }

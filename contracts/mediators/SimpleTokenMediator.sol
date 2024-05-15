@@ -145,13 +145,11 @@ contract SimpleTokenMediator is
     }
 
     /// @notice Receives a cross chain message from an IGlacisAdapter.
-    /// @param fromChainId Source chain (Glacis chain ID)
-    /// @param fromChainId Source address
     /// @param payload Received payload from Glacis Router
     function _receiveMessage(
         address[] memory,   // fromAdapters
-        uint256 fromChainId,
-        bytes32 fromAddress,
+        uint256, // fromChainId
+        bytes32, // fromAddress
         bytes memory payload
     ) internal override {
         // Access control security is handled by allowed routes. No need to check for remoteCounterpart
