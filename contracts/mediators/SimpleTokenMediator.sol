@@ -154,10 +154,7 @@ contract SimpleTokenMediator is
         bytes32 fromAddress,
         bytes memory payload
     ) internal override {
-        // Ensure that the executor is the glacis router and that the source is from an accepted mediator.
-        if (fromAddress != remoteCounterpart[fromChainId]) {
-            revert SimpleTokenMediator__OnlyTokenMediatorAllowed();
-        }
+        // Access control security is handled by allowed routes. No need to check for remoteCounterpart
 
         (bytes32 to, uint256 tokenAmount) = decodeTokenPayload(payload);
 

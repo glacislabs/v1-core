@@ -30,6 +30,7 @@ import {GlacisHyperlaneAdapter} from "../contracts/adapters/GlacisHyperlaneAdapt
 import {HyperlaneMailboxMock} from "./contracts/mocks/hyperlane/HyperlaneMailboxMock.sol";
 import {GlacisCCIPAdapter} from "../contracts/adapters/GlacisCCIPAdapter.sol";
 import {CCIPRouterMock} from "./contracts/mocks/ccip/CCIPRouterMock.sol";
+import {SimpleTokenMediator} from "../contracts/mediators/SimpleTokenMediator.sol";
 import {AddressBytes32} from "../contracts/libraries/AddressBytes32.sol";
 
 contract LocalTestSetup is Test {
