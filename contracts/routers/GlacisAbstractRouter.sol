@@ -43,8 +43,8 @@ abstract contract GlacisAbstractRouter is
         if (glacisGMPId == 0) revert GlacisAbstractRouter__GMPIDCannotBeZero();
 
         // Unregister previous adapter
-        delete glacisGMPIdToAdapter[glacisGMPId];
         delete adapterToGlacisGMPId[glacisGMPIdToAdapter[glacisGMPId]];
+        delete glacisGMPIdToAdapter[glacisGMPId];
 
         // Adds new adapter
         glacisGMPIdToAdapter[glacisGMPId] = glacisAdapter;
