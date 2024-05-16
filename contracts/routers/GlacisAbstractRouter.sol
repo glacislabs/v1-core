@@ -9,6 +9,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 error GlacisAbstractRouter__InvalidAdapterAddress(); //0xa46f71e2
 error GlacisAbstractRouter__GMPIDCannotBeZero(); //0x4332f55b
+error GlacisAbstractRouter__GMPIDTooHigh();
 
 /// @title Glacis Abstract Router
 /// @notice A base class for the GlacisRouter
@@ -41,6 +42,7 @@ abstract contract GlacisAbstractRouter is
         if (glacisAdapter == address(0))
             revert GlacisAbstractRouter__InvalidAdapterAddress();
         if (glacisGMPId == 0) revert GlacisAbstractRouter__GMPIDCannotBeZero();
+        if (glacisGMPId > GlacisCommons.GLACIS_RESERVED_IDS) revert GlacisAbstractRouter__GMPIDTooHigh();
 
         // Unregister previous adapter
         delete adapterToGlacisGMPId[glacisGMPIdToAdapter[glacisGMPId]];
@@ -53,16 +55,16 @@ abstract contract GlacisAbstractRouter is
 
     /// @notice Unregisters a GMP adapter
     /// @param glacisGMPId The Glacis ID of the GMP
-    /// @param glacisAdapter The address of the deployed adapter
     function unRegisterAdapter(
-        uint8 glacisGMPId,
-        address glacisAdapter
+        uint8 glacisGMPId
     ) external virtual onlyOwner {
-        if (glacisAdapter == address(0))
+        address adapter = glacisGMPIdToAdapter[glacisGMPId];
+        if (adapter == address(0))
             revert GlacisAbstractRouter__InvalidAdapterAddress();
         if (glacisGMPId == 0) revert GlacisAbstractRouter__GMPIDCannotBeZero();
+        
         delete glacisGMPIdToAdapter[glacisGMPId];
-        delete adapterToGlacisGMPId[glacisAdapter];
+        delete adapterToGlacisGMPId[adapter];
     }
 
     /// @notice Creates a messageId
