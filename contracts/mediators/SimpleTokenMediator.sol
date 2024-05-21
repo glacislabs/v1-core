@@ -3,7 +3,7 @@
 pragma solidity 0.8.18;
 
 import {IGlacisRouter} from "../interfaces/IGlacisRouter.sol";
-import {GlacisClientOwnable} from "../client/GlacisClientOwnable.sol";
+import {GlacisClient} from "../client/GlacisClient.sol";
 import {IXERC20} from "../interfaces/IXERC20.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpartManager.sol";
@@ -15,20 +15,17 @@ error SimpleTokenMediator__DestinationChainUnavailable();
 error SimpleTokenMediator__TokenMapInitializationIncorrect();
 
 /// @title Simple Token Mediator
-/// @notice This contract burns and mints XERC-20 tokens without additional 
+/// @notice This contract burns and mints XERC-20 tokens without additional
 /// features. There is no additional Glacis XERC-20 interface, tokens cannot
 /// be sent with a payload, and there is no special interface for a client to
-/// inherit from.  
-/// The `route` function has been replaced with a `sendCrossChain` 
-/// function to differentiate it from the routing with payload that the 
+/// inherit from.
+/// The `route` function has been replaced with a `sendCrossChain`
+/// function to differentiate it from the routing with payload that the
 /// GlacisTokenMediator has. Similarly, the retry function has been replaced
-/// with a `sendCrossChainRetry`.  
-/// Developers using this must ensure that their token has the same address on 
-/// each chain. 
-contract SimpleTokenMediator is
-    GlacisRemoteCounterpartManager,
-    GlacisClientOwnable
-{
+/// with a `sendCrossChainRetry`.
+/// Developers using this must ensure that their token has the same address on
+/// each chain.
+contract SimpleTokenMediator is GlacisRemoteCounterpartManager, GlacisClient {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 
@@ -39,7 +36,9 @@ contract SimpleTokenMediator is
         address _glacisRouter,
         uint256 _quorum,
         address _owner
-    ) GlacisClientOwnable(_glacisRouter, _quorum, _owner) { }
+    ) GlacisClient(_glacisRouter, _quorum) {
+        _transferOwnership(_owner);
+    }
 
     address public xERC20Token;
 
@@ -71,7 +70,11 @@ contract SimpleTokenMediator is
 
         IXERC20(xERC20Token).burn(msg.sender, tokenAmount);
         bytes memory tokenPayload = packTokenPayload(to, tokenAmount);
-        emit SimpleTokenMediator__TokensBurnt(msg.sender, xERC20Token, tokenAmount);
+        emit SimpleTokenMediator__TokensBurnt(
+            msg.sender,
+            xERC20Token,
+            tokenAmount
+        );
         return
             IGlacisRouter(GLACIS_ROUTER).route{value: msg.value}(
                 chainId,
@@ -107,17 +110,19 @@ contract SimpleTokenMediator is
         bytes memory tokenPayload = packTokenPayload(to, tokenAmount);
 
         // Use helper function (otherwise stack too deep)
-        return _routeRetry(
-            chainId,
-            tokenPayload,
-            adapters,
-            fees,
-            refundAddress,
-            messageId,
-            nonce
-        );
+        return
+            _routeRetry(
+                chainId,
+                tokenPayload,
+                adapters,
+                fees,
+                refundAddress,
+                messageId,
+                nonce
+            );
     }
 
+    /// A private function to help with stack to deep during retries.
     function _routeRetry(
         uint256 chainId,
         bytes memory tokenPayload,
@@ -126,7 +131,7 @@ contract SimpleTokenMediator is
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
-    ) private returns(bytes32) {
+    ) private returns (bytes32) {
         bytes32 destinationTokenMediator = remoteCounterpart[chainId];
         if (destinationTokenMediator == bytes32(0))
             revert SimpleTokenMediator__DestinationChainUnavailable();
@@ -147,7 +152,7 @@ contract SimpleTokenMediator is
     /// @notice Receives a cross chain message from an IGlacisAdapter.
     /// @param payload Received payload from Glacis Router
     function _receiveMessage(
-        address[] memory,   // fromAdapters
+        address[] memory, // fromAdapters
         uint256, // fromChainId
         bytes32, // fromAddress
         bytes memory payload
@@ -159,9 +164,14 @@ contract SimpleTokenMediator is
         // Mint
         address toAddress = to.toAddress();
         IXERC20(xERC20Token).mint(toAddress, tokenAmount);
-        emit SimpleTokenMediator__TokensMinted(toAddress, xERC20Token, tokenAmount);
+        emit SimpleTokenMediator__TokensMinted(
+            toAddress,
+            xERC20Token,
+            tokenAmount
+        );
     }
 
+    /// Packs a token payload into this contract's standard.
     function packTokenPayload(
         bytes32 to,
         uint256 tokenAmount
@@ -169,12 +179,31 @@ contract SimpleTokenMediator is
         return abi.encode(to, tokenAmount);
     }
 
+    /// Decodes a token payload into this contract's standard.
     function decodeTokenPayload(
         bytes memory payload
     ) internal pure returns (bytes32 to, uint256 tokenAmount) {
-        (
-            to,
-            tokenAmount
-        ) = abi.decode(payload, (bytes32, uint256));
+        (to, tokenAmount) = abi.decode(payload, (bytes32, uint256));
+    }
+
+    /// @notice Add an allowed route for this client
+    /// @param allowedRoute Route to be added
+    function addAllowedRoute(
+        GlacisCommons.GlacisRoute memory allowedRoute
+    ) external onlyOwner {
+        _addAllowedRoute(allowedRoute);
+    }
+
+    /// @notice Removes an allowed route for this client
+    /// @param route Allowed route to be removed
+    function removeAllowedRoute(
+        GlacisCommons.GlacisRoute calldata route
+    ) external onlyOwner {
+        _removeAllowedRoute(route);
+    }
+
+    /// @notice Removes all allowed routes for this client
+    function removeAllAllowedRoutes() external onlyOwner {
+        _removeAllAllowedRoutes();
     }
 }

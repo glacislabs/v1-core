@@ -5,7 +5,7 @@ pragma solidity 0.8.18;
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IGlacisRouterEvents} from "../interfaces/IGlacisRouter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 error GlacisAbstractRouter__InvalidAdapterAddress(); //0xa46f71e2
 error GlacisAbstractRouter__GMPIDCannotBeZero(); //0x4332f55b
@@ -16,7 +16,7 @@ error GlacisAbstractRouter__GMPIDTooHigh();
 abstract contract GlacisAbstractRouter is
     GlacisCommons,
     IGlacisRouterEvents,
-    Ownable
+    Ownable2Step
 {
     using AddressBytes32 for address;
 
