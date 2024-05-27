@@ -72,17 +72,17 @@ abstract contract GlacisAccessControlClient is GlacisCommons, IGlacisAccessContr
         address fromApdater,
         bytes memory // payload
     ) public view override returns (bool) {
-        for (uint256 i = 0; i < allowedRoutes.length; i++) {
+        for (uint256 i; i < allowedRoutes.length; i++) {
             GlacisCommons.GlacisRoute memory allowedRoute = allowedRoutes[i];
             if (
                 (allowedRoute.fromApdater == fromApdater ||
                     // NOTE: Wildcard should not allow any adapter to make any message, just Glacis' reserved IDs
-                    (allowedRoute.fromApdater == address(0) && uint160(fromApdater) <= GLACIS_RESERVED_IDS)
+                    (allowedRoute.fromApdater == address(WILDCARD) && uint160(fromApdater) <= GLACIS_RESERVED_IDS)
                 ) &&
                 (allowedRoute.fromChainId == fromChainId ||
-                    allowedRoute.fromChainId == 0) &&
+                    allowedRoute.fromChainId == WILDCARD) &&
                 (allowedRoute.fromAddress == fromAddress ||
-                    allowedRoute.fromAddress == bytes32(0))
+                    allowedRoute.fromAddress == bytes32(uint256(WILDCARD)))
             ) {
                 return true;
             }

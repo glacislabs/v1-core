@@ -210,7 +210,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
                 address(glacisTokenClientSampleSource).toBytes32(), // from
-                address(0) // fromGmpId
+                address(WILDCARD) // fromGmpId
             )
         );
 

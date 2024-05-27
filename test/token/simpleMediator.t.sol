@@ -43,7 +43,7 @@ contract TokenMediatorTests is LocalTestSetup {
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
                 address(simpleTokenMediator).toBytes32(), // from
-                address(0) // from adapters
+                address(WILDCARD) // from adapters
             )
         );
         addRemoteMediator(

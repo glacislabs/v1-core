@@ -5,7 +5,7 @@ import {LocalTestSetup, GlacisRouter, GlacisCommons} from "../LocalTestSetup.sol
 import {GlacisAbstractRouter__InvalidAdapterAddress, GlacisAbstractRouter__GMPIDCannotBeZero, GlacisAbstractRouter__GMPIDTooHigh} from "../../contracts/routers/GlacisAbstractRouter.sol";
 import "forge-std/console.sol";
 
-contract RouterTests is LocalTestSetup, GlacisCommons {
+contract RouterTests is LocalTestSetup {
     GlacisRouter internal glacisRouter;
 
     function setUp() public {
@@ -14,7 +14,7 @@ contract RouterTests is LocalTestSetup, GlacisCommons {
 
     function test__GlacisRouter_RegistersAdapter(address adapter, uint8 gmpID) external {
         vm.assume(adapter != address(0));
-        vm.assume(gmpID <= GlacisCommons.GLACIS_RESERVED_IDS);
+        vm.assume(gmpID <= GLACIS_RESERVED_IDS);
         vm.assume(gmpID > 0);
 
         glacisRouter.registerAdapter(gmpID, adapter);
@@ -26,7 +26,7 @@ contract RouterTests is LocalTestSetup, GlacisCommons {
     function test__GlacisRouter_ReplacesAdapter(address adapter, address replacingAdapter, uint8 gmpID) external {
         vm.assume(adapter != address(0));
         vm.assume(replacingAdapter != address(0));
-        vm.assume(gmpID <= GlacisCommons.GLACIS_RESERVED_IDS);
+        vm.assume(gmpID <= GLACIS_RESERVED_IDS);
         vm.assume(gmpID > 0);
         
         glacisRouter.registerAdapter(gmpID, adapter);
@@ -42,7 +42,7 @@ contract RouterTests is LocalTestSetup, GlacisCommons {
 
     function test__GlacisRouter_DeletesAdapter(address adapter, uint8 gmpID) external {
         vm.assume(adapter != address(0));
-        vm.assume(gmpID <= GlacisCommons.GLACIS_RESERVED_IDS);
+        vm.assume(gmpID <= GLACIS_RESERVED_IDS);
         vm.assume(gmpID > 0);
         
         glacisRouter.registerAdapter(gmpID, adapter);
@@ -62,7 +62,7 @@ contract RouterTests is LocalTestSetup, GlacisCommons {
         glacisRouter.registerAdapter(0, address(0x123));
 
         vm.expectRevert(GlacisAbstractRouter__GMPIDTooHigh.selector);
-        glacisRouter.registerAdapter(uint8(GlacisCommons.GLACIS_RESERVED_IDS) + 1, address(0x123));
+        glacisRouter.registerAdapter(uint8(GLACIS_RESERVED_IDS) + 1, address(0x123));
     }
 
     function test__GlacisRouter_NonOwnersCannotAddOrDeleteAdapters() external {

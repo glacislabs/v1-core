@@ -33,7 +33,7 @@ import {CCIPRouterMock} from "./contracts/mocks/ccip/CCIPRouterMock.sol";
 import {SimpleTokenMediator} from "../contracts/mediators/SimpleTokenMediator.sol";
 import {AddressBytes32} from "../contracts/libraries/AddressBytes32.sol";
 
-contract LocalTestSetup is Test {
+contract LocalTestSetup is Test, GlacisCommons {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 
@@ -269,10 +269,10 @@ contract LocalTestSetup is Test {
     {
         clientSample = new GlacisClientSample(address(router), address(this));
         GlacisClientSample(clientSample).addAllowedRoute(
-            GlacisCommons.GlacisRoute(
+            GlacisRoute(
                 block.chainid, // fromChainId
                 address(clientSample).toBytes32(), // from
-                address(0) // fromGmpId
+                address(WILDCARD) // fromGmpId
             )
         );
         clientTextSample = new GlacisClientTextSample(
@@ -280,10 +280,10 @@ contract LocalTestSetup is Test {
             address(this)
         );
         GlacisClientTextSample(clientTextSample).addAllowedRoute(
-            GlacisCommons.GlacisRoute(
+            GlacisRoute(
                 block.chainid, // fromChainId
                 address(clientTextSample).toBytes32(), // from
-                address(0) // fromGmpId
+                address(WILDCARD) // fromGmpId
             )
         );
     }
@@ -304,7 +304,7 @@ contract LocalTestSetup is Test {
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
                 address(clientSample).toBytes32(), // from
-                address(0) // fromGmpId
+                address(WILDCARD) // fromGmpId
             )
         );
     }
@@ -365,7 +365,7 @@ contract LocalTestSetup is Test {
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
                 address(glacisTokenClientSampleSource).toBytes32(), // from
-                address(0) // fromGmpId
+                address(WILDCARD) // fromGmpId
             )
         );
         xERC20Sample.setLimits(address(glacisTokenMediator), 10e18, 10e18);

@@ -23,6 +23,7 @@ contract GlacisCommons {
         address fromApdater; // 0 means any GMP, can also hold address
     }
 
+    uint160 constant public WILDCARD = type(uint160).max;
     uint256 constant public GLACIS_RESERVED_IDS = 248;
 
     /// @notice De-serialize a uint8 bitmap to an uint8 array

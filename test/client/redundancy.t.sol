@@ -174,7 +174,7 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
 
 contract RedundancyReceivingDataTestHarness is GlacisClient {
     constructor(address glacisRouter) GlacisClient(glacisRouter, 3) {
-        _addAllowedRoute(GlacisCommons.GlacisRoute(0, bytes32(0), address(0)));
+        _addAllowedRoute(GlacisCommons.GlacisRoute(WILDCARD, bytes32(uint256(WILDCARD)), address(WILDCARD)));
     }
 
     address[] public fromGmpIds;
