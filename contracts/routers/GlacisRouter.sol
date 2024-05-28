@@ -19,6 +19,7 @@ error GlacisRouter__MessageIdNotValid();
 error GlacisRouter__FeeArrayMustEqualGMPArray();
 error GlacisRouter__GMPCountMustBeAtLeastOne();
 error GlacisRouter__FeeSumMustBeEqualToValue();
+error GlacisRouter__DestinationRetryNotSatisfied(bool quorumSatisfied, bool notExecuted, bool quorumIsNotZero);
 
 /// @title Glacis Router
 /// @notice A central router to send and receive cross-chain messages
@@ -291,6 +292,62 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         } else {
             messageReceipts[glacisData.messageId] = currentReceipt;
         }
+    }
+
+    /// @notice Retries execution of a cross-chain message without incrementing quorum.
+    /// @param fromChainId Source chain (Glacis chain ID)
+    /// @param glacisPayload Received payload with embedded GlacisData
+    function retryReceiveMessage(
+        uint256 fromChainId,
+        bytes memory glacisPayload
+    ) public {
+        // Decode sent data
+        (GlacisData memory glacisData, bytes memory payload) = abi.decode(
+            glacisPayload,
+            (GlacisData, bytes)
+        );
+
+        // Get the client
+        IGlacisClient client = IGlacisClient(glacisData.originalTo.toAddress());
+
+        // Get the quorum requirements
+        uint256 quorum = client.getQuorum(glacisData, payload);
+
+        // Check satisfaction of current receipt
+        MessageData memory currentReceipt = messageReceipts[
+            glacisData.messageId
+        ];
+
+        // Verify that the messageID can be calculated from the data provided,
+        if (
+            !_validateGlacisMessageId(
+                glacisData.messageId,
+                GLACIS_CHAIN_ID,
+                fromChainId,
+                glacisData.originalTo,
+                glacisData.originalFrom,
+                glacisData.nonce,
+                payload
+            )
+        ) revert GlacisRouter__MessageIdNotValid();
+
+        // Execute if quorum is satisfied
+        if (
+            currentReceipt.uniqueMessagesReceived >= quorum &&
+            !currentReceipt.executed &&
+            quorum > 0
+        ) {
+            currentReceipt.executed = true;
+            messageReceipts[glacisData.messageId] = currentReceipt;
+
+            client.receiveMessage(
+                receivedAdaptersList[glacisData.messageId],
+                fromChainId,
+                glacisData.originalFrom,
+                payload
+            );
+        }
+        else revert GlacisRouter__DestinationRetryNotSatisfied(currentReceipt.uniqueMessagesReceived >= quorum, !currentReceipt.executed, quorum > 0);
     }
 
     /// @notice Validates that all the fees sum up to the total payment
