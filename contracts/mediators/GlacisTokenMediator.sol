@@ -3,7 +3,7 @@
 pragma solidity 0.8.18;
 
 import {IGlacisTokenClient} from "../interfaces/IGlacisTokenClient.sol";
-import {IGlacisRouter} from "../interfaces/IGlacisRouter.sol";
+import {GlacisRouter} from "../routers/GlacisRouter.sol";
 import {IGlacisTokenMediator} from "../interfaces/IGlacisTokenMediator.sol";
 import {IGlacisClient} from "../interfaces/IGlacisClient.sol";
 import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
@@ -76,7 +76,7 @@ contract GlacisTokenMediator is
         );
         emit GlacisTokenMediator__TokensBurnt(msg.sender, token, tokenAmount);
         return
-            IGlacisRouter(GLACIS_ROUTER).route{value: msg.value}(
+            GlacisRouter(GLACIS_ROUTER).route{value: msg.value}(
                 chainId,
                 destinationTokenMediator,
                 tokenPayload,
@@ -153,7 +153,7 @@ contract GlacisTokenMediator is
             revert GlacisTokenMediator__DestinationChainUnavailable();
 
         return
-            IGlacisRouter(GLACIS_ROUTER).routeRetry{value: msg.value}(
+            GlacisRouter(GLACIS_ROUTER).routeRetry{value: msg.value}(
                 chainId,
                 destinationTokenMediator,
                 tokenPayload,
@@ -281,11 +281,10 @@ contract GlacisTokenMediator is
             bytes memory originalPayload
         ) = decodeTokenPayload(payload);
 
-        // If the destination smart contract is an EOA, then we allow it.
+        // If the destination smart contract is an EOA, then we can only allow adapters that are using
+        // our canonical GMPs. Otherwise, we would allow malicious custom adapters.
         address toAddress = to.toAddress();
-        if (toAddress.code.length == 0) {
-            return true;
-        }
+        if (toAddress.code.length == 0) return GlacisRouter(GLACIS_ROUTER).adapterToGlacisGMPId(fromAdapter) > 0;
 
         // Forwards check to the token client
         return
