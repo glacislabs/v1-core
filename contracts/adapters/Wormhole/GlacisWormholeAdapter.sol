@@ -57,7 +57,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
         (uint256 nativePriceQuote, ) = WORMHOLE_RELAYER.quoteEVMDeliveryPrice(
             destinationChainId,
             RECEIVER_VALUE,
-            GAS_LIMIT
+            incentives.gasLimit > 0 ? GAS_LIMIT : incentives.gasLimit
         );
 
         if (nativePriceQuote > msg.value)
