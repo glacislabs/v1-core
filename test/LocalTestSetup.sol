@@ -48,10 +48,13 @@ contract LocalTestSetup is Test, GlacisCommons {
     function createFees(
         uint256 amount,
         uint256 size
-    ) internal pure returns (uint256[] memory) {
-        uint256[] memory fees = new uint256[](size);
+    ) internal pure returns (AdapterIncentives[] memory) {
+        AdapterIncentives[] memory fees = new AdapterIncentives[](size);
         for (uint256 i; i < size; ++i) {
-            fees[i] = amount;
+            fees[i] = AdapterIncentives({ 
+                gasLimit: 0,
+                nativeCurrencyValue: uint128(amount)
+            });
         }
         return fees;
     }

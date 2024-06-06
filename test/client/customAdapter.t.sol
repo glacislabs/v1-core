@@ -69,8 +69,7 @@ contract CustomAdapterTests is LocalTestSetup {
     }
 
     function test__Abstraction_CustomAdapter(uint256 val) external {
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 0.1 ether;
+        AdapterIncentives[] memory fees = createFees(0.1 ether, 1);
         address[] memory adapters = new address[](1);
         adapters[0] = customAdapter;
 
@@ -89,8 +88,7 @@ contract CustomAdapterTests is LocalTestSetup {
     }
 
     function test__FeeArrayFailureWithCustomAdapter(uint256 val) external {
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 0.2 ether;
+        AdapterIncentives[] memory fees = createFees(0.2 ether, 1);
         address[] memory adapters = new address[](2);
         adapters[0] = AXELAR_GMP_ID;
         adapters[1] = customAdapter;
@@ -112,9 +110,7 @@ contract CustomAdapterTests is LocalTestSetup {
         address[] memory adapters = new address[](2);
         adapters[0] = customAdapter;
         adapters[1] = AXELAR_GMP_ID;
-        uint256[] memory fees = new uint256[](2);
-        fees[0] = 0.2 ether;
-        fees[1] = 0.2 ether;
+        AdapterIncentives[] memory fees = createFees(0.2 ether, 2);
 
         clientSample.setQuorum(2);
 

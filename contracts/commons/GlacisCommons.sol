@@ -23,6 +23,11 @@ contract GlacisCommons {
         address fromApdater; // 0 means any GMP, can also hold address
     }
 
+    struct AdapterIncentives {
+        uint128 gasLimit;
+        uint128 nativeCurrencyValue;
+    }
+
     uint160 constant public WILDCARD = type(uint160).max;
     uint256 constant public GLACIS_RESERVED_IDS = 248;
 

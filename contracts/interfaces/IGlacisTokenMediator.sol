@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.18;
 
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
+
 /// @title IGlacisTokenMediator
 /// @notice An interface of a mediator that sends XERC20s with a payload across chains  
 interface IGlacisTokenMediator {
@@ -31,7 +33,7 @@ interface IGlacisTokenMediator {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        uint256[] memory fees,
+        GlacisCommons.AdapterIncentives[] memory fees,
         address refundAddress,
         address token,
         uint256 tokenAmount
@@ -53,7 +55,7 @@ interface IGlacisTokenMediator {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        uint256[] memory fees,
+        GlacisCommons.AdapterIncentives[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce,

@@ -51,8 +51,11 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     ) internal returns (bytes32) {
         address[] memory adapters = new address[](1);
         adapters[0] = adapter;
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = gasPayment;
+        AdapterIncentives[] memory fees = new AdapterIncentives[](1);
+        fees[0] = AdapterIncentives({ 
+            gasLimit: 0,
+            nativeCurrencyValue: uint128(msg.value)
+        });
         (bytes32 messageId,) = IGlacisRouter(GLACIS_ROUTER).route{
             value: gasPayment
         }(chainId, to, payload, adapters, fees, refundAddress, false);
@@ -74,7 +77,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        uint256[] memory fees,
+        AdapterIncentives[] memory fees,
         address refundAddress,
         uint256 gasPayment
     ) internal returns (bytes32) {
@@ -100,7 +103,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        uint256[] memory fees,
+        AdapterIncentives[] memory fees,
         address refundAddress,
         bool retriable,
         uint256 gasPayment
@@ -128,7 +131,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        uint256[] memory fees,
+        AdapterIncentives[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce,

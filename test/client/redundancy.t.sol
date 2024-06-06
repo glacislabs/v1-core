@@ -129,7 +129,7 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
         gmps[2] = WORMHOLE_GMP_ID;
-        uint256[] memory fees = createFees(
+        AdapterIncentives[] memory fees = createFees(
             0.3 ether / gmps.length,
             gmps.length
         );
@@ -304,7 +304,7 @@ contract RedundancyReceivingDataTestHarness is GlacisClient {
         bytes32 to,
         bytes memory _payload,
         address[] memory gmps,
-        uint256[] memory fees,
+        AdapterIncentives[] memory fees,
         uint256 gasPayment
     ) external payable {
         _routeRedundant(
