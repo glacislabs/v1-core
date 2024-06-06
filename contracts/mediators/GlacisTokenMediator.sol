@@ -21,7 +21,8 @@ error GlacisTokenMediator__DestinationChainUnavailable();
 contract GlacisTokenMediator is
     IGlacisTokenMediator,
     GlacisRemoteCounterpartManager,
-    IGlacisClient
+    IGlacisClient,
+    GlacisCommons
 {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
@@ -229,7 +230,7 @@ contract GlacisTokenMediator is
     /// @param glacisData The glacis config data that comes with the message
     /// @param payload The payload that comes with the message
     function getQuorum(
-        GlacisCommons.GlacisData memory glacisData,
+        GlacisData memory glacisData,
         bytes memory payload
     ) public view override returns (uint256) {
         (
@@ -284,7 +285,9 @@ contract GlacisTokenMediator is
         // If the destination smart contract is an EOA, then we can only allow adapters that are using
         // our canonical GMPs. Otherwise, we would allow malicious custom adapters.
         address toAddress = to.toAddress();
-        if (toAddress.code.length == 0) return GlacisRouter(GLACIS_ROUTER).adapterToGlacisGMPId(fromAdapter) > 0;
+        if (toAddress.code.length == 0) 
+            return GlacisRouter(GLACIS_ROUTER).adapterToGlacisGMPId(fromAdapter) > 0 || 
+                (uint160(fromAdapter) <= GLACIS_RESERVED_IDS && GlacisRouter(GLACIS_ROUTER).glacisGMPIdToAdapter(uint8(uint160(fromAdapter))) != address(0));
 
         // Forwards check to the token client
         return
