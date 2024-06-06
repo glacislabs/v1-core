@@ -9,6 +9,7 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered} from "./GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
 error GlacisCCIPAdapter__GlacisFeeExtrapolationFailed(
     uint256 currentBalance,
@@ -92,6 +93,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
+        GlacisCommons.AdapterIncentives calldata incentives,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         uint64 destinationChain = glacisChainIdToAdapterChainId[toChainId];

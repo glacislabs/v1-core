@@ -7,6 +7,7 @@ import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {SimpleNonblockingLzApp} from "./SimpleNonblockingLzApp.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
+import {GlacisCommons} from "../../commons/GlacisCommons.sol";
 
 error GlacisLayerZeroAdapter__LZChainIdNotAccepted(uint256);
 
@@ -79,6 +80,7 @@ contract GlacisLayerZeroAdapter is
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
+        GlacisCommons.AdapterIncentives calldata incentives,
         bytes memory payload
     ) internal override {
         uint16 _dstchainId = glacisChainIdToAdapterChainId[toChainId];

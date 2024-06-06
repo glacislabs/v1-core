@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 
 import {IGlacisRouter} from "../interfaces/IGlacisRouter.sol";
 import {IGlacisAdapter} from "../interfaces/IGlacisAdapter.sol";
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpartManager.sol";
 
 error GlacisAbstractAdapter__OnlyGlacisRouterAllowed();
@@ -39,9 +40,10 @@ abstract contract GlacisAbstractAdapter is
     function sendMessage(
         uint256 toChainId,
         address refundAddress,
+        GlacisCommons.AdapterIncentives calldata incentives,
         bytes calldata payload
     ) external payable override onlyGlacisRouter {
-        _sendMessage(toChainId, refundAddress, payload);
+        _sendMessage(toChainId, refundAddress, incentives, payload);
     }
 
     /// @notice Dispatches payload to specified Glacis chain ID and address through a Glacis Adapter implementation
@@ -51,6 +53,7 @@ abstract contract GlacisAbstractAdapter is
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
+        GlacisCommons.AdapterIncentives calldata incentives,
         bytes memory payload
     ) internal virtual;
 

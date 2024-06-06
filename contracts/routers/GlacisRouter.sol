@@ -195,6 +195,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             IGlacisAdapter(adapter).sendMessage{value: fees[adapterIndex].nativeCurrencyValue}(
                 chainId,
                 refundAddress,
+                fees[adapterIndex],
                 glacisPackedPayload
             );
 
