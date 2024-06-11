@@ -100,6 +100,9 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         if (destinationChain == 0)
             revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
 
+        // Initialize a router client instance to interact with cross-chain router
+        IRouterClient router = IRouterClient(this.getRouter());
+
         Client.EVM2AnyMessage memory evm2AnyMessage;
         uint256 fees;
 
@@ -163,9 +166,6 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
                     fees
                 );
         }
-
-        // Initialize a router client instance to interact with cross-chain router
-        IRouterClient router = IRouterClient(this.getRouter());
 
         // Send the CCIP message through the router and store the returned CCIP message ID
         router.ccipSend{value: fees}(destinationChain, evm2AnyMessage);
