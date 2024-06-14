@@ -18,7 +18,7 @@ interface IGlacisAdapter {
     function sendMessage(
         uint256 chainId,
         address refundAddress,
-        GlacisCommons.AdapterIncentives calldata incentives,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes calldata payload
     ) external payable;
 

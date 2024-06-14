@@ -26,7 +26,7 @@ abstract contract IGlacisRouterEvents is GlacisCommons
         bytes32 to,
         bytes data,
         address[] adapters,
-        AdapterIncentives[] fees,
+        CrossChainGas[] fees,
         address refundAddress,
         bool retriable
     );
@@ -37,7 +37,7 @@ abstract contract IGlacisRouterEvents is GlacisCommons
         bytes32 to,
         bytes data,
         address[] adapters,
-        AdapterIncentives[] fees,
+        CrossChainGas[] fees,
         address refundAddress
     );
 }
@@ -59,7 +59,7 @@ interface IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        GlacisCommons.AdapterIncentives[] memory fees,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         bool retriable
     ) external payable returns (bytes32, uint256);
@@ -79,7 +79,7 @@ interface IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        GlacisCommons.AdapterIncentives[] memory fees,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce

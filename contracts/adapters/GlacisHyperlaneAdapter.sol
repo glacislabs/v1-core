@@ -93,7 +93,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.AdapterIncentives calldata incentives,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         uint32 destinationDomain = glacisChainIdToAdapterChainId[toChainId]; // this costs 3k gas

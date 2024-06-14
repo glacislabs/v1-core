@@ -60,7 +60,7 @@ contract SimpleTokenMediator is GlacisRemoteCounterpartManager, GlacisClient {
         uint256 chainId,
         bytes32 to,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         address refundAddress,
         uint256 tokenAmount
     ) public payable virtual returns (bytes32, uint256) {
@@ -100,7 +100,7 @@ contract SimpleTokenMediator is GlacisRemoteCounterpartManager, GlacisClient {
         uint256 chainId,
         bytes32 to,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce,
@@ -127,7 +127,7 @@ contract SimpleTokenMediator is GlacisRemoteCounterpartManager, GlacisClient {
         uint256 chainId,
         bytes memory tokenPayload,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce

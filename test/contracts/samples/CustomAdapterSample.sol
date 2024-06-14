@@ -20,7 +20,7 @@ contract CustomAdapterSample is GlacisAbstractAdapter {
     function _sendMessage(
         uint256 toChainId,
         address,
-        GlacisCommons.AdapterIncentives calldata,
+        GlacisCommons.CrossChainGas calldata,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         GLACIS_ROUTER.receiveMessage(toChainId, payload);

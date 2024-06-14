@@ -33,7 +33,7 @@ interface IGlacisTokenMediator {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        GlacisCommons.AdapterIncentives[] memory fees,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         address token,
         uint256 tokenAmount
@@ -55,7 +55,7 @@ interface IGlacisTokenMediator {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        GlacisCommons.AdapterIncentives[] memory fees,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce,

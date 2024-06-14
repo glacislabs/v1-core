@@ -93,7 +93,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.AdapterIncentives calldata incentives,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         string memory destinationChain = glacisChainIdToAdapterChainId[

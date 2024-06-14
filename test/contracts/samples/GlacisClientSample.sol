@@ -24,7 +24,7 @@ contract GlacisClientSample is GlacisClientOwnable {
         uint256 toChainId,
         bytes32 to,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         bytes calldata payload
     ) external payable returns (bytes32) {
         return
@@ -43,7 +43,7 @@ contract GlacisClientSample is GlacisClientOwnable {
         uint256 chainId,
         bytes32 to,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         bytes memory payload
     ) external payable returns (bytes32) {
         return
@@ -64,7 +64,7 @@ contract GlacisClientSample is GlacisClientOwnable {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         address refundAddress,
         bool retriable,
         uint256 gasPayment
@@ -86,7 +86,7 @@ contract GlacisClientSample is GlacisClientOwnable {
         uint256 chainId,
         bytes32 to,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         bytes memory payload,
         bytes32 messageId,
         uint256 nonce

@@ -93,7 +93,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     function approve(
         uint256 proposalId,
         address payTo,
-        AdapterIncentives[][] memory fees
+        CrossChainGas[][] memory fees
     ) public payable onlyMembers {
         uint256 totalVotes = 0;
         uint256 totalMembers = membersArray.length;
@@ -124,7 +124,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
 
                 uint256 valueRemaining = msg.value;
                 for (uint256 i; i < plen; ++i) {
-                    AdapterIncentives[] memory f = fees[i];
+                    CrossChainGas[] memory f = fees[i];
                     uint256 fLen = f.length;
                     uint256 feeSum;
 
@@ -152,7 +152,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
 
     function _executeProposal(
         Proposal memory p,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         uint256 gasPayment
     ) internal returns (bytes32 messageID) {
         if (p.token == address(0)) {
@@ -185,7 +185,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     /// @param proposalId the proposal id to approve.
     function approve(
         uint256 proposalId,
-        AdapterIncentives[][] memory fees
+        CrossChainGas[][] memory fees
     ) external payable onlyMembers {
         approve(proposalId, msg.sender, fees);
     }
@@ -198,7 +198,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
         uint256 proposalId,
         uint256 messageIndex,
         uint256 nonce,
-        AdapterIncentives[] memory fees
+        CrossChainGas[] memory fees
     ) external payable {
         Proposal memory p = proposals[proposalId][messageIndex];
         if (p.token == address(0)) {
@@ -286,7 +286,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     /// Allows this smart contract to execute proposals. Can only be called by self.
     function selfExecuteProposal(
         Proposal[] memory _proposals,
-        AdapterIncentives[] memory fees
+        CrossChainGas[] memory fees
     ) external payable onlySelf {
         uint256 proposalsLen = _proposals.length;
         uint256 dividedMsgValue = msg.value / fees.length;

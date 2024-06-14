@@ -60,7 +60,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        GlacisRouter.AdapterIncentives[] memory fees,
+        GlacisRouter.CrossChainGas[] memory fees,
         address refundAddress,
         bool retriable
     ) public payable virtual returns (bytes32 messageId, uint256 nonce) {
@@ -113,7 +113,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        GlacisRouter.AdapterIncentives[] memory fees,
+        GlacisRouter.CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
@@ -177,7 +177,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         uint256 chainId,
         bytes memory glacisPackedPayload,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         address refundAddress
     ) internal {
         uint256 adaptersLength = adapters.length;
@@ -356,7 +356,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param fees The fees array
     function validateFeesInput(
         uint256 adaptersLength,
-        AdapterIncentives[] memory fees
+        CrossChainGas[] memory fees
     ) internal {
         if (adaptersLength == 0)
             revert GlacisRouter__GMPCountMustBeAtLeastOne();

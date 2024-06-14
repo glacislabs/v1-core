@@ -58,7 +58,7 @@ contract GlacisTokenMediator is
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        GlacisCommons.AdapterIncentives[] memory fees,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         address token,
         uint256 tokenAmount
@@ -104,7 +104,7 @@ contract GlacisTokenMediator is
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        GlacisCommons.AdapterIncentives[] memory fees,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce,
@@ -144,7 +144,7 @@ contract GlacisTokenMediator is
         uint256 chainId,
         bytes memory tokenPayload,
         address[] memory adapters,
-        GlacisCommons.AdapterIncentives[] memory fees,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce

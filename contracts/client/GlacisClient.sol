@@ -51,8 +51,8 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     ) internal returns (bytes32) {
         address[] memory adapters = new address[](1);
         adapters[0] = adapter;
-        AdapterIncentives[] memory fees = new AdapterIncentives[](1);
-        fees[0] = AdapterIncentives({ 
+        CrossChainGas[] memory fees = new CrossChainGas[](1);
+        fees[0] = CrossChainGas({ 
             gasLimit: 0,
             nativeCurrencyValue: uint128(msg.value)
         });
@@ -77,7 +77,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         address refundAddress,
         uint256 gasPayment
     ) internal returns (bytes32) {
@@ -103,7 +103,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         address refundAddress,
         bool retriable,
         uint256 gasPayment
@@ -131,7 +131,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        AdapterIncentives[] memory fees,
+        CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce,

@@ -23,7 +23,7 @@ contract GlacisCommons {
         address fromApdater; // 0 means any GMP, can also hold address
     }
 
-    struct AdapterIncentives {
+    struct CrossChainGas {
         uint128 gasLimit;
         uint128 nativeCurrencyValue;
     }

@@ -50,7 +50,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.AdapterIncentives calldata incentives,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal override {
         uint16 destinationChainId = glacisChainIdToAdapterChainId[toChainId];

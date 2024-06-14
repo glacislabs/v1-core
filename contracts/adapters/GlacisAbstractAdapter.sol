@@ -40,7 +40,7 @@ abstract contract GlacisAbstractAdapter is
     function sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.AdapterIncentives calldata incentives,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes calldata payload
     ) external payable override onlyGlacisRouter {
         _sendMessage(toChainId, refundAddress, incentives, payload);
@@ -53,7 +53,7 @@ abstract contract GlacisAbstractAdapter is
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.AdapterIncentives calldata incentives,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal virtual;
 
