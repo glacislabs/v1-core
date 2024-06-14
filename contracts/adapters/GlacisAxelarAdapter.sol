@@ -10,6 +10,7 @@ import {AddressString} from "../libraries/AddressString.sol";
 import {GlacisAbstractAdapter} from "./GlacisAbstractAdapter.sol";
 import {IGlacisRouter} from "../routers/GlacisRouter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
 /// @title Glacis Adapter for Axelar  
 /// @notice A Glacis Adapter for the Axelar network. Sends messages through the Axelar Gateway's callContract() and
@@ -92,6 +93,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         string memory destinationChain = glacisChainIdToAdapterChainId[

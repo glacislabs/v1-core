@@ -60,7 +60,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        uint256[] memory fees,
+        GlacisRouter.CrossChainGas[] memory fees,
         address refundAddress,
         bool retriable
     ) public payable virtual returns (bytes32 messageId, uint256 nonce) {
@@ -113,7 +113,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes32 to,
         bytes memory payload,
         address[] memory adapters,
-        uint256[] memory fees,
+        GlacisRouter.CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
@@ -177,7 +177,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         uint256 chainId,
         bytes memory glacisPackedPayload,
         address[] memory adapters,
-        uint256[] memory fees,
+        CrossChainGas[] memory fees,
         address refundAddress
     ) internal {
         uint256 adaptersLength = adapters.length;
@@ -192,9 +192,10 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             }
             else if (adapter == address(0)) revert GlacisRouter__RouteDoesNotExist();
 
-            IGlacisAdapter(adapter).sendMessage{value: fees[adapterIndex]}(
+            IGlacisAdapter(adapter).sendMessage{value: fees[adapterIndex].nativeCurrencyValue}(
                 chainId,
                 refundAddress,
+                fees[adapterIndex],
                 glacisPackedPayload
             );
 
@@ -355,7 +356,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param fees The fees array
     function validateFeesInput(
         uint256 adaptersLength,
-        uint256[] memory fees
+        CrossChainGas[] memory fees
     ) internal {
         if (adaptersLength == 0)
             revert GlacisRouter__GMPCountMustBeAtLeastOne();
@@ -364,7 +365,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
 
         uint256 feeSum;
         for (uint8 i; i < adaptersLength; ) {
-            feeSum += fees[i];
+            feeSum += fees[i].nativeCurrencyValue;
             unchecked {
                 ++i;
             }

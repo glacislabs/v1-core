@@ -137,8 +137,7 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         address[] memory adapters = new address[](2);
         adapters[0] = AXELAR_GMP_ID;
         adapters[1] = customAdapter;
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 0.1 ether;
+        CrossChainGas[] memory fees = createFees(0.1 ether, 1);
 
         vm.expectRevert(GlacisRouter__FeeArrayMustEqualGMPArray.selector);
         glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.1 ether}(

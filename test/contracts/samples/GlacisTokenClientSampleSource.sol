@@ -47,7 +47,7 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
         uint256 toChainId,
         bytes32 to,
         address[] memory adapters,
-        uint256[] memory fees,
+        CrossChainGas[] memory fees,
         bytes memory payload,
         address token,
         uint256 amount
@@ -70,7 +70,7 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
         uint256 chainId,
         bytes32 to,
         address[] memory adapters,
-        uint256[] memory fees,
+        CrossChainGas[] memory fees,
         bytes memory payload,
         address token,
         uint256 amount
@@ -93,7 +93,7 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
         uint256 chainId,
         bytes32 to,
         address[] calldata adapters,
-        uint256[] calldata fees,
+        CrossChainGas[] calldata fees,
         bytes calldata payload,
         address token,
         uint256 amount
@@ -124,7 +124,7 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
         uint256 chainId,
         bytes32 to,
         address[] calldata adapters,
-        uint256[] calldata fees,
+        CrossChainGas[] calldata fees,
         bytes calldata payload,
         RetrySendWithTokenPackage calldata package
     ) external payable returns (bytes32) {

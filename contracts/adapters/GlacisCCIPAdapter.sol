@@ -9,6 +9,7 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered} from "./GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
 error GlacisCCIPAdapter__GlacisFeeExtrapolationFailed(
     uint256 currentBalance,
@@ -92,46 +93,79 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         uint64 destinationChain = glacisChainIdToAdapterChainId[toChainId];
         if (destinationChain == 0)
             revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
-        // Extrapolate gas limit
-        uint256 extrapolation = extrapolateGasLimitFromValue(
-            msg.value,
-            destinationChain,
-            payload
-        );
-        emit GlacisCCIPAdapter__ExtrapolatedGasLimit(extrapolation, msg.value);
-        // Create an EVM2AnyMessage struct in memory with necessary information for sending a cross-chain message
-        Client.EVM2AnyMessage memory evm2AnyMessage = Client.EVM2AnyMessage({
-            receiver: abi.encode(remoteCounterpart[toChainId]), // ABI-encoded receiver address
-            data: payload,
-            tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
-            // NOTE: extraArgs is subject to changes by CCIP in the future.
-            // We are not supposed to hard code this, but it's hard to get around. We will likely have to
-            // regularly redeploy this adapter.
-            extraArgs: Client._argsToBytes(
-                // Additional arguments, setting gas limit
-                // Unfortunately required: https://docs.chain.link/ccip/best-practices#setting-gaslimit
-                // Also note that unspent gas is NOT REFUNDED
-                Client.EVMExtraArgsV1({gasLimit: extrapolation})
-            ),
-            // Set the feeToken to a feeTokenAddress, indicating specific asset will be used for fees
-            feeToken: address(0)
-        });
 
         // Initialize a router client instance to interact with cross-chain router
         IRouterClient router = IRouterClient(this.getRouter());
 
-        // Get the fee required to send the CCIP message
-        uint256 fees = router.getFee(destinationChain, evm2AnyMessage);
-        if (fees > msg.value)
-            revert GlacisCCIPAdapter__GlacisFeeExtrapolationFailed(
+        Client.EVM2AnyMessage memory evm2AnyMessage;
+        uint256 fees;
+
+        // Use incentives if available
+        if (incentives.gasLimit > 0) {
+            // Create an EVM2AnyMessage struct in memory with necessary information for sending a cross-chain message
+            evm2AnyMessage = Client.EVM2AnyMessage({
+                receiver: abi.encode(remoteCounterpart[toChainId]), // ABI-encoded receiver address
+                data: payload,
+                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
+                // NOTE: extraArgs is subject to changes by CCIP in the future.
+                // We are not supposed to hard code this, but it's hard to get around. We will likely have to
+                // regularly redeploy this adapter.
+                extraArgs: Client._argsToBytes(
+                    // Additional arguments, setting gas limit
+                    // Unfortunately required: https://docs.chain.link/ccip/best-practices#setting-gaslimit
+                    // Also note that unspent gas is NOT REFUNDED
+                    Client.EVMExtraArgsV1({gasLimit: incentives.gasLimit})
+                ),
+                // Set the feeToken to a feeTokenAddress, indicating specific asset will be used for fees
+                feeToken: address(0)
+            });
+
+            // Get the fee required to send the CCIP message
+            fees = router.getFee(destinationChain, evm2AnyMessage);
+            if (fees > msg.value)
+                revert GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
+        }
+        // Otherwise, attempt to extrapolate
+        else {
+            uint256 extrapolation = extrapolateGasLimitFromValue(
                 msg.value,
-                fees
+                destinationChain,
+                payload
             );
+            emit GlacisCCIPAdapter__ExtrapolatedGasLimit(extrapolation, msg.value);
+            
+            // Create an EVM2AnyMessage struct in memory with necessary information for sending a cross-chain message
+            evm2AnyMessage = Client.EVM2AnyMessage({
+                receiver: abi.encode(remoteCounterpart[toChainId]), // ABI-encoded receiver address
+                data: payload,
+                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
+                // NOTE: extraArgs is subject to changes by CCIP in the future.
+                // We are not supposed to hard code this, but it's hard to get around. We will likely have to
+                // regularly redeploy this adapter.
+                extraArgs: Client._argsToBytes(
+                    // Additional arguments, setting gas limit
+                    // Unfortunately required: https://docs.chain.link/ccip/best-practices#setting-gaslimit
+                    // Also note that unspent gas is NOT REFUNDED
+                    Client.EVMExtraArgsV1({gasLimit: extrapolation})
+                ),
+                // Set the feeToken to a feeTokenAddress, indicating specific asset will be used for fees
+                feeToken: address(0)
+            });
+
+            // Get the fee required to send the CCIP message
+            fees = router.getFee(destinationChain, evm2AnyMessage);
+            if (fees > msg.value)
+                revert GlacisCCIPAdapter__GlacisFeeExtrapolationFailed(
+                    msg.value,
+                    fees
+                );
+        }
 
         // Send the CCIP message through the router and store the returned CCIP message ID
         router.ccipSend{value: fees}(destinationChain, evm2AnyMessage);

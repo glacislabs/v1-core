@@ -47,7 +47,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
         uint256 toChainId,
         bytes32 to,
         address[] memory gmps,
-        uint256[] memory fees,
+        CrossChainGas[] memory fees,
         bytes memory payload,
         address token,
         uint256 amount
@@ -70,7 +70,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
         uint256 chainId,
         bytes32 to,
         address[] memory gmps,
-        uint256[] memory fees,
+        CrossChainGas[] memory fees,
         bytes memory payload,
         address token,
         uint256 amount
@@ -93,7 +93,7 @@ contract GlacisTokenClientSampleDestination is GlacisTokenClientOwnable {
         uint256 chainId,
         bytes32 to,
         address[] memory gmps,
-        uint256[] memory fees,
+        CrossChainGas[] memory fees,
         bytes memory payload,
         address token,
         uint256 amount,

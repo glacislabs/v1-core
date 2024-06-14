@@ -136,8 +136,7 @@ contract TokenMediatorTests is LocalTestSetup {
 
         address[] memory adapters = new address[](1);
         adapters[0] = AXELAR_GMP_ID;
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 1 ether;
+        CrossChainGas[] memory fees = createFees(1 ether, 1);
 
         xERC20Sample.approve(address(simpleTokenMediator), amount);
         simpleTokenMediator.sendCrossChain{value: 1 ether}(
@@ -161,8 +160,7 @@ contract TokenMediatorTests is LocalTestSetup {
 
         address[] memory adapters = new address[](1);
         adapters[0] = AXELAR_GMP_ID;
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 1 ether;
+        CrossChainGas[] memory fees = createFees(1 ether, 1);
 
         xERC20Sample.approve(address(simpleTokenMediator), amount);
 
@@ -190,9 +188,7 @@ contract TokenMediatorTests is LocalTestSetup {
         address[] memory adapters = new address[](2);
         adapters[0] = AXELAR_GMP_ID;
         adapters[1] = LAYERZERO_GMP_ID;
-        uint256[] memory fees = new uint256[](2);
-        fees[0] = 0.5 ether;
-        fees[1] = 0.5 ether;
+        CrossChainGas[] memory fees = createFees(0.5 ether, 2);
 
         xERC20Sample.approve(address(simpleTokenMediator), amount);
         simpleTokenMediator.sendCrossChain{value: 1 ether}(
@@ -219,8 +215,7 @@ contract TokenMediatorTests is LocalTestSetup {
 
         address[] memory adapters = new address[](1);
         adapters[0] = AXELAR_GMP_ID;
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 1 ether;
+        CrossChainGas[] memory fees = createFees(1 ether, 1);
 
         xERC20Sample.approve(address(simpleTokenMediator), amount);
         simpleTokenMediator.sendCrossChain{value: 1 ether}(
@@ -247,8 +242,7 @@ contract TokenMediatorTests is LocalTestSetup {
 
         address[] memory adapters = new address[](1);
         adapters[0] = AXELAR_GMP_ID;
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 1 ether;
+        CrossChainGas[] memory fees = createFees(1 ether, 1);
 
         xERC20Sample.approve(address(simpleTokenMediator), amount);
         (bytes32 messageId, uint256 nonce) = simpleTokenMediator.sendCrossChain{value: 1 ether}(

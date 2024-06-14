@@ -7,6 +7,7 @@ import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {IGlacisRouter} from "../../routers/GlacisRouter.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
+import {GlacisCommons} from "../../commons/GlacisCommons.sol";
 
 error GlacisWormholeAdapter__OnlyRelayerAllowed();
 error GlacisWormholeAdapter__AlreadyProcessedVAA();
@@ -49,13 +50,14 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal override {
         uint16 destinationChainId = glacisChainIdToAdapterChainId[toChainId];
         (uint256 nativePriceQuote, ) = WORMHOLE_RELAYER.quoteEVMDeliveryPrice(
             destinationChainId,
             RECEIVER_VALUE,
-            GAS_LIMIT
+            incentives.gasLimit > 0 ? GAS_LIMIT : incentives.gasLimit
         );
 
         if (nativePriceQuote > msg.value)

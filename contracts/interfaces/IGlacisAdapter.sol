@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
 
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
+
 /// @title IGlacisAdapter
 /// @notice An interface that defines the GMP modules (adapters) that the GlacisRouter interacts with.
 interface IGlacisAdapter {
@@ -16,6 +18,7 @@ interface IGlacisAdapter {
     function sendMessage(
         uint256 chainId,
         address refundAddress,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes calldata payload
     ) external payable;
 
