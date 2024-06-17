@@ -131,7 +131,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             if (fees > msg.value)
                 revert GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
         }
-        // Otherwise, attempt to extrapolate
+        // Otherwise, attempt to extrapolate (not the recommended path)
         else {
             uint256 extrapolation = extrapolateGasLimitFromValue(
                 msg.value,
