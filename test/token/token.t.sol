@@ -177,7 +177,7 @@ contract TokenTests__Axelar is LocalTestSetup {
         xERC20Sample.transfer(address(glacisTokenClientSampleSource), 5);
 
         // Send a redundant message that we expect to finish executing
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
         glacisTokenClientSampleSource.sendMessageAndTokens__redundant{
@@ -210,7 +210,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             GlacisCommons.GlacisRoute(
                 block.chainid, // fromChainId
                 address(glacisTokenClientSampleSource).toBytes32(), // from
-                0 // fromGmpId
+                address(WILDCARD) // fromGmpId
             )
         );
 
@@ -249,7 +249,7 @@ contract TokenTests__Axelar is LocalTestSetup {
         );
 
         // Send a redundant message that we expect to finish executing
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
         glacisTokenClientSampleSource.sendMessageAndTokens__redundant{
@@ -465,8 +465,8 @@ contract TokenTests__Axelar is LocalTestSetup {
         glacisTokenMediator.addRemoteCounterparts(glacisIDs, adapterCounterparts);
 
         // Prank a receiveMessage from a random chainID
-        uint8[] memory gmps = new uint8[](1);
-        gmps[0] = 1;
+        address[] memory gmps = new address[](1);
+        gmps[0] = AXELAR_GMP_ID;
         vm.startPrank(address(glacisRouter));
         glacisTokenMediator.receiveMessage(        
             gmps,
@@ -499,8 +499,8 @@ contract TokenTests__Axelar is LocalTestSetup {
         glacisTokenMediator.addRemoteCounterparts(glacisIDs, adapterCounterparts);
 
         // Prank a receiveMessage from a random chainID
-        uint8[] memory gmps = new uint8[](1);
-        gmps[0] = 1;
+        address[] memory gmps = new address[](1);
+        gmps[0] = AXELAR_GMP_ID;
         vm.startPrank(address(glacisRouter));
         vm.expectRevert(
             abi.encodeWithSelector(

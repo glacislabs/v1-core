@@ -23,7 +23,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     struct Proposal {
         uint256 toChain;
         bool retriable;
-        uint8[] gmps;
+        address[] gmps;
         address token;
         uint256 tokenAmount;
         // Will be interpreted as address + calldata
@@ -93,7 +93,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     function approve(
         uint256 proposalId,
         address payTo,
-        uint256[][] memory fees
+        CrossChainGas[][] memory fees
     ) public payable onlyMembers {
         uint256 totalVotes = 0;
         uint256 totalMembers = membersArray.length;
@@ -124,12 +124,12 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
 
                 uint256 valueRemaining = msg.value;
                 for (uint256 i; i < plen; ++i) {
-                    uint256[] memory f = fees[i];
+                    CrossChainGas[] memory f = fees[i];
                     uint256 fLen = f.length;
                     uint256 feeSum;
 
                     for (uint256 j; j < fLen; ++j) {
-                        feeSum += f[j];
+                        feeSum += f[j].nativeCurrencyValue;
                     }
                     if (feeSum > valueRemaining) {
                         revert GlacisDAOSample__NotEnoughMessageValueRemainingForFees();
@@ -152,7 +152,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
 
     function _executeProposal(
         Proposal memory p,
-        uint256[] memory fees,
+        CrossChainGas[] memory fees,
         uint256 gasPayment
     ) internal returns (bytes32 messageID) {
         if (p.token == address(0)) {
@@ -160,8 +160,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
-                gmps: p.gmps,
-                customAdapters: emptyCustomAdapters(),
+                adapters: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
                 retriable: p.retriable,
@@ -172,8 +171,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
-                gmps: p.gmps,
-                customAdapters: emptyCustomAdapters(),
+                adapters: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
                 gasPayment: gasPayment,
@@ -187,7 +185,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     /// @param proposalId the proposal id to approve.
     function approve(
         uint256 proposalId,
-        uint256[][] memory fees
+        CrossChainGas[][] memory fees
     ) external payable onlyMembers {
         approve(proposalId, msg.sender, fees);
     }
@@ -200,7 +198,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
         uint256 proposalId,
         uint256 messageIndex,
         uint256 nonce,
-        uint256[] memory fees
+        CrossChainGas[] memory fees
     ) external payable {
         Proposal memory p = proposals[proposalId][messageIndex];
         if (p.token == address(0)) {
@@ -208,8 +206,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
-                gmps: p.gmps,
-                customAdapters: emptyCustomAdapters(),
+                adapters: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
                 nonce: nonce,
@@ -221,8 +218,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
-                gmps: p.gmps,
-                customAdapters: emptyCustomAdapters(),
+                adapters: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
                 token: p.token,
@@ -240,7 +236,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
 
     /// Receives a message from other chains' DAO deployments.
     function _receiveMessage(
-        uint8[] memory,
+        address[] memory,
         uint256,
         bytes32 fromAddress,
         bytes memory payload
@@ -258,7 +254,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
 
     /// Receives a message from other chains' DAO deployments. (Same as _receiveMessage)
     function _receiveMessageWithTokens(
-        uint8[] memory,
+        address[] memory,
         uint256,
         bytes32 fromAddress,
         bytes memory payload,
@@ -290,7 +286,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
     /// Allows this smart contract to execute proposals. Can only be called by self.
     function selfExecuteProposal(
         Proposal[] memory _proposals,
-        uint256[] memory fees
+        CrossChainGas[] memory fees
     ) external payable onlySelf {
         uint256 proposalsLen = _proposals.length;
         uint256 dividedMsgValue = msg.value / fees.length;

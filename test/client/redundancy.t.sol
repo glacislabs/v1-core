@@ -6,6 +6,7 @@ import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisCommons} from "../../contracts/commons/GlacisCommons.sol";
 import {GlacisClient} from "../../contracts/client/GlacisClient.sol";
 import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
+import {GlacisRouter__DestinationRetryNotSatisfied} from "../../contracts/routers/GlacisRouter.sol";
 
 contract RedundancyTests is LocalTestSetup {
     using AddressBytes32 for address;
@@ -30,11 +31,11 @@ contract RedundancyTests is LocalTestSetup {
         );
         (lzGatewayMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
-        (clientSample,) = deployGlacisClientSample(glacisRouter);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
     }
 
     function test__Redundancy_Quorum1_AxelarLayerZero(uint256 val) external {
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
 
@@ -50,7 +51,7 @@ contract RedundancyTests is LocalTestSetup {
     }
 
     function test__Redundancy_Quorum2_AxelarLayerZero(uint256 val) external {
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
         clientSample.setQuorum(2);
@@ -73,7 +74,7 @@ contract RedundancyTests is LocalTestSetup {
         vm.assume(quorum >= 3);
         clientSample.setQuorum(quorum);
 
-        uint8[] memory gmps = new uint8[](2);
+        address[] memory gmps = new address[](2);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
 
@@ -124,11 +125,11 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
     }
 
     function test_Redundancy_ReceivingGMPData() public {
-        uint8[] memory gmps = new uint8[](3);
+        address[] memory gmps = new address[](3);
         gmps[0] = AXELAR_GMP_ID;
         gmps[1] = LAYERZERO_GMP_ID;
         gmps[2] = WORMHOLE_GMP_ID;
-        uint256[] memory fees = createFees(
+        CrossChainGas[] memory fees = createFees(
             0.3 ether / gmps.length,
             gmps.length
         );
@@ -151,19 +152,19 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
             0.3 ether
         );
 
-        uint8[] memory gmps_received = new uint8[](3);
+        address[] memory gmps_received = new address[](3);
         gmps_received[0] = harness.fromGmpIds(0);
         gmps_received[1] = harness.fromGmpIds(1);
         gmps_received[2] = harness.fromGmpIds(2);
 
-        assert(uint8Contains(gmps_received, AXELAR_GMP_ID));
-        assert(uint8Contains(gmps_received, LAYERZERO_GMP_ID));
-        assert(uint8Contains(gmps_received, WORMHOLE_GMP_ID));
+        assert(addressArrContains(gmps_received, address(axelarAdapter)));
+        assert(addressArrContains(gmps_received, address(lzAdapter)));
+        assert(addressArrContains(gmps_received, address(whAdapter)));
     }
 
-    function uint8Contains(
-        uint8[] memory gmps_received,
-        uint8 key
+    function addressArrContains(
+        address[] memory gmps_received,
+        address key
     ) internal pure returns (bool) {
         for (uint256 i; i < gmps_received.length; ++i) {
             if (gmps_received[i] == key) return true;
@@ -172,18 +173,122 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
     }
 }
 
-contract RedundancyReceivingDataTestHarness is GlacisClient {
-    constructor(address glacisRouter) GlacisClient(glacisRouter, 3) {
-        _addAllowedRoute(GlacisCommons.GlacisRoute(0, bytes32(0), 0));
+contract DestinationRedundancyTests is LocalTestSetup {
+    using AddressBytes32 for address;
+
+    AxelarGatewayMock internal axelarGatewayMock;
+    AxelarGasServiceMock internal axelarGasServiceMock;
+    GlacisAxelarAdapter internal axelarAdapter;
+
+    LayerZeroGMPMock internal lzGatewayMock;
+    GlacisLayerZeroAdapter internal lzAdapter;
+
+    GlacisRouter internal glacisRouter;
+    GlacisClientSample internal clientSample;
+
+    function setUp() public {
+        glacisRouter = deployGlacisRouter();
+        (axelarGatewayMock, axelarGasServiceMock) = deployAxelarFixture();
+        axelarAdapter = deployAxelarAdapters(
+            glacisRouter,
+            axelarGatewayMock,
+            axelarGasServiceMock
+        );
+        (lzGatewayMock) = deployLayerZeroFixture();
+        lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
     }
 
-    uint8[] public fromGmpIds;
+    function test__DestRedundancy_VariableQuorum(uint256 val) external {
+        address[] memory gmps = new address[](1);
+        gmps[0] = AXELAR_GMP_ID;
+
+        // Set to an impossible quorum
+        clientSample.setQuorum(2);
+        bytes32 messageId = clientSample
+            .setRemoteValue__redundancy{value: 0.1 ether}(
+            block.chainid,
+            address(clientSample).toBytes32(),
+            gmps,
+            createFees(0.1 ether / gmps.length, gmps.length),
+            abi.encode(val)
+        );
+        assertEq(clientSample.value(), 0);
+
+        // Change quorum to 1
+        clientSample.setQuorum(1);
+
+        // Attempt to retry with new quorum
+        glacisRouter.retryReceiveMessage(
+            block.chainid,
+            // NOTE: while unlikely to change, this is how the GlacisData is currently encoded
+            abi.encode(
+                messageId,
+                0, /*nonce,*/
+                address(clientSample).toBytes32(),
+                address(clientSample).toBytes32(),
+                abi.encode(val)
+            )
+        );
+
+        assertEq(clientSample.value(), val);
+    }
+
+    // Cannot replay test
+    function test__DestRedundancy_CannotReplay(uint256 val) external {
+        address[] memory gmps = new address[](1);
+        gmps[0] = AXELAR_GMP_ID;
+
+        // Successful call
+        clientSample.setQuorum(1);
+        bytes32 messageId = clientSample
+            .setRemoteValue__redundancy{value: 0.1 ether}(
+            block.chainid,
+            address(clientSample).toBytes32(),
+            gmps,
+            createFees(0.1 ether / gmps.length, gmps.length),
+            abi.encode(val)
+        );
+        assertEq(clientSample.value(), val);
+
+        // Attempt to retry
+        vm.expectRevert(
+            abi.encodeWithSelector(GlacisRouter__DestinationRetryNotSatisfied.selector, true, false, true)
+        );
+        glacisRouter.retryReceiveMessage(
+            block.chainid,
+            // NOTE: while unlikely to change, this is how the GlacisData is currently encoded
+            abi.encode(
+                messageId,
+                0, /*nonce,*/
+                address(clientSample).toBytes32(),
+                address(clientSample).toBytes32(),
+                abi.encode(val)
+            )
+        );
+    }
+
+    receive() external payable {}
+}
+
+contract RedundancyReceivingDataTestHarness is GlacisClient {
+    constructor(address glacisRouter) GlacisClient(glacisRouter, 3) {
+        _addAllowedRoute(
+            GlacisCommons.GlacisRoute(
+                WILDCARD,
+                bytes32(uint256(WILDCARD)),
+                address(WILDCARD)
+            )
+        );
+    }
+
+    address[] public fromGmpIds;
     uint256 public fromChainId;
     bytes32 public fromAddress;
     bytes public payload;
 
     function _receiveMessage(
-        uint8[] memory _fromGmpIds,
+        address[] memory _fromGmpIds,
         uint256 _fromChainId,
         bytes32 _fromAddress,
         bytes memory _payload
@@ -198,8 +303,8 @@ contract RedundancyReceivingDataTestHarness is GlacisClient {
         uint256 chainId,
         bytes32 to,
         bytes memory _payload,
-        uint8[] memory gmps,
-        uint256[] memory fees,
+        address[] memory gmps,
+        CrossChainGas[] memory fees,
         uint256 gasPayment
     ) external payable {
         _routeRedundant(

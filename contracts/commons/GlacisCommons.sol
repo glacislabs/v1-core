@@ -20,8 +20,16 @@ contract GlacisCommons {
     struct GlacisRoute {
         uint256 fromChainId; // 0 means any chain
         bytes32 fromAddress; // 0x00 means any address
-        uint160 fromGmpId; // 0 means any GMP, can also hold address
+        address fromApdater; // 0 means any GMP, can also hold address
     }
+
+    struct CrossChainGas {
+        uint128 gasLimit;
+        uint128 nativeCurrencyValue;
+    }
+
+    uint160 constant public WILDCARD = type(uint160).max;
+    uint256 constant public GLACIS_RESERVED_IDS = 248;
 
     /// @notice De-serialize a uint8 bitmap to an uint8 array
     /// @param bitmap The bitmap to be de-serialized

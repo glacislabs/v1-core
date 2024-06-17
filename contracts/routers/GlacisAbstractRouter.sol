@@ -5,17 +5,18 @@ pragma solidity 0.8.18;
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IGlacisRouterEvents} from "../interfaces/IGlacisRouter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 error GlacisAbstractRouter__InvalidAdapterAddress(); //0xa46f71e2
 error GlacisAbstractRouter__GMPIDCannotBeZero(); //0x4332f55b
+error GlacisAbstractRouter__GMPIDTooHigh();
 
 /// @title Glacis Abstract Router
 /// @notice A base class for the GlacisRouter
 abstract contract GlacisAbstractRouter is
     GlacisCommons,
     IGlacisRouterEvents,
-    Ownable
+    Ownable2Step
 {
     using AddressBytes32 for address;
 
@@ -41,10 +42,11 @@ abstract contract GlacisAbstractRouter is
         if (glacisAdapter == address(0))
             revert GlacisAbstractRouter__InvalidAdapterAddress();
         if (glacisGMPId == 0) revert GlacisAbstractRouter__GMPIDCannotBeZero();
+        if (glacisGMPId > GlacisCommons.GLACIS_RESERVED_IDS) revert GlacisAbstractRouter__GMPIDTooHigh();
 
         // Unregister previous adapter
-        delete glacisGMPIdToAdapter[glacisGMPId];
         delete adapterToGlacisGMPId[glacisGMPIdToAdapter[glacisGMPId]];
+        delete glacisGMPIdToAdapter[glacisGMPId];
 
         // Adds new adapter
         glacisGMPIdToAdapter[glacisGMPId] = glacisAdapter;
@@ -53,16 +55,16 @@ abstract contract GlacisAbstractRouter is
 
     /// @notice Unregisters a GMP adapter
     /// @param glacisGMPId The Glacis ID of the GMP
-    /// @param glacisAdapter The address of the deployed adapter
     function unRegisterAdapter(
-        uint8 glacisGMPId,
-        address glacisAdapter
+        uint8 glacisGMPId
     ) external virtual onlyOwner {
-        if (glacisAdapter == address(0))
+        address adapter = glacisGMPIdToAdapter[glacisGMPId];
+        if (adapter == address(0))
             revert GlacisAbstractRouter__InvalidAdapterAddress();
         if (glacisGMPId == 0) revert GlacisAbstractRouter__GMPIDCannotBeZero();
+        
         delete glacisGMPIdToAdapter[glacisGMPId];
-        delete adapterToGlacisGMPId[glacisAdapter];
+        delete adapterToGlacisGMPId[adapter];
     }
 
     /// @notice Creates a messageId

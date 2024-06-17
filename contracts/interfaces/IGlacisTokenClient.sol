@@ -9,12 +9,12 @@ import {IGlacisAccessControlClient} from "./IGlacisAccessControlClient.sol";
 /// @notice Should be paired with the IGlacisClient abstract smart contract.
 interface IGlacisTokenClient is IGlacisAccessControlClient {
     /// @notice Receives message from GMP(s) through GlacisRouter
-    /// @param fromGmpIds ID of the GMP that sent this message (that reached quorum requirements)
+    /// @param fromAdapters Addresses of the adapters that sent this message (that reached quorum requirements)
     /// @param fromChainId Source chain (Glacis chain ID)
     /// @param fromAddress Source address on source chain
     /// @param payload Routed payload
     function receiveMessageWithTokens(
-        uint8[] memory fromGmpIds,
+        address[] memory fromAdapters,
         uint256 fromChainId,
         bytes32 fromAddress,
         bytes calldata payload,
@@ -30,13 +30,4 @@ interface IGlacisTokenClient is IGlacisAccessControlClient {
         address,
         uint256
     ) external view returns (uint256);
-
-    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter.
-    function isCustomAdapter(
-        address adapter,
-        GlacisCommons.GlacisData memory glacisData,
-        bytes memory payload,
-        address token,
-        uint256 amount
-    ) external returns(bool); 
 }

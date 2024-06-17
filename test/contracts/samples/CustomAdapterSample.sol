@@ -4,6 +4,7 @@ pragma solidity 0.8.18;
 
 import {GlacisAbstractAdapter} from "../../../contracts/adapters/GlacisAbstractAdapter.sol";
 import {IGlacisRouter} from "../../../contracts/routers/GlacisRouter.sol";
+import {GlacisCommons} from "../../../contracts/commons/GlacisCommons.sol";
 
 contract CustomAdapterSample is GlacisAbstractAdapter {
     constructor(
@@ -19,6 +20,7 @@ contract CustomAdapterSample is GlacisAbstractAdapter {
     function _sendMessage(
         uint256 toChainId,
         address,
+        GlacisCommons.CrossChainGas calldata,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         GLACIS_ROUTER.receiveMessage(toChainId, payload);

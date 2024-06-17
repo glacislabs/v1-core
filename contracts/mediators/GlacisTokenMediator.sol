@@ -3,7 +3,7 @@
 pragma solidity 0.8.18;
 
 import {IGlacisTokenClient} from "../interfaces/IGlacisTokenClient.sol";
-import {IGlacisRouter} from "../interfaces/IGlacisRouter.sol";
+import {GlacisRouter} from "../routers/GlacisRouter.sol";
 import {IGlacisTokenMediator} from "../interfaces/IGlacisTokenMediator.sol";
 import {IGlacisClient} from "../interfaces/IGlacisClient.sol";
 import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
@@ -21,7 +21,8 @@ error GlacisTokenMediator__DestinationChainUnavailable();
 contract GlacisTokenMediator is
     IGlacisTokenMediator,
     GlacisRemoteCounterpartManager,
-    IGlacisClient
+    IGlacisClient,
+    GlacisCommons
 {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
@@ -47,8 +48,7 @@ contract GlacisTokenMediator is
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
-    /// @param gmps The GMP Ids to use for routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP & custom adapter to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param token Token (implementing XERC20 standard) to be sent to remote contract
@@ -57,9 +57,8 @@ contract GlacisTokenMediator is
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
-        uint256[] memory fees,
+        address[] memory adapters,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         address token,
         uint256 tokenAmount
@@ -78,12 +77,11 @@ contract GlacisTokenMediator is
         );
         emit GlacisTokenMediator__TokensBurnt(msg.sender, token, tokenAmount);
         return
-            IGlacisRouter(GLACIS_ROUTER).route{value: msg.value}(
+            GlacisRouter(GLACIS_ROUTER).route{value: msg.value}(
                 chainId,
                 destinationTokenMediator,
                 tokenPayload,
-                gmps,
-                customAdapters,
+                adapters,
                 fees,
                 refundAddress,
                 true // Token Mediator always enables retry
@@ -94,8 +92,7 @@ contract GlacisTokenMediator is
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
-    /// @param gmps The GMP Ids to use for routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param messageId The message ID of the message to retry
@@ -106,9 +103,8 @@ contract GlacisTokenMediator is
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
-        uint256[] memory fees,
+        address[] memory adapters,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce,
@@ -128,8 +124,7 @@ contract GlacisTokenMediator is
         return _routeRetry(
             chainId,
             tokenPayload,
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             refundAddress,
             messageId,
@@ -140,8 +135,7 @@ contract GlacisTokenMediator is
     /// @notice An internal routing function that helps with stack too deep
     /// @param chainId Destination chain (Glacis chain ID)
     /// @param tokenPayload Formatted payload to be routed
-    /// @param gmps The GMP Ids to use for routing
-    /// @param customAdapters An array of custom adapters to be used for the routing
+    /// @param adapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
     /// @param messageId The message ID of the message to retry
@@ -149,9 +143,8 @@ contract GlacisTokenMediator is
     function _routeRetry(
         uint256 chainId,
         bytes memory tokenPayload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
-        uint256[] memory fees,
+        address[] memory adapters,
+        GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
@@ -161,12 +154,11 @@ contract GlacisTokenMediator is
             revert GlacisTokenMediator__DestinationChainUnavailable();
 
         return
-            IGlacisRouter(GLACIS_ROUTER).routeRetry{value: msg.value}(
+            GlacisRouter(GLACIS_ROUTER).routeRetry{value: msg.value}(
                 chainId,
                 destinationTokenMediator,
                 tokenPayload,
-                gmps,
-                customAdapters,
+                adapters,
                 fees,
                 refundAddress,
                 messageId,
@@ -175,12 +167,12 @@ contract GlacisTokenMediator is
     }
 
     /// @notice Receives a cross chain message from an IGlacisAdapter.
-    /// @param fromGmpIds Used GMP Ids for routing
+    /// @param fromAdapters Used adapter addresses for routing
     /// @param fromChainId Source chain (Glacis chain ID)
     /// @param fromChainId Source address
     /// @param payload Received payload from Glacis Router
     function receiveMessage(
-        uint8[] memory fromGmpIds,
+        address[] memory fromAdapters,
         uint256 fromChainId,
         bytes32 fromAddress,
         bytes memory payload
@@ -223,7 +215,7 @@ contract GlacisTokenMediator is
 
         if (toAddress.code.length > 0) {
             client.receiveMessageWithTokens(
-                fromGmpIds,
+                fromAdapters,
                 fromChainId,
                 originalFrom,
                 originalPayload,
@@ -238,7 +230,7 @@ contract GlacisTokenMediator is
     /// @param glacisData The glacis config data that comes with the message
     /// @param payload The payload that comes with the message
     function getQuorum(
-        GlacisCommons.GlacisData memory glacisData,
+        GlacisData memory glacisData,
         bytes memory payload
     ) public view override returns (uint256) {
         (
@@ -270,12 +262,12 @@ contract GlacisTokenMediator is
     /// @notice Queries if a route from path GMP+Chain+Address is allowed for this client
     /// @param fromChainId Source chain Id
     /// @param fromAddress Source address
-    /// @param fromGmpId source GMP Id
+    /// @param fromAdapter source GMP Id
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
         uint256 fromChainId,
         bytes32 fromAddress,
-        uint160 fromGmpId,
+        address fromAdapter,
         bytes memory payload
     ) external view returns (bool) {
         // First checks to ensure that the GlacisTokenMediator is speaking to a registered remote version
@@ -290,54 +282,20 @@ contract GlacisTokenMediator is
             bytes memory originalPayload
         ) = decodeTokenPayload(payload);
 
-        // If the destination smart contract is an EOA, then we allow it.
+        // If the destination smart contract is an EOA, then we can only allow adapters that are using
+        // our canonical GMPs. Otherwise, we would allow malicious custom adapters.
         address toAddress = to.toAddress();
-        if (toAddress.code.length == 0) {
-            return true;
-        }
+        if (toAddress.code.length == 0) 
+            return GlacisRouter(GLACIS_ROUTER).adapterToGlacisGMPId(fromAdapter) > 0 || 
+                (uint160(fromAdapter) <= GLACIS_RESERVED_IDS && GlacisRouter(GLACIS_ROUTER).glacisGMPIdToAdapter(uint8(uint160(fromAdapter))) != address(0));
 
         // Forwards check to the token client
         return
             IGlacisTokenClient(toAddress).isAllowedRoute(
                 fromChainId,
                 originalFrom,
-                fromGmpId,
+                fromAdapter,
                 originalPayload
-            );
-    }
-
-    /// @notice Returns true if this contract recognizes the input adapter as a custom adapter  
-    /// @param adapter The address of the custom adapter in question  
-    /// @param glacisData The glacis data of the message   
-    /// @param payload The abstract payload of the message  
-    function isCustomAdapter(
-        address adapter,
-        GlacisCommons.GlacisData memory glacisData,
-        bytes memory payload
-    ) public override returns (bool) {
-        (
-            bytes32 to,
-            ,
-            ,
-            bytes32 token,
-            uint256 tokenAmount,
-
-        ) = decodeTokenPayload(payload);
-
-        // If the destination smart contract is an EOA, then it is not.
-        address toAddress = to.toAddress();
-        if (toAddress.code.length == 0) {
-            return false;
-        }
-
-        // Forwards check to the token client
-        return
-            IGlacisTokenClient(toAddress).isCustomAdapter(
-                adapter,
-                glacisData,
-                payload,
-                token.toAddress(),
-                tokenAmount
             );
     }
 

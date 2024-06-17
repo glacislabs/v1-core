@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter, GlacisCommons} from "../LocalTestSetup.sol";
 import {GlacisTokenMediator, GlacisTokenClientSampleSource, GlacisTokenClientSampleDestination, XERC20Sample, ERC20Sample, XERC20LockboxSample, XERC20NativeLockboxSample} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisClientTextSample} from "../contracts/samples/GlacisClientTextSample.sol";
@@ -25,7 +25,7 @@ import {HyperlaneSample} from "../contracts/samples/control/HyperlaneSample.sol"
 import {HyperlaneTextSample} from "../contracts/samples/control/HyperlaneTextSample.sol";
 import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 import {CustomAdapterSample} from "../contracts/samples/CustomAdapterSample.sol";
-import {GlacisRouter__FeeArrayMustEqualGMPArray, GlacisRouter__OnlyAdaptersAllowed, GlacisRouter__MessageAlreadyReceivedFromGMP} from "../../contracts/routers/GlacisRouter.sol";
+import {GlacisRouter__FeeArrayMustEqualGMPArray, GlacisRouter__ClientDeniedRoute, GlacisRouter__MessageAlreadyReceivedFromGMP} from "../../contracts/routers/GlacisRouter.sol";
 import "forge-std/console.sol";
 
 contract CustomAdapterTokenTests is LocalTestSetup {
@@ -71,8 +71,22 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         customAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
-        glacisTokenClientSampleSource.addCustomAdapter(customAdapter);
-        glacisTokenClientSampleDestination.addCustomAdapter(customAdapter);
+
+        // Add custom adapter to allowed routes
+        glacisTokenClientSampleSource.addAllowedRoute(
+            GlacisCommons.GlacisRoute(
+                block.chainid, // fromChainId
+                address(glacisTokenClientSampleDestination).toBytes32(), // from
+                customAdapter // fromGmpId
+            )
+        );
+        glacisTokenClientSampleDestination.addAllowedRoute(
+            GlacisCommons.GlacisRoute(
+                block.chainid, // fromChainId
+                address(glacisTokenClientSampleSource).toBytes32(), // from
+                customAdapter // fromGmpId
+            )
+        );
     }
 
     function test__Abstraction_CustomAdapterToken(uint256 amount) external {
@@ -87,15 +101,13 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         uint256 preDestinationValue = glacisTokenClientSampleDestination
             .value();
 
-        uint8[] memory gmps = new uint8[](0);
-        address[] memory customAdapters = new address[](1);
-        customAdapters[0] = customAdapter;
+        address[] memory adapters = new address[](1);
+        adapters[0] = customAdapter;
 
         glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.1 ether}(
             block.chainid,
             address(glacisTokenClientSampleDestination).toBytes32(),
-            gmps,
-            customAdapters,
+            adapters,
             createFees(0.1 ether, 1),
             abi.encode(amount),
             address(xERC20Sample),
@@ -122,19 +134,16 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         vm.assume(amount < 10e15);
         xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
 
-        uint8[] memory gmps = new uint8[](1);
-        gmps[0] = 1;
-        address[] memory customAdapters = new address[](1);
-        customAdapters[0] = customAdapter;
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 0.1 ether;
+        address[] memory adapters = new address[](2);
+        adapters[0] = AXELAR_GMP_ID;
+        adapters[1] = customAdapter;
+        CrossChainGas[] memory fees = createFees(0.1 ether, 1);
 
         vm.expectRevert(GlacisRouter__FeeArrayMustEqualGMPArray.selector);
         glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.1 ether}(
             block.chainid,
             address(glacisTokenClientSampleDestination).toBytes32(),
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             abi.encode(amount),
             address(xERC20Sample),
@@ -156,17 +165,15 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         uint256 preDestinationValue = glacisTokenClientSampleDestination
             .value();
 
-        uint8[] memory gmps = new uint8[](1);
-        gmps[0] = 1;
-        address[] memory customAdapters = new address[](1);
-        customAdapters[0] = customAdapter;
+        address[] memory adapters = new address[](2);
+        adapters[0] = AXELAR_GMP_ID;
+        adapters[1] = customAdapter;
 
         glacisTokenClientSampleDestination.setQuorum(2);
         glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.4 ether}(
             block.chainid,
             address(glacisTokenClientSampleDestination).toBytes32(),
-            gmps,
-            customAdapters,
+            adapters,
             createFees(0.2 ether, 2),
             abi.encode(amount),
             address(xERC20Sample),
@@ -200,19 +207,28 @@ contract CustomAdapterTokenTests is LocalTestSetup {
             .value();
 
         // Create second adapter & pack it
-        address[] memory customAdapters = new address[](2);
+        address[] memory adapters = new address[](2);
         {
-            customAdapters[0] = customAdapter;
+            adapters[0] = customAdapter;
 
             address notAddedCustomAdapter = address(
                 new CustomAdapterSample(address(glacisRouter), address(this))
             );
-            customAdapters[1] = notAddedCustomAdapter;
-            glacisTokenClientSampleSource.addCustomAdapter(
-                notAddedCustomAdapter
+            adapters[1] = notAddedCustomAdapter;
+
+            glacisTokenClientSampleSource.addAllowedRoute(
+                GlacisCommons.GlacisRoute(
+                    block.chainid, // fromChainId
+                    address(glacisTokenClientSampleDestination).toBytes32(), // from
+                    notAddedCustomAdapter // fromGmpId
+                )
             );
-            glacisTokenClientSampleDestination.addCustomAdapter(
-                notAddedCustomAdapter
+            glacisTokenClientSampleDestination.addAllowedRoute(
+                GlacisCommons.GlacisRoute(
+                    block.chainid, // fromChainId
+                    address(glacisTokenClientSampleSource).toBytes32(), // from
+                    notAddedCustomAdapter // fromGmpId
+                )
             );
         }
 
@@ -220,8 +236,7 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.4 ether}(
             block.chainid,
             address(glacisTokenClientSampleDestination).toBytes32(),
-            new uint8[](0),
-            customAdapters,
+            adapters,
             createFees(0.2 ether, 2),
             abi.encode(amount),
             address(xERC20Sample),
@@ -257,32 +272,38 @@ contract CustomAdapterTokenTests is LocalTestSetup {
             .value();
 
         // Create gmps + customAdapters
-        uint8[] memory gmps = new uint8[](2);
-        gmps[0] = 1;
-        gmps[1] = 2;
-        address[] memory customAdapters = new address[](2);
+        address[] memory adapters = new address[](4);
         {
-            customAdapters[0] = customAdapter;
+            adapters[0] = customAdapter;
 
             address notAddedCustomAdapter = address(
                 new CustomAdapterSample(address(glacisRouter), address(this))
             );
-            customAdapters[1] = notAddedCustomAdapter;
-            glacisTokenClientSampleSource.addCustomAdapter(
-                notAddedCustomAdapter
+            adapters[1] = notAddedCustomAdapter;
+
+            glacisTokenClientSampleSource.addAllowedRoute(
+                GlacisCommons.GlacisRoute(
+                    block.chainid, // fromChainId
+                    address(glacisTokenClientSampleDestination).toBytes32(), // from
+                    notAddedCustomAdapter // fromGmpId
+                )
             );
-            glacisTokenClientSampleDestination.addCustomAdapter(
-                notAddedCustomAdapter
+            glacisTokenClientSampleDestination.addAllowedRoute(
+                GlacisCommons.GlacisRoute(
+                    block.chainid, // fromChainId
+                    address(glacisTokenClientSampleSource).toBytes32(), // from
+                    notAddedCustomAdapter // fromGmpId
+                )
             );
-            customAdapters[1] = notAddedCustomAdapter;
         }
+        adapters[2] = AXELAR_GMP_ID;
+        adapters[3] = LAYERZERO_GMP_ID;
 
         glacisTokenClientSampleDestination.setQuorum(4);
         glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.8 ether}(
             block.chainid,
             address(glacisTokenClientSampleDestination).toBytes32(),
-            gmps,
-            customAdapters,
+            adapters,
             createFees(0.2 ether, 4),
             abi.encode(amount),
             address(xERC20Sample),
@@ -311,14 +332,9 @@ contract CustomAdapterTokenTests is LocalTestSetup {
 
         xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
 
-        address notAddedCustomAdapter = address(
-            new CustomAdapterSample(address(glacisRouter), address(this))
-        );
-        glacisTokenClientSampleDestination.addCustomAdapter(notAddedCustomAdapter);
-
-        address[] memory customAdapters = new address[](2);
-        customAdapters[0] = customAdapter;
-        customAdapters[1] = customAdapter;
+        address[] memory adapters = new address[](2);
+        adapters[0] = customAdapter;
+        adapters[1] = customAdapter;
 
         glacisTokenClientSampleDestination.setQuorum(2);
 
@@ -326,8 +342,7 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.4 ether}(
             block.chainid,
             address(glacisTokenClientSampleDestination).toBytes32(),
-            new uint8[](0),
-            customAdapters,
+            adapters,
             createFees(0.2 ether, 2),
             abi.encode(amount),
             address(xERC20Sample),
@@ -344,17 +359,16 @@ contract CustomAdapterTokenTests is LocalTestSetup {
         address notAddedCustomAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
-        address[] memory customAdapters = new address[](1);
-        customAdapters[0] = notAddedCustomAdapter;
+        address[] memory adapters = new address[](1);
+        adapters[0] = notAddedCustomAdapter;
 
         glacisTokenClientSampleDestination.setQuorum(1);
 
-        vm.expectRevert(GlacisRouter__OnlyAdaptersAllowed.selector);
+        vm.expectRevert(GlacisRouter__ClientDeniedRoute.selector);
         glacisTokenClientSampleSource.sendMessageAndTokens{value: 0.4 ether}(
             block.chainid,
             address(glacisTokenClientSampleDestination).toBytes32(),
-            new uint8[](0),
-            customAdapters,
+            adapters,
             createFees(0.4 ether, 1),
             abi.encode(amount),
             address(xERC20Sample),

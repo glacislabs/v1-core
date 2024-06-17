@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.18;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroReceiver.sol";
 import "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroUserApplicationConfig.sol";
 import "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroEndpoint.sol";
@@ -31,7 +31,7 @@ interface SimpleNonblockingLzAppEvents {
 /// @title Simple Nonblocking LzApp  
 /// @notice A generic LzReceiver implementation that removes the base reference to the blocking LzApp  
 abstract contract SimpleNonblockingLzApp is
-    Ownable,
+    Ownable2Step,
     ILayerZeroReceiver,
     ILayerZeroUserApplicationConfig,
     SimpleNonblockingLzAppEvents

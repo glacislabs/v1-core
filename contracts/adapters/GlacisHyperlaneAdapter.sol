@@ -10,6 +10,7 @@ import {TypeCasts} from "@hyperlane-xyz/core/contracts/libs/TypeCasts.sol";
 import {IInterchainSecurityModule} from "@hyperlane-xyz/core/contracts/interfaces/IInterchainSecurityModule.sol";
 import {IPostDispatchHook} from "@hyperlane-xyz/core/contracts/interfaces/hooks/IPostDispatchHook.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid} from "./GlacisAbstractAdapter.sol";
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
 error GlacisHyperlaneAdapter__OnlyMailboxAllowed();
 error GlacisHyperlaneAdapter__FeeNotEnough();
@@ -92,6 +93,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
+        GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         uint32 destinationDomain = glacisChainIdToAdapterChainId[toChainId]; // this costs 3k gas

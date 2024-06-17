@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter, WormholeRelayerMock, GlacisWormholeAdapter} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter, WormholeRelayerMock, GlacisWormholeAdapter, GlacisCommons} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisClientTextSample} from "../contracts/samples/GlacisClientTextSample.sol";
 import {AxelarOneWayGatewayMock} from "../contracts/mocks/axelar/AxelarOneWayGatewayMock.sol";
@@ -24,7 +24,7 @@ import {HyperlaneSample} from "../contracts/samples/control/HyperlaneSample.sol"
 import {HyperlaneTextSample} from "../contracts/samples/control/HyperlaneTextSample.sol";
 import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 import {CustomAdapterSample} from "../contracts/samples/CustomAdapterSample.sol";
-import {GlacisRouter__FeeArrayMustEqualGMPArray, GlacisRouter__OnlyAdaptersAllowed, GlacisRouter__MessageAlreadyReceivedFromGMP} from "../../contracts/routers/GlacisRouter.sol";
+import {GlacisRouter__FeeArrayMustEqualGMPArray, GlacisRouter__ClientDeniedRoute, GlacisRouter__MessageAlreadyReceivedFromGMP} from "../../contracts/routers/GlacisRouter.sol";
 import "forge-std/console.sol";
 
 contract CustomAdapterTests is LocalTestSetup {
@@ -57,22 +57,27 @@ contract CustomAdapterTests is LocalTestSetup {
         customAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
-        clientSample.addCustomAdapter(customAdapter);
+
+        // Add custom adapter to allowed routes
+        clientSample.addAllowedRoute(
+            GlacisCommons.GlacisRoute(
+                block.chainid, // fromChainId
+                address(clientSample).toBytes32(), // from
+                customAdapter // fromGmpId
+            )
+        );
     }
 
     function test__Abstraction_CustomAdapter(uint256 val) external {
-        uint8[] memory gmps = new uint8[](0);
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 0.1 ether;
-        address[] memory customAdapters = new address[](1);
-        customAdapters[0] = customAdapter;
+        CrossChainGas[] memory fees = createFees(0.1 ether, 1);
+        address[] memory adapters = new address[](1);
+        adapters[0] = customAdapter;
 
         clientSample.setRemoteValue{value: 0.1 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(val),
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             address(this),
             false,
@@ -83,20 +88,17 @@ contract CustomAdapterTests is LocalTestSetup {
     }
 
     function test__FeeArrayFailureWithCustomAdapter(uint256 val) external {
-        uint8[] memory gmps = new uint8[](1);
-        gmps[0] = 1;
-        uint256[] memory fees = new uint256[](1);
-        fees[0] = 0.2 ether;
-        address[] memory customAdapters = new address[](1);
-        customAdapters[0] = customAdapter;
+        CrossChainGas[] memory fees = createFees(0.2 ether, 1);
+        address[] memory adapters = new address[](2);
+        adapters[0] = AXELAR_GMP_ID;
+        adapters[1] = customAdapter;
 
         vm.expectRevert(GlacisRouter__FeeArrayMustEqualGMPArray.selector);
         clientSample.setRemoteValue{value: 0.2 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(val),
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             address(this),
             false,
@@ -105,13 +107,10 @@ contract CustomAdapterTests is LocalTestSetup {
     }
 
     function test__Redundancy_CustomAdapterAndGMP(uint256 val) external {
-        uint8[] memory gmps = new uint8[](1);
-        gmps[0] = 1;
-        address[] memory customAdapters = new address[](1);
-        customAdapters[0] = customAdapter;
-        uint256[] memory fees = new uint256[](2);
-        fees[0] = 0.2 ether;
-        fees[1] = 0.2 ether;
+        address[] memory adapters = new address[](2);
+        adapters[0] = customAdapter;
+        adapters[1] = AXELAR_GMP_ID;
+        CrossChainGas[] memory fees = createFees(0.2 ether, 2);
 
         clientSample.setQuorum(2);
 
@@ -119,8 +118,7 @@ contract CustomAdapterTests is LocalTestSetup {
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(val),
-            gmps,
-            customAdapters,
+            adapters,
             fees,
             address(this),
             false,
@@ -134,21 +132,25 @@ contract CustomAdapterTests is LocalTestSetup {
         address notAddedCustomAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
-        clientSample.addCustomAdapter(notAddedCustomAdapter);
+        clientSample.addAllowedRoute(
+            GlacisCommons.GlacisRoute(
+                block.chainid, // fromChainId
+                address(clientSample).toBytes32(), // from
+                notAddedCustomAdapter // fromGmpId
+            )
+        );
 
-        uint8[] memory gmps = new uint8[](0);
-        address[] memory customAdapters = new address[](2);
-        customAdapters[0] = customAdapter;
-        customAdapters[1] = notAddedCustomAdapter;
-        
+        address[] memory adapters = new address[](2);
+        adapters[0] = customAdapter;
+        adapters[1] = notAddedCustomAdapter;
+
         clientSample.setQuorum(2);
 
         clientSample.setRemoteValue{value: 0.4 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(val),
-            gmps,
-            customAdapters,
+            adapters,
             createFees(0.2 ether, 2),
             address(this),
             false,
@@ -162,23 +164,27 @@ contract CustomAdapterTests is LocalTestSetup {
         address notAddedCustomAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
-        clientSample.addCustomAdapter(notAddedCustomAdapter);
+        clientSample.addAllowedRoute(
+            GlacisCommons.GlacisRoute(
+                block.chainid, // fromChainId
+                address(clientSample).toBytes32(), // from
+                notAddedCustomAdapter // fromGmpId
+            )
+        );
 
-        uint8[] memory gmps = new uint8[](2);
-        gmps[0] = 1;
-        gmps[1] = 2;
-        address[] memory customAdapters = new address[](2);
-        customAdapters[0] = customAdapter;
-        customAdapters[1] = notAddedCustomAdapter;
-        
+        address[] memory adapters = new address[](4);
+        adapters[0] = AXELAR_GMP_ID;
+        adapters[1] = customAdapter;
+        adapters[2] = LAYERZERO_GMP_ID;
+        adapters[3] = notAddedCustomAdapter;
+
         clientSample.setQuorum(4);
 
         clientSample.setRemoteValue{value: 0.8 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(val),
-            gmps,
-            customAdapters,
+            adapters,
             createFees(0.2 ether, 4),
             address(this),
             false,
@@ -191,10 +197,9 @@ contract CustomAdapterTests is LocalTestSetup {
     function test__Quorum_SameCustomAdapter(uint256 val) external {
         vm.assume(clientSample.value() != val);
 
-        uint8[] memory gmps = new uint8[](0);
-        address[] memory customAdapters = new address[](2);
-        customAdapters[0] = customAdapter;
-        customAdapters[1] = customAdapter;
+        address[] memory adapters = new address[](2);
+        adapters[0] = customAdapter;
+        adapters[1] = customAdapter;
 
         clientSample.setQuorum(2);
 
@@ -203,8 +208,7 @@ contract CustomAdapterTests is LocalTestSetup {
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(val),
-            gmps,
-            customAdapters,
+            adapters,
             createFees(0.2 ether, 2),
             address(this),
             false,
@@ -212,27 +216,33 @@ contract CustomAdapterTests is LocalTestSetup {
         );
     }
 
-    function test__Quorum_ShouldStopFinalExecutionWithCustomAdapter(uint256 val) external {
+    function test__Quorum_ShouldStopFinalExecutionWithCustomAdapter(
+        uint256 val
+    ) external {
         vm.assume(clientSample.value() != val);
 
         address notAddedCustomAdapter = address(
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
-        clientSample.addCustomAdapter(notAddedCustomAdapter);
+        clientSample.addAllowedRoute(
+            GlacisCommons.GlacisRoute(
+                block.chainid, // fromChainId
+                address(clientSample).toBytes32(), // from
+                notAddedCustomAdapter // fromGmpId
+            )
+        );
 
-        uint8[] memory gmps = new uint8[](0);
-        address[] memory customAdapters = new address[](2);
-        customAdapters[0] = customAdapter;
-        customAdapters[1] = notAddedCustomAdapter;
-        
+        address[] memory adapters = new address[](2);
+        adapters[0] = customAdapter;
+        adapters[1] = notAddedCustomAdapter;
+
         clientSample.setQuorum(2);
 
         clientSample.setRemoteValue{value: 0.4 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(val),
-            gmps,
-            customAdapters,
+            adapters,
             createFees(0.2 ether, 2),
             address(this),
             false,
@@ -249,20 +259,18 @@ contract CustomAdapterTests is LocalTestSetup {
             new CustomAdapterSample(address(glacisRouter), address(this))
         );
 
-        uint8[] memory gmps = new uint8[](1);
-        gmps[0] = 1;
-        address[] memory customAdapters = new address[](1);
-        customAdapters[0] = notAddedCustomAdapter;
+        address[] memory adapters = new address[](2);
+        adapters[0] = notAddedCustomAdapter;
+        adapters[1] = AXELAR_GMP_ID;
 
         clientSample.setQuorum(2);
 
-        vm.expectRevert(GlacisRouter__OnlyAdaptersAllowed.selector);
+        vm.expectRevert(GlacisRouter__ClientDeniedRoute.selector);
         clientSample.setRemoteValue{value: 0.4 ether}(
             block.chainid,
             address(clientSample).toBytes32(),
             abi.encode(val),
-            gmps,
-            customAdapters,
+            adapters,
             createFees(0.2 ether, 2),
             address(this),
             false,

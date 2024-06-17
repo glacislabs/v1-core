@@ -9,19 +9,19 @@ error GlacisAccessControlClient__RouteAlreadyAdded();
 /// @title Glacis Access Control Client
 /// @dev This contract encapsulates Glacis Access Control client logic. Contracts inheriting this will have access to
 /// Glacis Access control features  
-abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
-    GlacisCommons.GlacisRoute[] private allowedRoutes;
+abstract contract GlacisAccessControlClient is GlacisCommons, IGlacisAccessControlClient {
+    GlacisRoute[] private allowedRoutes;
 
     /// @notice Adds an allowed route for this client
     /// @param allowedRoute Route to be added
     function _addAllowedRoute(
-        GlacisCommons.GlacisRoute memory allowedRoute
+        GlacisRoute memory allowedRoute
     ) internal {
         if (
             !isAllowedRoute(
                 allowedRoute.fromChainId,
                 allowedRoute.fromAddress,
-                allowedRoute.fromGmpId,
+                allowedRoute.fromApdater,
                 ""
             )
         ) allowedRoutes.push(allowedRoute);
@@ -33,7 +33,7 @@ abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
     function getAllowedRoutes()
         external
         view
-        returns (GlacisCommons.GlacisRoute[] memory)
+        returns (GlacisRoute[] memory)
     {
         return allowedRoutes;
     }
@@ -41,12 +41,12 @@ abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
     /// @notice Removes an allowed route for this client
     /// @param route Allowed route to be removed
     function _removeAllowedRoute(
-        GlacisCommons.GlacisRoute calldata route
+        GlacisRoute calldata route
     ) internal {
         for (uint256 i = 0; i < allowedRoutes.length; i++) {
             GlacisCommons.GlacisRoute memory allowedRoute = allowedRoutes[i];
             if (
-                allowedRoute.fromGmpId == route.fromGmpId &&
+                allowedRoute.fromApdater == route.fromApdater &&
                 allowedRoute.fromChainId == route.fromChainId &&
                 allowedRoute.fromAddress == route.fromAddress
             ) {
@@ -64,23 +64,25 @@ abstract contract GlacisAccessControlClient is IGlacisAccessControlClient {
     /// @notice Queries if a route from path GMP+Chain+Address is allowed for this client
     /// @param fromChainId Source chain Id
     /// @param fromAddress Source address
-    /// @param fromGmpId source GMP Id
+    /// @param fromApdater source GMP Id
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
         uint256 fromChainId,
         bytes32 fromAddress,
-        uint160 fromGmpId,
+        address fromApdater,
         bytes memory // payload
     ) public view override returns (bool) {
-        for (uint256 i = 0; i < allowedRoutes.length; i++) {
+        for (uint256 i; i < allowedRoutes.length; i++) {
             GlacisCommons.GlacisRoute memory allowedRoute = allowedRoutes[i];
             if (
-                (allowedRoute.fromGmpId == fromGmpId ||
-                    allowedRoute.fromGmpId == 0) &&
+                (allowedRoute.fromApdater == fromApdater ||
+                    // NOTE: Wildcard should not allow any adapter to make any message, just Glacis' reserved IDs
+                    (allowedRoute.fromApdater == address(WILDCARD) && uint160(fromApdater) <= GLACIS_RESERVED_IDS)
+                ) &&
                 (allowedRoute.fromChainId == fromChainId ||
-                    allowedRoute.fromChainId == 0) &&
+                    allowedRoute.fromChainId == WILDCARD) &&
                 (allowedRoute.fromAddress == fromAddress ||
-                    allowedRoute.fromAddress == bytes32(0))
+                    allowedRoute.fromAddress == bytes32(uint256(WILDCARD)))
             ) {
                 return true;
             }

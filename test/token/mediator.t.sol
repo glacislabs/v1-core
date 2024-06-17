@@ -92,8 +92,8 @@ contract TokenMediatorTests is LocalTestSetup {
         // Message is being received by the router
         vm.startPrank(address(glacisRouter));
 
-        uint8[] memory gmpArray = new uint8[](1);
-        gmpArray[0] = 1;
+        address[] memory gmpArray = new address[](1);
+        gmpArray[0] = AXELAR_GMP_ID;
 
         vm.expectRevert(GlacisTokenMediator__OnlyTokenMediatorAllowed.selector);
         glacisTokenMediator.receiveMessage(
@@ -115,8 +115,8 @@ contract TokenMediatorTests is LocalTestSetup {
         // Message is being received by the router
         vm.startPrank(address(glacisRouter));
 
-        uint8[] memory gmpArray = new uint8[](1);
-        gmpArray[0] = 1;
+        address[] memory gmpArray = new address[](1);
+        gmpArray[0] = AXELAR_GMP_ID;
 
         glacisTokenMediator.receiveMessage(
             gmpArray,
@@ -149,7 +149,7 @@ contract TokenMediatorTests is LocalTestSetup {
         bool isAllowed = glacisTokenMediator.isAllowedRoute(
             chainId,
             address(0x456).toBytes32(), // wrong mediator address (what we're testing)
-            1,
+            AXELAR_GMP_ID,
             payload
         );
         assertFalse(isAllowed);
@@ -173,9 +173,33 @@ contract TokenMediatorTests is LocalTestSetup {
         bool isAllowed = glacisTokenMediator.isAllowedRoute(
             chainId,
             addr.toBytes32(), // correct mediator address (what we're testing)
-            1,
+            AXELAR_GMP_ID,
             payload
         );
         assertTrue(isAllowed);
+    }
+
+    function test__TokenMediator_IsAllowedRouteFalseWhenSendToEOAWithCustomAdapter(
+        address addr,
+        uint256 chainId
+    ) external {
+        vm.assume(chainId != 0);
+        vm.assume(addr != address(0) && addr.code.length == 0);
+        bytes memory payload = abi.encode(
+            address(0x123), // EOA
+            msg.sender,
+            address(xERC20Sample),
+            address(xERC20Sample),
+            1,
+            bytes("")
+        );
+        addRemoteMediator(chainId, addr.toBytes32());
+        bool isAllowed = glacisTokenMediator.isAllowedRoute(
+            chainId,
+            addr.toBytes32(), // correct mediator address
+            address(0x123456789), // Custom Adapter
+            payload
+        );
+        assertFalse(isAllowed);
     }
 }

@@ -14,17 +14,17 @@ contract GlacisClientSample is GlacisClientOwnable {
     function setRemoteValue__execute(
         uint256 toChainId,
         bytes32 to,
-        uint8 gmp,
+        address adapter,
         bytes calldata payload
     ) external payable returns (bytes32) {
-        return _routeSingle(toChainId, to, payload, gmp, msg.sender, msg.value);
+        return _routeSingle(toChainId, to, payload, adapter, msg.sender, msg.value);
     }
 
     function setRemoteValue__redundancy(
         uint256 toChainId,
         bytes32 to,
-        uint8[] memory gmps,
-        uint256[] memory fees,
+        address[] memory adapters,
+        CrossChainGas[] memory fees,
         bytes calldata payload
     ) external payable returns (bytes32) {
         return
@@ -32,7 +32,7 @@ contract GlacisClientSample is GlacisClientOwnable {
                 toChainId,
                 to,
                 payload,
-                gmps,
+                adapters,
                 fees,
                 msg.sender,
                 msg.value
@@ -42,8 +42,8 @@ contract GlacisClientSample is GlacisClientOwnable {
     function setRemoteValue__retriable(
         uint256 chainId,
         bytes32 to,
-        uint8[] memory gmps,
-        uint256[] memory fees,
+        address[] memory adapters,
+        CrossChainGas[] memory fees,
         bytes memory payload
     ) external payable returns (bytes32) {
         return
@@ -51,8 +51,7 @@ contract GlacisClientSample is GlacisClientOwnable {
                 chainId,
                 to,
                 payload,
-                gmps,
-                emptyCustomAdapters(),
+                adapters,
                 fees,
                 msg.sender,
                 true,
@@ -64,9 +63,8 @@ contract GlacisClientSample is GlacisClientOwnable {
         uint256 chainId,
         bytes32 to,
         bytes memory payload,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
-        uint256[] memory fees,
+        address[] memory adapters,
+        CrossChainGas[] memory fees,
         address refundAddress,
         bool retriable,
         uint256 gasPayment
@@ -76,8 +74,7 @@ contract GlacisClientSample is GlacisClientOwnable {
                 chainId,
                 to,
                 payload,
-                gmps,
-                customAdapters,
+                adapters,
                 fees,
                 refundAddress,
                 retriable,
@@ -88,9 +85,8 @@ contract GlacisClientSample is GlacisClientOwnable {
     function setRemoteValue__retry(
         uint256 chainId,
         bytes32 to,
-        uint8[] memory gmps,
-        address[] memory customAdapters,
-        uint256[] memory fees,
+        address[] memory adapters,
+        CrossChainGas[] memory fees,
         bytes memory payload,
         bytes32 messageId,
         uint256 nonce
@@ -100,8 +96,7 @@ contract GlacisClientSample is GlacisClientOwnable {
                 chainId,
                 to,
                 payload,
-                gmps,
-                customAdapters,
+                adapters,
                 fees,
                 msg.sender,
                 messageId,
@@ -113,7 +108,7 @@ contract GlacisClientSample is GlacisClientOwnable {
     event ValueChanged(uint256 indexed value);
 
     function _receiveMessage(
-        uint8[] memory, // fromGmpId,
+        address[] memory, // fromGmpId,
         uint256, // fromChainId,
         bytes32, // fromAddress,
         bytes memory payload

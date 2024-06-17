@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.18;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {IGlacisRemoteCounterpartManager} from "../interfaces/IGlacisRemoteCounterpartManager.sol";
 
 error GlacisRemoteCounterpartManager__RemoteCounterpartCannotHaveChainIdZero();
@@ -13,7 +13,7 @@ error GlacisRemoteCounterpartManager__MediatorsAndChainIDsMustHaveSameLength();
 /// @notice Is an ownable contract
 contract GlacisRemoteCounterpartManager is
     IGlacisRemoteCounterpartManager,
-    Ownable
+    Ownable2Step
 {
     mapping(uint256 => bytes32) public remoteCounterpart;
 
