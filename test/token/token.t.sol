@@ -486,7 +486,7 @@ contract TokenTests__Axelar is LocalTestSetup {
     }
 
     function test__Token_BadTokenVariantDenied(bytes32 otherToken, uint256 otherChainId) external {
-        vm.assume(otherToken != bytes32(0));
+        vm.assume(otherToken != bytes32(0) && otherToken != xERC20Sample);
         vm.assume(otherChainId != 0);
 
         // NOTE: Does not sets the token as variant
