@@ -240,9 +240,6 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         }
         if (!routeAllowed) revert GlacisRouter__ClientDeniedRoute();
 
-        // Get the quorum requirements
-        uint256 quorum = client.getQuorum(glacisData, payload);
-
         // Check if the message per GMP is unique
         MessageData memory currentReceipt = messageReceipts[
             glacisData.messageId
@@ -251,6 +248,9 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         // Ensures that the message hasn't come from the same adapter again
         if (receivedCustomAdapterMessages[glacisData.messageId][msg.sender])
             revert GlacisRouter__MessageAlreadyReceivedFromGMP();
+
+        // Get the quorum requirements
+        uint256 quorum = client.getQuorum(glacisData, payload, currentReceipt.uniqueMessagesReceived);
 
         receivedCustomAdapterMessages[glacisData.messageId][msg.sender] = true;
 
@@ -312,13 +312,13 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         // Get the client
         IGlacisClient client = IGlacisClient(glacisData.originalTo.toAddress());
 
-        // Get the quorum requirements
-        uint256 quorum = client.getQuorum(glacisData, payload);
-
         // Check satisfaction of current receipt
         MessageData memory currentReceipt = messageReceipts[
             glacisData.messageId
         ];
+
+        // Get the quorum requirements
+        uint256 quorum = client.getQuorum(glacisData, payload, currentReceipt.uniqueMessagesReceived);
 
         // Verify that the messageID can be calculated from the data provided,
         if (

@@ -551,6 +551,7 @@ contract GlacisTokenClientSampleDestinationQuorumHarness is
     function getQuorum(
         GlacisCommons.GlacisData memory, // glacisData,
         bytes memory, // payload,
+        uint256, // uniqueMessagesReceived
         address, // token,
         uint256 tokenAmount
     ) external view virtual override returns (uint256) {
