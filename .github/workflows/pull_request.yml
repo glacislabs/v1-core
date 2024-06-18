@@ -30,6 +30,6 @@ jobs:
         run: forge coverage --report lcov
         
       - name: Check for requested coverage
-        run: scripts/check-coverage.sh 40 40 40
+        run: scripts/check-coverage.sh ${{vars.LINE_COVERAGE}} ${{vars.FUNCTION_COVERAGE}} ${{vars.BRANCH_COVERAGE}}
 
-      - run: echo " This job's status is ${{ job.status }}."
+      - run: echo "This job's status is ${{ job.status }}."
