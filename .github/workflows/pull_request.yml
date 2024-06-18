@@ -29,7 +29,7 @@ jobs:
       - name: Generate coverage report
         run: forge coverage --report lcov
         
-      - name: Check for requested coverage
+      - name: Enforce requested coverage checks
         run: scripts/check-coverage.sh ${{vars.LINE_COVERAGE}} ${{vars.FUNCTION_COVERAGE}} ${{vars.BRANCH_COVERAGE}}
 
       - run: echo "This job's status is ${{ job.status }}."
