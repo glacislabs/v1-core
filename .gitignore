@@ -20,3 +20,7 @@ cache_forge
 package-lock.json
 forge-std
 ds-test
+
+lcov.html
+lcov.info
+lcov.txt
