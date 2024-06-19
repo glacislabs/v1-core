@@ -80,7 +80,7 @@ contract GlacisLayerZeroAdapter is
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.CrossChainGas calldata incentives,
+        GlacisCommons.CrossChainGas calldata,
         bytes memory payload
     ) internal override {
         uint16 _dstchainId = glacisChainIdToAdapterChainId[toChainId];

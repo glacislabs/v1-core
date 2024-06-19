@@ -93,7 +93,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.CrossChainGas calldata incentives,
+        GlacisCommons.CrossChainGas calldata,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         string memory destinationChain = glacisChainIdToAdapterChainId[
@@ -135,10 +135,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
             _toLowerCase(string(sourceAddress[2:42])).toAddress().toBytes32()
         )
     {
-        uint256 sourceChainId = adapterChainIdToGlacisChainId[sourceChain];
-        if (sourceChainId == 0)
-            revert GlacisAbstractAdapter__SourceChainNotRegistered();
-        GLACIS_ROUTER.receiveMessage(sourceChainId, payload);
+        GLACIS_ROUTER.receiveMessage(adapterChainIdToGlacisChainId[sourceChain], payload);
     }
 
     /// @notice Converts a string to lowercase
