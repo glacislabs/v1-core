@@ -41,6 +41,7 @@ contract AdapterTests__Hyperlane is LocalTestSetup {
         hyperlaneAdapter.setGlacisChainIds(chains, hyperlaneDomains);
 
         assertEq(hyperlaneAdapter.glacisChainIdToAdapterChainId(chain), chain);
+        assertEq(hyperlaneAdapter.adapterChainID(chain), chain);
         assertEq(hyperlaneAdapter.adapterChainIdToGlacisChainId(chain), chain);
         assertTrue(hyperlaneAdapter.chainIsAvailable(chain));
     }
