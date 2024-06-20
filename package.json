@@ -2,6 +2,7 @@
   "name": "glacisv1",
   "scripts": {
     "test": "forge test",
+    "coverage": "forge coverage --report lcov; genhtml --branch-coverage lcov.info -output lcov.html",
     "test:forge:debug": "forge test -vvv",
     "test:gas": "bash scripts/plotGas.sh",
     "hint": "solhint 'contracts/**/*.sol' 'test/**/*.sol'",
