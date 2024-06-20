@@ -33,6 +33,10 @@ contract HyperlaneMailboxMock is Mailbox {
         _disableInitializers();
     }
 
+    function setHookFee(uint256 fee) external {
+        TestPostDispatchHook(address(defaultHook)).setFee(fee);
+    }
+
     function addRemoteMailbox(
         uint32 _domain,
         HyperlaneMailboxMock _mailbox

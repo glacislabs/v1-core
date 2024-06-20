@@ -9,13 +9,12 @@ import {StandardHookMetadata} from "@hyperlane-xyz/core/contracts/hooks/libs/Sta
 import {TypeCasts} from "@hyperlane-xyz/core/contracts/libs/TypeCasts.sol";
 import {IInterchainSecurityModule} from "@hyperlane-xyz/core/contracts/interfaces/IInterchainSecurityModule.sol";
 import {IPostDispatchHook} from "@hyperlane-xyz/core/contracts/interfaces/hooks/IPostDispatchHook.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid} from "./GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__ChainIsNotAvailable} from "./GlacisAbstractAdapter.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
 error GlacisHyperlaneAdapter__OnlyMailboxAllowed();
 error GlacisHyperlaneAdapter__FeeNotEnough();
 error GlacisHyperlaneAdapter__RefundAddressMustReceiveNativeCurrency();
-error GlacisHyperlaneAdapter__UnconfiguredOrigin();
 
 /// @title Glacis Adapter for Hyperlane  
 /// @notice A Glacis Adapter for the cannonical Hyperlane network. Sends messages through dispatch() and receives
@@ -96,9 +95,13 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
         GlacisCommons.CrossChainGas calldata,
         bytes memory payload
     ) internal override onlyGlacisRouter {
-        uint32 destinationDomain = glacisChainIdToAdapterChainId[toChainId]; // this costs 3k gas
+        uint32 destinationDomain = glacisChainIdToAdapterChainId[toChainId];
+        bytes32 destinationAddress = remoteCounterpart[toChainId];
+
+        if (destinationAddress == bytes32(0))
+            revert GlacisAbstractAdapter__NoRemoteAdapterForChainId(toChainId);
         if (destinationDomain == 0)
-            revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
+            revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
 
         // Generate metadata using refundAddress
         bytes memory metadata = StandardHookMetadata.overrideRefundAddress(
@@ -106,7 +109,6 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
         );
 
         // Ensure that we have enough of the required fee (will revert if not this value)
-        bytes32 destinationAddress = remoteCounterpart[toChainId];
         uint256 nativePriceQuote = MAIL_BOX.quoteDispatch(
             destinationDomain,
             destinationAddress,
@@ -156,12 +158,6 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
             revert GlacisHyperlaneAdapter__OnlyMailboxAllowed();
         }
 
-        uint256 glacisChainId = adapterChainIdToGlacisChainId[_origin];
-
-        if (glacisChainId == 0) {
-            revert GlacisHyperlaneAdapter__UnconfiguredOrigin();
-        }
-
-        GLACIS_ROUTER.receiveMessage(glacisChainId, _message);
+        GLACIS_ROUTER.receiveMessage(adapterChainIdToGlacisChainId[_origin], _message);
     }
 }

@@ -15,7 +15,8 @@ error GlacisAbstractAdapter__InvalidChainId();
 error GlacisAbstractAdapter__NoAdapterConfiguredForChain();
 error GlacisAbstractAdapter__SourceChainNotRegistered();
 error GlacisAbstractAdapter__IDArraysMustBeSameLength();
-error GlacisAbstractAdapter__NoRemoteAdapterForChainId(uint256 chainId); //0xb295f036
+error GlacisAbstractAdapter__NoRemoteAdapterForChainId(uint256 chainId);
+error GlacisAbstractAdapter__ChainIsNotAvailable(uint256 toChainId);
 
 /// @title Glacis Abstract Adapter for all GMPs  
 /// @notice All adapters inheriting from this contract will be able to receive GlacisRouter requests through _sendMessage

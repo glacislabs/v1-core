@@ -21,6 +21,4 @@ interface IGlacisAdapter {
         GlacisCommons.CrossChainGas calldata incentives,
         bytes calldata payload
     ) external payable;
-
-    error IGlacisAdapter__ChainIsNotAvailable(uint256 toChainId);
 }

@@ -5,7 +5,7 @@ pragma solidity 0.8.18;
 import {IGlacisRouter} from "../../interfaces/IGlacisRouter.sol";
 import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {SimpleNonblockingLzApp} from "./SimpleNonblockingLzApp.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid} from "../GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../../commons/GlacisCommons.sol";
 
@@ -85,7 +85,7 @@ contract GlacisLayerZeroAdapter is
     ) internal override {
         uint16 _dstchainId = glacisChainIdToAdapterChainId[toChainId];
         if (_dstchainId == 0)
-            revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
+            revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
         _lzSend({
             _dstChainId: glacisChainIdToAdapterChainId[toChainId],
             _dstChainAddress: remoteCounterpart[toChainId].toAddress(),

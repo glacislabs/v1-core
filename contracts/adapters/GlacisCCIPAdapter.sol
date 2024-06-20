@@ -7,7 +7,7 @@ import {IGlacisRouter} from "../routers/GlacisRouter.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered} from "./GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered, GlacisAbstractAdapter__ChainIsNotAvailable} from "./GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
@@ -98,7 +98,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     ) internal override onlyGlacisRouter {
         uint64 destinationChain = glacisChainIdToAdapterChainId[toChainId];
         if (destinationChain == 0)
-            revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
+            revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
 
         // Initialize a router client instance to interact with cross-chain router
         IRouterClient router = IRouterClient(this.getRouter());
