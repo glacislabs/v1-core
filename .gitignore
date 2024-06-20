@@ -21,6 +21,9 @@ package-lock.json
 forge-std
 ds-test
 
+# lcov
 lcov.html
 lcov.info
 lcov.txt
+forge-pruned-lcov.info
+report
