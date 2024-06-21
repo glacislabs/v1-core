@@ -29,7 +29,7 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
         bytes memory payload,
         address token,
         uint256 amount
-    ) external payable returns (bytes32) {
+    ) external payable returns (bytes32,uint256) {
         return
             _routeWithTokensSingle(
                 toChainId,
@@ -51,33 +51,10 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
         bytes memory payload,
         address token,
         uint256 amount
-    ) external payable returns (bytes32) {
+    ) external payable returns (bytes32,uint256) {
         return
             _routeWithTokensRedundant(
                 toChainId,
-                to,
-                payload,
-                adapters,
-                fees,
-                msg.sender,
-                token,
-                amount,
-                msg.value
-            );
-    }
-
-    function sendMessageAndTokens__retriable(
-        uint256 chainId,
-        bytes32 to,
-        address[] memory adapters,
-        CrossChainGas[] memory fees,
-        bytes memory payload,
-        address token,
-        uint256 amount
-    ) external payable returns (bytes32) {
-        return
-            _routeWithTokens(
-                chainId,
                 to,
                 payload,
                 adapters,
@@ -97,7 +74,7 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
         bytes calldata payload,
         address token,
         uint256 amount
-    ) external payable returns (bytes32) {
+    ) external payable returns (bytes32,uint256) {
         return
             _routeWithTokens(
                 chainId,
@@ -112,6 +89,8 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
             );
     }
 
+    RetrySendWithTokenPackage public package;
+
     // @notice Struct for sending tokens as a retry. Required to avoid stack too deep.
     struct RetrySendWithTokenPackage {
         address token;
@@ -120,13 +99,36 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
         uint256 nonce;
     }
 
+    function createRetryWithTokenPackage(
+        address _token,
+        uint256 _amount,
+        bytes32 _messageId,
+        uint256 _nonce
+    ) public {
+        package = RetrySendWithTokenPackage({
+            token: _token,
+            amount: _amount,
+            messageId: _messageId,
+            nonce: _nonce
+        });
+    }
+
+    // Función para obtener los detalles del paquete
+    function getRetryWithTokenPackage()
+        public
+        view
+        returns (RetrySendWithTokenPackage memory)
+    {
+        return package;
+    }
+
     function retrySendWithTokens(
         uint256 chainId,
         bytes32 to,
         address[] calldata adapters,
         CrossChainGas[] calldata fees,
         bytes calldata payload,
-        RetrySendWithTokenPackage calldata package
+        RetrySendWithTokenPackage calldata _package
     ) external payable returns (bytes32) {
         return
             _retryRouteWithTokens(
@@ -136,10 +138,10 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
                 adapters,
                 fees,
                 msg.sender,
-                package.messageId,
-                package.nonce,
-                package.token,
-                package.amount,
+                _package.messageId,
+                _package.nonce,
+                _package.token,
+                _package.amount,
                 msg.value
             );
     }
@@ -156,20 +158,5 @@ contract GlacisTokenClientSampleSource is GlacisTokenClientOwnable {
     ) internal override {
         if (payload.length > 0) (value) += abi.decode(payload, (uint256));
         emit ValueChanged(value);
-    }
-
-    // Setup of custom quorum (for testing purposes)
-
-    uint256 internal customQuorum = 1;
-
-    function setQuorum(uint256 q) external onlyOwner {
-        customQuorum = q;
-    }
-
-    function getQuorum(
-        GlacisCommons.GlacisData memory,
-        bytes memory
-    ) public view override returns (uint256) {
-        return customQuorum;
     }
 }

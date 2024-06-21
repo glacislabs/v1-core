@@ -167,7 +167,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 gasPayment: gasPayment
             });
         } else {
-            messageID = _routeWithTokens({
+            (messageID,) = _routeWithTokens({
                 to: address(this).toBytes32(),
                 chainId: p.toChain,
                 payload: abi.encode(p.finalTo, p.callValue, p.calldataPayload),
