@@ -156,7 +156,13 @@ contract TokenMediatorTests is LocalTestSetup {
         uint256 amount = 1000;
 
         // Allowed routes removed
-        simpleTokenMediator.removeAllAllowedRoutes();
+        simpleTokenMediator.removeAllowedRoute(
+            GlacisCommons.GlacisRoute(
+                block.chainid, // fromChainId
+                address(simpleTokenMediator).toBytes32(), // from
+                address(WILDCARD) // from adapters
+            )
+        );
 
         address[] memory adapters = new address[](1);
         adapters[0] = AXELAR_GMP_ID;

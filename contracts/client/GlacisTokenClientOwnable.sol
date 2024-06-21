@@ -35,9 +35,4 @@ abstract contract GlacisTokenClientOwnable is GlacisTokenClient, Ownable {
     ) external onlyOwner {
         _removeAllowedRoute(route);
     }
-
-    /// @notice Removes all allowed routes for this client
-    function removeAllAllowedRoutes() external onlyOwner {
-        _removeAllAllowedRoutes();
-    }
 }
