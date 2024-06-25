@@ -4,13 +4,12 @@ pragma solidity 0.8.18;
 
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IGlacisAccessControlClient} from "../interfaces/IGlacisAccessControlClient.sol";
-error GlacisAccessControlClient__RouteAlreadyAdded();
 
 /// @title Glacis Access Control Client
 /// @dev This contract encapsulates Glacis Access Control client logic. Contracts inheriting this will have access to
 /// Glacis Access control features  
 abstract contract GlacisAccessControlClient is GlacisCommons, IGlacisAccessControlClient {
-    mapping(uint256 => mapping(bytes32 => mapping(address => bool))) private allowedRoutes;
+    mapping(uint256 => mapping(bytes32 => mapping(address => bool))) public allowedRoutes;
 
     bytes32 constant internal WILD_BYTES = bytes32(uint256(WILDCARD));
     address constant internal WILD_ADDR = address(uint160(uint256(WILDCARD)));
@@ -20,15 +19,7 @@ abstract contract GlacisAccessControlClient is GlacisCommons, IGlacisAccessContr
     function _addAllowedRoute(
         GlacisRoute memory route
     ) internal {
-        if (
-            !isAllowedRoute(
-                route.fromChainId,
-                route.fromAddress,
-                route.fromAdapter,
-                ""
-            )
-        ) allowedRoutes[route.fromChainId][route.fromAddress][route.fromAdapter] = true;
-        else revert GlacisAccessControlClient__RouteAlreadyAdded();
+        allowedRoutes[route.fromChainId][route.fromAddress][route.fromAdapter] = true;
     }
 
     /// @notice Removes an allowed route for this client
