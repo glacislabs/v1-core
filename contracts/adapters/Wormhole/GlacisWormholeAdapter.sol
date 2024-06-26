@@ -5,7 +5,7 @@ import {IWormholeRelayer} from "./IWormholeRelayer.sol";
 import {IWormholeReceiver} from "./IWormholeReceiver.sol";
 import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {IGlacisRouter} from "../../routers/GlacisRouter.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered} from "../GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered, GlacisAbstractAdapter__ChainIsNotAvailable} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../../commons/GlacisCommons.sol";
 
@@ -53,9 +53,11 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
         GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal override {
-        uint16 destinationChainId = glacisChainIdToAdapterChainId[toChainId];
+        uint16 _dstchainId = glacisChainIdToAdapterChainId[toChainId];
+        if (_dstchainId == 0)
+            revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
         (uint256 nativePriceQuote, ) = WORMHOLE_RELAYER.quoteEVMDeliveryPrice(
-            destinationChainId,
+            _dstchainId,
             RECEIVER_VALUE,
             incentives.gasLimit > 0 ? GAS_LIMIT : incentives.gasLimit
         );
@@ -64,7 +66,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
             revert GlacisWormholeAdapter__NotEnoughValueForCrossChainTransaction();
 
         WORMHOLE_RELAYER.sendPayloadToEvm{value: nativePriceQuote}(
-            destinationChainId,
+            _dstchainId,
             remoteCounterpart[toChainId].toAddress(),
             payload,
             RECEIVER_VALUE,

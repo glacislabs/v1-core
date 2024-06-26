@@ -120,7 +120,7 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
         (lzGatewayMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
         whMock = deployWormholeFixture();
-        whAdapter = deployWormholeAdapter(glacisRouter, whMock);
+        whAdapter = deployWormholeAdapter(glacisRouter, whMock, block.chainid);
         harness = new RedundancyReceivingDataTestHarness(address(glacisRouter));
     }
 

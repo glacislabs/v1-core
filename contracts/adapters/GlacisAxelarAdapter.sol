@@ -4,7 +4,7 @@ pragma solidity 0.8.18;
 
 import {AxelarExecutable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/executable/AxelarExecutable.sol";
 import {IAxelarGasService} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IAxelarGasService.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__SourceChainNotRegistered} from "./GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__SourceChainNotRegistered, GlacisAbstractAdapter__ChainIsNotAvailable} from "./GlacisAbstractAdapter.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {AddressString} from "../libraries/AddressString.sol";
 import {GlacisAbstractAdapter} from "./GlacisAbstractAdapter.sol";
@@ -12,9 +12,9 @@ import {IGlacisRouter} from "../routers/GlacisRouter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
-/// @title Glacis Adapter for Axelar  
+/// @title Glacis Adapter for Axelar
 /// @notice A Glacis Adapter for the Axelar network. Sends messages through the Axelar Gateway's callContract() and
-/// receives Axelar requests through _execute()  
+/// receives Axelar requests through _execute()
 contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     using Strings for address;
     using AddressString for string;
@@ -105,7 +105,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
             .toAddress()
             .toHexString();
         if (bytes(destinationChain).length == 0)
-            revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
+            revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
 
         if (msg.value > 0) {
             GAS_SERVICE.payNativeGasForContractCall{value: msg.value}(

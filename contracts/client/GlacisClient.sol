@@ -107,12 +107,12 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         address refundAddress,
         bool retriable,
         uint256 gasPayment
-    ) internal returns (bytes32) {
-        (bytes32 messageId,) = IGlacisRouter(GLACIS_ROUTER).route{
+    ) internal returns (bytes32,uint256) {
+        (bytes32 messageId,uint256 nonce) = IGlacisRouter(GLACIS_ROUTER).route{
             value: gasPayment
         }(chainId, to, payload, adapters, fees, refundAddress, retriable);
         emit GlacisClient__MessageRouted(messageId, chainId, to);
-        return messageId;
+        return (messageId,nonce);
     }
 
     /// @notice Routes the payload to the specific address on destination chain through GlacisRouter using GMPs

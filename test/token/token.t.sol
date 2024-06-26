@@ -85,6 +85,43 @@ contract TokenTests__Axelar is LocalTestSetup {
         );
     }
 
+    event ValueChanged(uint256 indexed value);
+
+    function test__Token_SendMessageAndTokens_Axelar(uint256 amount) external {
+        vm.assume(amount < 10e15);
+        xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
+        uint256 preSourceBalance = xERC20Sample.balanceOf(
+            address(glacisTokenClientSampleSource)
+        );
+        uint256 preDestinationBalance = xERC20Sample.balanceOf(
+            address(glacisTokenClientSampleDestination)
+        );
+        uint256 preDestinationValue = glacisTokenClientSampleDestination
+            .value();
+        glacisTokenClientSampleSource.sendMessageAndTokens__abstract{
+            value: 0.1 ether
+        }(
+            block.chainid,
+            address(glacisTokenClientSampleDestination).toBytes32(),
+            AXELAR_GMP_ID,
+            abi.encode(amount), // no message only tokens
+            address(xERC20Sample),
+            amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleSource)),
+            preSourceBalance - amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleDestination)),
+            preDestinationBalance + amount
+        );
+        assertEq(
+            glacisTokenClientSampleDestination.value(),
+            preDestinationValue + amount
+        );
+    }
+
     function test__Token_SendXERC20AndMessage_Axelar(
         uint256 amount,
         uint256 remoteIncrementValue
@@ -450,7 +487,10 @@ contract TokenTests__Axelar is LocalTestSetup {
         );
     }
 
-    function test__Token_TokenVariantsAccepted(bytes32 otherToken, uint256 otherChainId) external {
+    function test__Token_TokenVariantsAccepted(
+        bytes32 otherToken,
+        uint256 otherChainId
+    ) external {
         vm.assume(otherToken != bytes32(0));
         vm.assume(otherChainId != 0);
 
@@ -462,30 +502,36 @@ contract TokenTests__Axelar is LocalTestSetup {
         glacisIDs[0] = otherChainId;
         bytes32[] memory adapterCounterparts = new bytes32[](1);
         adapterCounterparts[0] = address(glacisTokenMediator).toBytes32();
-        glacisTokenMediator.addRemoteCounterparts(glacisIDs, adapterCounterparts);
+        glacisTokenMediator.addRemoteCounterparts(
+            glacisIDs,
+            adapterCounterparts
+        );
 
         // Prank a receiveMessage from a random chainID
         address[] memory gmps = new address[](1);
         gmps[0] = AXELAR_GMP_ID;
         vm.startPrank(address(glacisRouter));
-        glacisTokenMediator.receiveMessage(        
+        glacisTokenMediator.receiveMessage(
             gmps,
             otherChainId,
             address(glacisTokenMediator).toBytes32(),
             abi.encode(
                 address(0x123).toBytes32(), // to = EOA
                 address(0x456).toBytes32(), // from
-                otherToken,                 // sourceToken
-                address(xERC20Sample).toBytes32(),   // token
-                1 ether,                    // tokenAmount
-                ""                          // originalPayload
+                otherToken, // sourceToken
+                address(xERC20Sample).toBytes32(), // token
+                1 ether, // tokenAmount
+                "" // originalPayload
             )
         );
 
         assertEq(xERC20Sample.balanceOf(address(0x123)), 1 ether);
     }
 
-    function test__Token_BadTokenVariantDenied(bytes32 otherToken, uint256 otherChainId) external {
+    function test__Token_BadTokenVariantDenied(
+        bytes32 otherToken,
+        uint256 otherChainId
+    ) external {
         vm.assume(otherToken != bytes32(0));
         vm.assume(otherChainId != 0);
 
@@ -496,7 +542,10 @@ contract TokenTests__Axelar is LocalTestSetup {
         glacisIDs[0] = otherChainId;
         bytes32[] memory adapterCounterparts = new bytes32[](1);
         adapterCounterparts[0] = address(glacisTokenMediator).toBytes32();
-        glacisTokenMediator.addRemoteCounterparts(glacisIDs, adapterCounterparts);
+        glacisTokenMediator.addRemoteCounterparts(
+            glacisIDs,
+            adapterCounterparts
+        );
 
         // Prank a receiveMessage from a random chainID
         address[] memory gmps = new address[](1);
@@ -504,24 +553,24 @@ contract TokenTests__Axelar is LocalTestSetup {
         vm.startPrank(address(glacisRouter));
         vm.expectRevert(
             abi.encodeWithSelector(
-                GlacisTokenMediator__IncorrectTokenVariant.selector, 
-                otherToken, otherChainId
+                GlacisTokenMediator__IncorrectTokenVariant.selector,
+                otherToken,
+                otherChainId
             )
         );
-        glacisTokenMediator.receiveMessage(        
+        glacisTokenMediator.receiveMessage(
             gmps,
             otherChainId,
             address(glacisTokenMediator).toBytes32(),
             abi.encode(
                 address(0x123).toBytes32(), // to = EOA
                 address(0x456).toBytes32(), // from
-                otherToken,                 // sourceToken
-                address(xERC20Sample).toBytes32(),   // token
-                1 ether,                    // tokenAmount
-                ""                          // originalPayload
+                otherToken, // sourceToken
+                address(xERC20Sample).toBytes32(), // token
+                1 ether, // tokenAmount
+                "" // originalPayload
             )
         );
-
     }
 
     receive() external payable {}
