@@ -26,6 +26,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
+      - run: mkdir coverage
       - run: npm run coverage
         
       - name: Enforce requested coverage checks
