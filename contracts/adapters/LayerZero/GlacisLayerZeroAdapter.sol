@@ -9,9 +9,9 @@ import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../../commons/GlacisCommons.sol";
 
-/// @title Glacis Adapter for Layer Zero  
+/// @title Glacis Adapter for Layer Zero
 /// @notice A Glacis Adapter for the LayerZero V1. Sends messages through _lzSend() and receives
-/// messages via _nonblockingLzReceive()  
+/// messages via _nonblockingLzReceive()
 contract GlacisLayerZeroAdapter is
     SimpleNonblockingLzApp,
     GlacisAbstractAdapter
@@ -88,7 +88,6 @@ contract GlacisLayerZeroAdapter is
             revert GlacisAbstractAdapter__NoRemoteAdapterForChainId(toChainId);
         if (_dstchainId == 0)
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
-
         _lzSend({
             _dstChainId: glacisChainIdToAdapterChainId[toChainId],
             _dstChainAddress: remoteCounterpart.toAddress(),
@@ -117,6 +116,7 @@ contract GlacisLayerZeroAdapter is
             bytes32(bytes20(sourceAddress)) >> 96
         )
     {
+        console2.log(adapterChainIdToGlacisChainId[srcChainId]);
         GLACIS_ROUTER.receiveMessage(
             adapterChainIdToGlacisChainId[srcChainId],
             payload

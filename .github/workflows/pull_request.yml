@@ -26,8 +26,8 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Generate coverage report
-        run: forge coverage --report lcov
+      - run: mkdir coverage
+      - run: npm run coverage
         
       - name: Enforce requested coverage checks
         run: scripts/check-coverage.sh ${{vars.LINE_COVERAGE}} ${{vars.FUNCTION_COVERAGE}} ${{vars.BRANCH_COVERAGE}}

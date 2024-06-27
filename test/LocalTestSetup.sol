@@ -182,12 +182,13 @@ contract LocalTestSetup is Test, GlacisCommons {
     /// Deploys and sets up adapters for Wormhole
     function deployWormholeAdapter(
         GlacisRouter router,
-        WormholeRelayerMock wormholeRelayer
+        WormholeRelayerMock wormholeRelayer,
+        uint256 wormholeChainId 
     ) internal returns (GlacisWormholeAdapter adapter) {
         adapter = new GlacisWormholeAdapter(
             router,
             address(wormholeRelayer),
-            1,
+            uint16(wormholeChainId),
             address(this)
         );
 

@@ -45,7 +45,7 @@ contract GlacisClientSample is GlacisClientOwnable {
         address[] memory adapters,
         CrossChainGas[] memory fees,
         bytes memory payload
-    ) external payable returns (bytes32) {
+    ) external payable returns (bytes32,uint256) {
         return
             _route(
                 chainId,
@@ -68,7 +68,7 @@ contract GlacisClientSample is GlacisClientOwnable {
         address refundAddress,
         bool retriable,
         uint256 gasPayment
-    ) external payable returns (bytes32) {
+    ) external payable returns (bytes32,uint256 ) {
         return
             _route(
                 chainId,

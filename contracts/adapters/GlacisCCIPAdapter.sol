@@ -18,7 +18,7 @@ error GlacisCCIPAdapter__GlacisFeeExtrapolationFailed(
 error GlacisCCIPAdapter__RefundAddressMustReceiveNativeCurrency();
 error GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
 
-/// @title Glacis Adapter for CCIP GMP  
+/// @title Glacis Adapter for CCIP GMP
 /// @notice A Glacis Adapter for CCIP. Sends messages through the CCIP router's ccipSend() and receives
 /// messages via _ccipReceive()
 contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
@@ -141,8 +141,11 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
                 destinationChain,
                 payload
             );
-            emit GlacisCCIPAdapter__ExtrapolatedGasLimit(extrapolation, msg.value);
-            
+            emit GlacisCCIPAdapter__ExtrapolatedGasLimit(
+                extrapolation,
+                msg.value
+            );
+
             // Create an EVM2AnyMessage struct in memory with necessary information for sending a cross-chain message
             evm2AnyMessage = Client.EVM2AnyMessage({
                 receiver: abi.encode(remoteCounterpart[toChainId]), // ABI-encoded receiver address
@@ -202,13 +205,13 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         );
     }
 
-    /// @notice Extrapolates destination chain's gas limit from an amount of the origin chain's gas token 
-    /// for a specific cross-chain transaction  
-    /// @param value The amount of the origin chain's gas token to use to pay for destination gas fees 
-    /// @param destinationChain The destination chain's CCIP chain ID  
-    /// @param payload The bytes payload to send across chains in this message  
-    /// @notice The CCIP fees are linearly calculated, so we can calculate the amount given. Unfortunately, 
-    /// we have to assume that the fee formula stay the same forever. This may not be the case  
+    /// @notice Extrapolates destination chain's gas limit from an amount of the origin chain's gas token
+    /// for a specific cross-chain transaction
+    /// @param value The amount of the origin chain's gas token to use to pay for destination gas fees
+    /// @param destinationChain The destination chain's CCIP chain ID
+    /// @param payload The bytes payload to send across chains in this message
+    /// @notice The CCIP fees are linearly calculated, so we can calculate the amount given. Unfortunately,
+    /// we have to assume that the fee formula stay the same forever. This may not be the case
     function extrapolateGasLimitFromValue(
         uint256 value,
         uint64 destinationChain,

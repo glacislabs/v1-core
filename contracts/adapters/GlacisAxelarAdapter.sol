@@ -12,9 +12,9 @@ import {IGlacisRouter} from "../routers/GlacisRouter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
-/// @title Glacis Adapter for Axelar  
+/// @title Glacis Adapter for Axelar
 /// @notice A Glacis Adapter for the Axelar network. Sends messages through the Axelar Gateway's callContract() and
-/// receives Axelar requests through _execute()  
+/// receives Axelar requests through _execute()
 contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     using Strings for address;
     using AddressString for string;

@@ -46,7 +46,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         address token,
         uint256 tokenAmount,
         uint256 gasPayment
-    ) internal returns (bytes32) {
+    ) internal returns (bytes32,uint256) {
         address[] memory adapters = new address[](1);
         adapters[0] = adapter;
         CrossChainGas[] memory fees = new CrossChainGas[](1);
@@ -87,7 +87,7 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         address token,
         uint256 tokenAmount,
         uint256 gasPayment
-    ) internal returns (bytes32) {
+    ) internal returns (bytes32,uint256) {
         return
             _routeWithTokens(
                 chainId,
@@ -122,12 +122,12 @@ abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
         address token,
         uint256 tokenAmount,
         uint256 gasPayment
-    ) internal returns (bytes32) {
-        (bytes32 messageId,) = IGlacisTokenMediator(GLACIS_TOKEN_ROUTER).route{
+    ) internal returns (bytes32, uint256) {
+        (bytes32 messageId, uint256 nonce) = IGlacisTokenMediator(GLACIS_TOKEN_ROUTER).route{
             value: gasPayment
         }(chainId, to, payload, adapters, fees, refundAddress, token, tokenAmount);
         emit GlacisTokenClient__MessageRouted(messageId, chainId, to);
-        return messageId;
+        return (messageId,nonce);
     }
 
     /// @notice Routes the payload to the specific address on destination chain through GlacisRouter using GMPs

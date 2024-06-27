@@ -16,12 +16,11 @@ error GlacisHyperlaneAdapter__OnlyMailboxAllowed();
 error GlacisHyperlaneAdapter__FeeNotEnough();
 error GlacisHyperlaneAdapter__RefundAddressMustReceiveNativeCurrency();
 
-/// @title Glacis Adapter for Hyperlane  
+/// @title Glacis Adapter for Hyperlane
 /// @notice A Glacis Adapter for the cannonical Hyperlane network. Sends messages through dispatch() and receives
-/// messages via handle()  
+/// messages via handle()
 /// @notice Opted to create our own mailbox client because Hyperlane's base Mailbox refund address was static
 contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
-
     // Required by Hyperlane, if kept as 0 then it will use the default router.
     IInterchainSecurityModule public interchainSecurityModule;
     IMailbox public immutable MAIL_BOX;
@@ -30,9 +29,9 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     mapping(uint256 => uint32) public glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;
 
-    /// @param _glacisRouter This chain's glacis router  
-    /// @param _hyperlaneMailbox This chain's hyperlane router  
-    /// @param _owner This adapter's owner  
+    /// @param _glacisRouter This chain's glacis router
+    /// @param _hyperlaneMailbox This chain's hyperlane router
+    /// @param _owner This adapter's owner
     constructor(
         address _glacisRouter,
         address _hyperlaneMailbox,
@@ -149,10 +148,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     )
         external
         payable
-        onlyAuthorizedAdapter(
-            adapterChainIdToGlacisChainId[_origin],
-            _sender
-        )
+        onlyAuthorizedAdapter(adapterChainIdToGlacisChainId[_origin], _sender)
     {
         if (msg.sender != address(MAIL_BOX)) {
             revert GlacisHyperlaneAdapter__OnlyMailboxAllowed();

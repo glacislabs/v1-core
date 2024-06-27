@@ -120,7 +120,7 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
         (lzGatewayMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
         whMock = deployWormholeFixture();
-        whAdapter = deployWormholeAdapter(glacisRouter, whMock);
+        whAdapter = deployWormholeAdapter(glacisRouter, whMock, block.chainid);
         harness = new RedundancyReceivingDataTestHarness(address(glacisRouter));
     }
 
@@ -205,8 +205,9 @@ contract DestinationRedundancyTests is LocalTestSetup {
 
         // Set to an impossible quorum
         clientSample.setQuorum(2);
-        bytes32 messageId = clientSample
-            .setRemoteValue__redundancy{value: 0.1 ether}(
+        bytes32 messageId = clientSample.setRemoteValue__redundancy{
+            value: 0.1 ether
+        }(
             block.chainid,
             address(clientSample).toBytes32(),
             gmps,
@@ -224,7 +225,7 @@ contract DestinationRedundancyTests is LocalTestSetup {
             // NOTE: while unlikely to change, this is how the GlacisData is currently encoded
             abi.encode(
                 messageId,
-                0, /*nonce,*/
+                0 /*nonce,*/,
                 address(clientSample).toBytes32(),
                 address(clientSample).toBytes32(),
                 abi.encode(val)
@@ -241,8 +242,9 @@ contract DestinationRedundancyTests is LocalTestSetup {
 
         // Successful call
         clientSample.setQuorum(1);
-        bytes32 messageId = clientSample
-            .setRemoteValue__redundancy{value: 0.1 ether}(
+        bytes32 messageId = clientSample.setRemoteValue__redundancy{
+            value: 0.1 ether
+        }(
             block.chainid,
             address(clientSample).toBytes32(),
             gmps,
@@ -253,14 +255,19 @@ contract DestinationRedundancyTests is LocalTestSetup {
 
         // Attempt to retry
         vm.expectRevert(
-            abi.encodeWithSelector(GlacisRouter__DestinationRetryNotSatisfied.selector, true, false, true)
+            abi.encodeWithSelector(
+                GlacisRouter__DestinationRetryNotSatisfied.selector,
+                true,
+                false,
+                true
+            )
         );
         glacisRouter.retryReceiveMessage(
             block.chainid,
             // NOTE: while unlikely to change, this is how the GlacisData is currently encoded
             abi.encode(
                 messageId,
-                0, /*nonce,*/
+                0 /*nonce,*/,
                 address(clientSample).toBytes32(),
                 address(clientSample).toBytes32(),
                 abi.encode(val)
