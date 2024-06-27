@@ -116,7 +116,6 @@ contract GlacisLayerZeroAdapter is
             bytes32(bytes20(sourceAddress)) >> 96
         )
     {
-        console2.log(adapterChainIdToGlacisChainId[srcChainId]);
         GLACIS_ROUTER.receiveMessage(
             adapterChainIdToGlacisChainId[srcChainId],
             payload
