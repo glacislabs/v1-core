@@ -26,7 +26,6 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Generate coverage report
       - run: npm run coverage
         
       - name: Enforce requested coverage checks
