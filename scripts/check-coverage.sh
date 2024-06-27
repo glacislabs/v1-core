@@ -2,7 +2,7 @@ LINE_COVERAGE=$1
 FUNCTION_COVERAGE=$2
 BRANCH_COVERAGE=$3
 
-genhtml --branch-coverage lcov.info -output lcov.html | grep "\.:" > lcov.txt
+genhtml --branch-coverage filtered-lcov.info -output lcov.html | grep "\.:" > lcov.txt
 
 sed -i 's/\.*:\ /=/g' lcov.txt
 sed -i 's/\..*//g' lcov.txt
