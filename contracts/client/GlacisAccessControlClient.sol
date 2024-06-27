@@ -4,38 +4,22 @@ pragma solidity 0.8.18;
 
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IGlacisAccessControlClient} from "../interfaces/IGlacisAccessControlClient.sol";
-error GlacisAccessControlClient__RouteAlreadyAdded();
 
 /// @title Glacis Access Control Client
 /// @dev This contract encapsulates Glacis Access Control client logic. Contracts inheriting this will have access to
 /// Glacis Access control features  
 abstract contract GlacisAccessControlClient is GlacisCommons, IGlacisAccessControlClient {
-    GlacisRoute[] private allowedRoutes;
+    mapping(uint256 => mapping(bytes32 => mapping(address => bool))) public allowedRoutes;
+
+    bytes32 constant internal WILD_BYTES = bytes32(uint256(WILDCARD));
+    address constant internal WILD_ADDR = address(uint160(uint256(WILDCARD)));
 
     /// @notice Adds an allowed route for this client
-    /// @param allowedRoute Route to be added
+    /// @param route Route to be added
     function _addAllowedRoute(
-        GlacisRoute memory allowedRoute
+        GlacisRoute memory route
     ) internal {
-        if (
-            !isAllowedRoute(
-                allowedRoute.fromChainId,
-                allowedRoute.fromAddress,
-                allowedRoute.fromApdater,
-                ""
-            )
-        ) allowedRoutes.push(allowedRoute);
-        else revert GlacisAccessControlClient__RouteAlreadyAdded();
-    }
-
-    /// @notice Get all allowed routes for this client
-    /// @return Complete allowed routes array
-    function getAllowedRoutes()
-        external
-        view
-        returns (GlacisRoute[] memory)
-    {
-        return allowedRoutes;
+        allowedRoutes[route.fromChainId][route.fromAddress][route.fromAdapter] = true;
     }
 
     /// @notice Removes an allowed route for this client
@@ -43,50 +27,29 @@ abstract contract GlacisAccessControlClient is GlacisCommons, IGlacisAccessContr
     function _removeAllowedRoute(
         GlacisRoute calldata route
     ) internal {
-        for (uint256 i = 0; i < allowedRoutes.length; i++) {
-            GlacisCommons.GlacisRoute memory allowedRoute = allowedRoutes[i];
-            if (
-                allowedRoute.fromApdater == route.fromApdater &&
-                allowedRoute.fromChainId == route.fromChainId &&
-                allowedRoute.fromAddress == route.fromAddress
-            ) {
-                allowedRoutes[i] = allowedRoutes[allowedRoutes.length - 1];
-                allowedRoutes.pop();
-            }
-        }
-    }
-
-    /// @notice Removes all allowed routes for this client
-    function _removeAllAllowedRoutes() internal {
-        delete allowedRoutes;
+        allowedRoutes[route.fromChainId][route.fromAddress][route.fromAdapter] = false;
     }
 
     /// @notice Queries if a route from path GMP+Chain+Address is allowed for this client
     /// @param fromChainId Source chain Id
     /// @param fromAddress Source address
-    /// @param fromApdater source GMP Id
+    /// @param fromAdapter source GMP Id
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
         uint256 fromChainId,
         bytes32 fromAddress,
-        address fromApdater,
+        address fromAdapter,
         bytes memory // payload
     ) public view override returns (bool) {
-        for (uint256 i; i < allowedRoutes.length; i++) {
-            GlacisCommons.GlacisRoute memory allowedRoute = allowedRoutes[i];
-            if (
-                (allowedRoute.fromApdater == fromApdater ||
-                    // NOTE: Wildcard should not allow any adapter to make any message, just Glacis' reserved IDs
-                    (allowedRoute.fromApdater == address(WILDCARD) && uint160(fromApdater) <= GLACIS_RESERVED_IDS)
-                ) &&
-                (allowedRoute.fromChainId == fromChainId ||
-                    allowedRoute.fromChainId == WILDCARD) &&
-                (allowedRoute.fromAddress == fromAddress ||
-                    allowedRoute.fromAddress == bytes32(uint256(WILDCARD)))
-            ) {
-                return true;
-            }
-        }
-        return false;
+        return
+            allowedRoutes[fromChainId][fromAddress][fromAdapter] ||
+            allowedRoutes[WILDCARD][fromAddress][fromAdapter] ||
+            allowedRoutes[WILDCARD][WILD_BYTES][fromAdapter] ||
+            allowedRoutes[fromChainId][WILD_BYTES][fromAdapter] ||
+            (uint160(fromAdapter) <= GLACIS_RESERVED_IDS && (
+                allowedRoutes[fromChainId][fromAddress][WILD_ADDR] ||
+                allowedRoutes[fromChainId][WILD_BYTES][WILD_ADDR] ||
+                allowedRoutes[WILDCARD][WILD_BYTES][WILD_ADDR]
+            ));
     }
 }

@@ -29,8 +29,9 @@ abstract contract IGlacisClient is IGlacisAccessControlClient {
 
     /// @notice The quorum of messages that the contract expects with a specific message
     function getQuorum(
-        GlacisCommons.GlacisData memory,
-        bytes memory
+        GlacisCommons.GlacisData memory,    // glacis data
+        bytes memory,                       // payload
+        uint256                             // unique messages received so far (for dynamic quorum, usually unused)
     ) public view virtual returns (uint256) {
         return DEFAULT_QUORUM;
     }

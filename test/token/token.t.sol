@@ -306,6 +306,17 @@ contract TokenTests__Axelar is LocalTestSetup {
         );
     }
 
+    function test__Token_XERC20_Limits(
+        uint256 maxMintLimit,
+        uint256 maxBurnLimit
+    ) external {
+        vm.assume(maxMintLimit < 10e17);
+        vm.assume(maxBurnLimit < 10e17);
+        xERC20Sample.setLimits(address(this), maxMintLimit, maxBurnLimit);
+        assertEq(xERC20Sample.mintingMaxLimitOf(address(this)), maxMintLimit);
+        assertEq(xERC20Sample.burningMaxLimitOf(address(this)), maxBurnLimit);
+    }
+
     function test__Token_XERC20LockBox_Deposit(uint256 amount) external {
         vm.assume(amount < 10e17);
         erc20Sample.approve(address(xERC20LockboxSample), amount);
@@ -532,7 +543,10 @@ contract TokenTests__Axelar is LocalTestSetup {
         bytes32 otherToken,
         uint256 otherChainId
     ) external {
-        vm.assume(otherToken != bytes32(0));
+        vm.assume(
+            otherToken != bytes32(0) &&
+                otherToken != address(xERC20Sample).toBytes32()
+        );
         vm.assume(otherChainId != 0);
 
         // NOTE: Does not sets the token as variant
@@ -573,6 +587,13 @@ contract TokenTests__Axelar is LocalTestSetup {
         );
     }
 
+    function test__Token_TokenVariantRemove(uint256 chainId) external {
+        vm.assume(chainId != 0);
+        // Sets the token as variant
+        xERC20Sample.removeTokenVariant(chainId);
+        assertEq(xERC20Sample.getTokenVariant(chainId), bytes32(0));
+    }
+
     receive() external payable {}
 }
 
@@ -600,6 +621,7 @@ contract GlacisTokenClientSampleDestinationQuorumHarness is
     function getQuorum(
         GlacisCommons.GlacisData memory, // glacisData,
         bytes memory, // payload,
+        uint256, // uniqueMessagesReceived
         address, // token,
         uint256 tokenAmount
     ) external view virtual override returns (uint256) {

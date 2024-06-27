@@ -40,6 +40,6 @@ contract CCIPRouterMock {
         assembly {
             gasLimit := mload(add(extraArgs, 36))
         }
-        return gasLimit * 1000;
+        return gasLimit * 1000 + 21000;
     }
 }

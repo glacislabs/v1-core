@@ -231,7 +231,8 @@ contract GlacisTokenMediator is
     /// @param payload The payload that comes with the message
     function getQuorum(
         GlacisData memory glacisData,
-        bytes memory payload
+        bytes memory payload,
+        uint256 uniqueMessagesReceived
     ) public view override returns (uint256) {
         (
             bytes32 to,
@@ -254,6 +255,7 @@ contract GlacisTokenMediator is
             IGlacisTokenClient(toAddress).getQuorum(
                 glacisData,
                 originalPayload,
+                uniqueMessagesReceived,
                 token.toAddress(),
                 tokenAmount
             );

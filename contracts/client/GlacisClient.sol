@@ -14,7 +14,6 @@ error GlacisClient__InvalidRouterAddress();
 /// Glacis features
 abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     address public immutable GLACIS_ROUTER;
-    GlacisCommons.GlacisRoute[] private allowedRoutes;
 
     event GlacisClient__MessageRouted(
         bytes32 messageId,

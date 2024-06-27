@@ -26,11 +26,8 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     mapping(uint256 => uint16) public glacisChainIdToAdapterChainId;
     mapping(uint16 => uint256) public adapterChainIdToGlacisChainId;
 
-    // TODO: figure out a better solution for the gas limit
     uint256 internal constant GAS_LIMIT = 900000;
     uint16 internal immutable WORMHOLE_CHAIN_ID;
-
-    // TODO: Look into transfers with token to see if this too can be abstracted.
     uint256 internal constant RECEIVER_VALUE = 0;
 
     constructor(
@@ -65,12 +62,14 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
         if (nativePriceQuote > msg.value)
             revert GlacisWormholeAdapter__NotEnoughValueForCrossChainTransaction();
 
+        // Will use the given gas limit, otherwise it will automatically set the 
+        // gas limit to 900k (not recommended)
         WORMHOLE_RELAYER.sendPayloadToEvm{value: nativePriceQuote}(
             _dstchainId,
             remoteCounterpart[toChainId].toAddress(),
             payload,
             RECEIVER_VALUE,
-            GAS_LIMIT,
+            incentives.gasLimit > 0 ? GAS_LIMIT : incentives.gasLimit,
             WORMHOLE_CHAIN_ID,
             refundAddress
         );

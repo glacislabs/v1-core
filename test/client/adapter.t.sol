@@ -198,7 +198,7 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
 
     function test__Adapter_ChainIsNotAvailable_LayerZero() external {
         uint256[] memory glacisChainIds = new uint256[](1);
-        glacisChainIds[0] = 1;
+        glacisChainIds[0] = block.chainid;
         uint16[] memory adapterIds = new uint16[](1);
         adapterIds[0] = 0;
 
@@ -207,11 +207,11 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
         vm.expectRevert(
             abi.encodeWithSelector(
                 GlacisAbstractAdapter__ChainIsNotAvailable.selector,
-                1
+                block.chainid
             )
         );
         clientSample.setRemoteValue__execute(
-            1,
+            block.chainid,
             bytes32(0),
             LAYERZERO_GMP_ID,
             ""
@@ -328,7 +328,7 @@ contract AdapterTests__Wormhole is LocalTestSetup {
             adapterIds[0]
         );
     }
-    
+
     function test__Adapter_AdapterChainId_Wormhole() external {
         uint256[] memory glacisChainIds = new uint256[](1);
         glacisChainIds[0] = 1;
@@ -336,7 +336,10 @@ contract AdapterTests__Wormhole is LocalTestSetup {
         adapterIds[0] = 1;
 
         wormholeAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
-        assertEq(wormholeAdapter.adapterChainID(glacisChainIds[0]), adapterIds[0]);
+        assertEq(
+            wormholeAdapter.adapterChainID(glacisChainIds[0]),
+            adapterIds[0]
+        );
     }
 
     function test__Adapter_ChainIsAvailable_Wormhole() external {
@@ -501,7 +504,7 @@ contract AdapterTests__CCIP is LocalTestSetup {
 
     function test__Adapter_ChainIsNotAvailable_CCIP() external {
         uint256[] memory glacisChainIds = new uint256[](1);
-        glacisChainIds[0] = 1;
+        glacisChainIds[0] = block.chainid;
         uint64[] memory adapterIds = new uint64[](1);
         adapterIds[0] = 0;
 
@@ -510,10 +513,15 @@ contract AdapterTests__CCIP is LocalTestSetup {
         vm.expectRevert(
             abi.encodeWithSelector(
                 GlacisAbstractAdapter__ChainIsNotAvailable.selector,
-                1
+                block.chainid
             )
         );
-        clientSample.setRemoteValue__execute(1, bytes32(0), CCIP_GMP_ID, "");
+        clientSample.setRemoteValue__execute(
+            block.chainid,
+            bytes32(0),
+            CCIP_GMP_ID,
+            ""
+        );
     }
 }
 
@@ -627,7 +635,7 @@ contract AdapterTests__Hyperlane is LocalTestSetup {
 
     function test__Adapter_ChainIsNotAvailable_Hyperlane() external {
         uint256[] memory glacisChainIds = new uint256[](1);
-        glacisChainIds[0] = 1;
+        glacisChainIds[0] = block.chainid;
         uint32[] memory adapterIds = new uint32[](1);
         adapterIds[0] = 0;
 
@@ -636,11 +644,11 @@ contract AdapterTests__Hyperlane is LocalTestSetup {
         vm.expectRevert(
             abi.encodeWithSelector(
                 GlacisAbstractAdapter__ChainIsNotAvailable.selector,
-                1
+                block.chainid
             )
         );
         clientSample.setRemoteValue__execute(
-            1,
+            block.chainid,
             bytes32(0),
             HYPERLANE_GMP_ID,
             ""

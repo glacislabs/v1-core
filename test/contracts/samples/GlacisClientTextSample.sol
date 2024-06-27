@@ -124,7 +124,8 @@ contract GlacisClientTextSample is GlacisClientOwnable {
 
     function getQuorum(
         GlacisCommons.GlacisData memory,
-        bytes memory
+        bytes memory,
+        uint256
     ) public view override returns (uint256) {
         return customQuorum;
     }

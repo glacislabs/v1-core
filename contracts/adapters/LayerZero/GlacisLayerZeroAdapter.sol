@@ -5,12 +5,9 @@ pragma solidity 0.8.18;
 import {IGlacisRouter} from "../../interfaces/IGlacisRouter.sol";
 import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {SimpleNonblockingLzApp} from "./SimpleNonblockingLzApp.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable} from "../GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable, GlacisAbstractAdapter__NoRemoteAdapterForChainId} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../../commons/GlacisCommons.sol";
-import "forge-std/console2.sol";
-
-error GlacisLayerZeroAdapter__LZChainIdNotAccepted(uint256);
 
 /// @title Glacis Adapter for Layer Zero
 /// @notice A Glacis Adapter for the LayerZero V1. Sends messages through _lzSend() and receives
@@ -81,15 +78,19 @@ contract GlacisLayerZeroAdapter is
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.CrossChainGas calldata incentives,
+        GlacisCommons.CrossChainGas calldata,
         bytes memory payload
     ) internal override {
+        bytes32 remoteCounterpart = remoteCounterpart[toChainId];
         uint16 _dstchainId = glacisChainIdToAdapterChainId[toChainId];
+
+        if (remoteCounterpart == bytes32(0))
+            revert GlacisAbstractAdapter__NoRemoteAdapterForChainId(toChainId);
         if (_dstchainId == 0)
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
         _lzSend({
             _dstChainId: glacisChainIdToAdapterChainId[toChainId],
-            _dstChainAddress: remoteCounterpart[toChainId].toAddress(),
+            _dstChainAddress: remoteCounterpart.toAddress(),
             _payload: payload,
             _refundAddress: payable(refundAddress),
             _zroPaymentAddress: address(0x0),
@@ -115,9 +116,6 @@ contract GlacisLayerZeroAdapter is
             bytes32(bytes20(sourceAddress)) >> 96
         )
     {
-        if (adapterChainIdToGlacisChainId[srcChainId] == 0)
-            revert GlacisLayerZeroAdapter__LZChainIdNotAccepted(srcChainId);
-        console2.log(adapterChainIdToGlacisChainId[srcChainId]);
         GLACIS_ROUTER.receiveMessage(
             adapterChainIdToGlacisChainId[srcChainId],
             payload

@@ -20,7 +20,7 @@ contract GlacisCommons {
     struct GlacisRoute {
         uint256 fromChainId; // 0 means any chain
         bytes32 fromAddress; // 0x00 means any address
-        address fromApdater; // 0 means any GMP, can also hold address
+        address fromAdapter; // 0 means any GMP, can also hold address
     }
 
     struct CrossChainGas {

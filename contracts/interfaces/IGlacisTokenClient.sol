@@ -27,6 +27,7 @@ interface IGlacisTokenClient is IGlacisAccessControlClient {
     function getQuorum(
         GlacisCommons.GlacisData memory,
         bytes memory,
+        uint256,
         address,
         uint256
     ) external view returns (uint256);

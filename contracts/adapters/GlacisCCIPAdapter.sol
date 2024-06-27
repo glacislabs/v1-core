@@ -7,7 +7,7 @@ import {IGlacisRouter} from "../routers/GlacisRouter.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered, GlacisAbstractAdapter__ChainIsNotAvailable} from "./GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered, GlacisAbstractAdapter__ChainIsNotAvailable, GlacisAbstractAdapter__NoRemoteAdapterForChainId} from "./GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
@@ -96,7 +96,10 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         GlacisCommons.CrossChainGas calldata incentives,
         bytes memory payload
     ) internal override onlyGlacisRouter {
+        bytes32 remoteAdapter = remoteCounterpart[toChainId];
         uint64 destinationChain = glacisChainIdToAdapterChainId[toChainId];
+        if (remoteAdapter == bytes32(0))
+            revert GlacisAbstractAdapter__NoRemoteAdapterForChainId(toChainId);
         if (destinationChain == 0)
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
 
@@ -110,7 +113,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         if (incentives.gasLimit > 0) {
             // Create an EVM2AnyMessage struct in memory with necessary information for sending a cross-chain message
             evm2AnyMessage = Client.EVM2AnyMessage({
-                receiver: abi.encode(remoteCounterpart[toChainId]), // ABI-encoded receiver address
+                receiver: abi.encode(remoteAdapter), // ABI-encoded receiver address
                 data: payload,
                 tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
                 // NOTE: extraArgs is subject to changes by CCIP in the future.
@@ -131,7 +134,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             if (fees > msg.value)
                 revert GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
         }
-        // Otherwise, attempt to extrapolate
+        // Otherwise, attempt to extrapolate (not the recommended path)
         else {
             uint256 extrapolation = extrapolateGasLimitFromValue(
                 msg.value,
@@ -196,14 +199,10 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             address(abi.decode(any2EvmMessage.sender, (address))).toBytes32()
         )
     {
-        uint256 sourceChainId = adapterChainIdToGlacisChainId[
-            any2EvmMessage.sourceChainSelector
-        ];
-
-        if (sourceChainId == 0)
-            revert GlacisAbstractAdapter__SourceChainNotRegistered();
-
-        GLACIS_ROUTER.receiveMessage(sourceChainId, any2EvmMessage.data);
+        GLACIS_ROUTER.receiveMessage(
+            adapterChainIdToGlacisChainId[any2EvmMessage.sourceChainSelector], 
+            any2EvmMessage.data
+        );
     }
 
     /// @notice Extrapolates destination chain's gas limit from an amount of the origin chain's gas token
@@ -258,8 +257,8 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         // Calculates x = (y-b) / m, but increased m by 0.5% to overestimate value needed
         uint256 gasLimit = (value - feeAt0GasLimit) / (m + (m / 200));
 
-        // CCIP caps at 2 million gas: https://docs.chain.link/ccip/service-limits
-        if (gasLimit > 2_000_000) return 2_000_000;
+        // CCIP caps at 3 million gas: https://docs.chain.link/ccip/service-limits
+        if (gasLimit > 3_000_000) return 3_000_000;
         else return gasLimit;
     }
 }
