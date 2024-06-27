@@ -5,15 +5,16 @@ pragma solidity 0.8.18;
 import {IGlacisRouter} from "../../interfaces/IGlacisRouter.sol";
 import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {SimpleNonblockingLzApp} from "./SimpleNonblockingLzApp.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid} from "../GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../../commons/GlacisCommons.sol";
+import "forge-std/console2.sol";
 
 error GlacisLayerZeroAdapter__LZChainIdNotAccepted(uint256);
 
-/// @title Glacis Adapter for Layer Zero  
+/// @title Glacis Adapter for Layer Zero
 /// @notice A Glacis Adapter for the LayerZero V1. Sends messages through _lzSend() and receives
-/// messages via _nonblockingLzReceive()  
+/// messages via _nonblockingLzReceive()
 contract GlacisLayerZeroAdapter is
     SimpleNonblockingLzApp,
     GlacisAbstractAdapter
@@ -85,7 +86,7 @@ contract GlacisLayerZeroAdapter is
     ) internal override {
         uint16 _dstchainId = glacisChainIdToAdapterChainId[toChainId];
         if (_dstchainId == 0)
-            revert IGlacisAdapter__ChainIsNotAvailable(toChainId);
+            revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
         _lzSend({
             _dstChainId: glacisChainIdToAdapterChainId[toChainId],
             _dstChainAddress: remoteCounterpart[toChainId].toAddress(),
@@ -116,6 +117,7 @@ contract GlacisLayerZeroAdapter is
     {
         if (adapterChainIdToGlacisChainId[srcChainId] == 0)
             revert GlacisLayerZeroAdapter__LZChainIdNotAccepted(srcChainId);
+        console2.log(adapterChainIdToGlacisChainId[srcChainId]);
         GLACIS_ROUTER.receiveMessage(
             adapterChainIdToGlacisChainId[srcChainId],
             payload

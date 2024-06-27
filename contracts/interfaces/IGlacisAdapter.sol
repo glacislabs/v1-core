@@ -22,5 +22,4 @@ interface IGlacisAdapter {
         bytes calldata payload
     ) external payable;
 
-    error IGlacisAdapter__ChainIsNotAvailable(uint256 toChainId);
 }

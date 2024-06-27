@@ -6,7 +6,7 @@ import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {IGlacisRemoteCounterpartManager} from "../interfaces/IGlacisRemoteCounterpartManager.sol";
 
 error GlacisRemoteCounterpartManager__RemoteCounterpartCannotHaveChainIdZero();
-error GlacisRemoteCounterpartManager__MediatorsAndChainIDsMustHaveSameLength();
+error GlacisRemoteCounterpartManager__CounterpartsAndChainIDsMustHaveSameLength();
 
 /// @title Glacis Remote Counterpart Manager
 /// @notice An inheritable contract that allows an owner to add and remove remote counterparts
@@ -25,7 +25,7 @@ contract GlacisRemoteCounterpartManager is
         bytes32[] calldata counterpart
     ) external onlyOwner {
         if (chainIds.length != counterpart.length)
-            revert GlacisRemoteCounterpartManager__MediatorsAndChainIDsMustHaveSameLength();
+            revert GlacisRemoteCounterpartManager__CounterpartsAndChainIDsMustHaveSameLength();
         for (uint256 i; i < chainIds.length; ++i) {
             if (chainIds[i] == 0)
                 revert GlacisRemoteCounterpartManager__RemoteCounterpartCannotHaveChainIdZero();

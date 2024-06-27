@@ -143,7 +143,7 @@ contract AbstractionTests__Wormhole is LocalTestSetup {
         (wormholeRelayerMock) = deployWormholeFixture();
         wormholeAdapter = deployWormholeAdapter(
             glacisRouter,
-            wormholeRelayerMock
+            wormholeRelayerMock, block.chainid
         );
         (clientSample, ) = deployGlacisClientSample(glacisRouter);
     }
@@ -348,7 +348,7 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
         (wormholeRelayerMock) = deployWormholeFixture();
         wormholeAdapter = deployWormholeAdapter(
             glacisRouter,
-            wormholeRelayerMock
+            wormholeRelayerMock, block.chainid
         );
         wormholeSample = new WormholeSample(address(wormholeRelayerMock), 1);
         wormholeTextSample = new WormholeTextSample(
