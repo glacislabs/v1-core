@@ -8,6 +8,7 @@ import {SimpleNonblockingLzApp} from "./SimpleNonblockingLzApp.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../../commons/GlacisCommons.sol";
+import "forge-std/console2.sol";
 
 error GlacisLayerZeroAdapter__LZChainIdNotAccepted(uint256);
 
@@ -116,6 +117,7 @@ contract GlacisLayerZeroAdapter is
     {
         if (adapterChainIdToGlacisChainId[srcChainId] == 0)
             revert GlacisLayerZeroAdapter__LZChainIdNotAccepted(srcChainId);
+        console2.log(adapterChainIdToGlacisChainId[srcChainId]);
         GLACIS_ROUTER.receiveMessage(
             adapterChainIdToGlacisChainId[srcChainId],
             payload
