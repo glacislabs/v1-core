@@ -328,6 +328,26 @@ contract AdapterTests__Wormhole is LocalTestSetup {
             adapterIds[0]
         );
     }
+    
+    function test__Adapter_AdapterChainId_Wormhole() external {
+        uint256[] memory glacisChainIds = new uint256[](1);
+        glacisChainIds[0] = 1;
+        uint16[] memory adapterIds = new uint16[](1);
+        adapterIds[0] = 1;
+
+        wormholeAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
+        assertEq(wormholeAdapter.adapterChainID(glacisChainIds[0]), adapterIds[0]);
+    }
+
+    function test__Adapter_ChainIsAvailable_Wormhole() external {
+        uint256[] memory glacisChainIds = new uint256[](1);
+        glacisChainIds[0] = 1;
+        uint16[] memory adapterIds = new uint16[](1);
+        adapterIds[0] = 1;
+
+        wormholeAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
+        assertTrue(wormholeAdapter.chainIsAvailable(glacisChainIds[0]));
+    }
 
     function test__Adapter_ChainIsNotAvailable_Wormhole() external {
         uint256[] memory glacisChainIds = new uint256[](1);
