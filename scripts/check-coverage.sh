@@ -2,12 +2,12 @@ LINE_COVERAGE=$1
 FUNCTION_COVERAGE=$2
 BRANCH_COVERAGE=$3
 
-genhtml --branch-coverage filtered-lcov.info -output lcov.html | grep "\.:" > lcov.txt
+genhtml --branch-coverage coverage/filtered-lcov.info -output coverage/lcov.html | grep "\.:" > coverage/lcov.txt
 
-sed -i 's/\.*:\ /=/g' lcov.txt
-sed -i 's/\..*//g' lcov.txt
+sed -i 's/\.*:\ /=/g' coverage/lcov.txt
+sed -i 's/\..*//g' coverage/lcov.txt
 
-. lcov.txt
+. coverage/lcov.txt
 echo "Checking PR coverage "`date`
 echo
 echo "Requested coverage"
