@@ -91,7 +91,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.CrossChainGas calldata,
+        GlacisCommons.CrossChainGas memory,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         uint32 destinationDomain = glacisChainIdToAdapterChainId[toChainId];

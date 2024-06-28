@@ -47,16 +47,18 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.CrossChainGas calldata incentives,
+        GlacisCommons.CrossChainGas memory incentives,
         bytes memory payload
     ) internal override {
         uint16 _dstchainId = glacisChainIdToAdapterChainId[toChainId];
         if (_dstchainId == 0)
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
+
+        uint256 selectedGasLimit = incentives.gasLimit > 0 ? incentives.gasLimit : GAS_LIMIT;
         (uint256 nativePriceQuote, ) = WORMHOLE_RELAYER.quoteEVMDeliveryPrice(
             _dstchainId,
             RECEIVER_VALUE,
-            incentives.gasLimit > 0 ? GAS_LIMIT : incentives.gasLimit
+            selectedGasLimit
         );
 
         if (nativePriceQuote > msg.value)
@@ -69,7 +71,7 @@ contract GlacisWormholeAdapter is IWormholeReceiver, GlacisAbstractAdapter {
             remoteCounterpart[toChainId].toAddress(),
             payload,
             RECEIVER_VALUE,
-            incentives.gasLimit > 0 ? GAS_LIMIT : incentives.gasLimit,
+            selectedGasLimit,
             WORMHOLE_CHAIN_ID,
             refundAddress
         );

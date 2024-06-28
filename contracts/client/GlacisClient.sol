@@ -53,7 +53,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         CrossChainGas[] memory fees = new CrossChainGas[](1);
         fees[0] = CrossChainGas({ 
             gasLimit: 0,
-            nativeCurrencyValue: uint128(msg.value)
+            nativeCurrencyValue: uint128(gasPayment)
         });
         (bytes32 messageId,) = IGlacisRouter(GLACIS_ROUTER).route{
             value: gasPayment

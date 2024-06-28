@@ -22,3 +22,8 @@ forge-std
 ds-test
 
 coverage
+
+lcov.txt
+forge-pruned-lcov.info
+lcov.html
+report

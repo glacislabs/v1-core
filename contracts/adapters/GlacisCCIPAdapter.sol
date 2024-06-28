@@ -93,7 +93,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.CrossChainGas calldata incentives,
+        GlacisCommons.CrossChainGas memory incentives,
         bytes memory payload
     ) internal override onlyGlacisRouter {
         bytes32 remoteAdapter = remoteCounterpart[toChainId];
