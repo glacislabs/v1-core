@@ -46,15 +46,16 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         _transferOwnership(_owner);
     }
 
-    /// @notice Routes the payload to the specific address on the destination chain
-    /// using specified GMPs with quorum and retribale feature
-    /// @param chainId Destination chain (Glacis chain ID)
+    /// @notice Routes the payload to the specific address on the destination chain using specified adapters
+    /// @param chainId Destination chain (EIP-155)
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
-    /// @param adapters An array of adapters to be used for the routing
+    /// @param adapters An array of adapters to be used for the routing (addresses 0x01-0xF8 for Glacis adapters 
+    /// or specific addresses for custom adapters)
     /// @param fees Array of fees to be sent to each GMP & custom adapter for routing (must be same length as gmps)
-    /// @param refundAddress An (ideally EOA) address for native currency to be sent to that are greater than fees charged
-    /// @param retriable True if this message could be retried
+    /// @param refundAddress An address for native currency to be sent to that are greater than fees charged. If it is a 
+    /// contract it needs to support receive function, tx will revert otherwise
+    /// @param retriable True if this message could pottentially be retried
     function route(
         uint256 chainId,
         bytes32 to,
@@ -82,7 +83,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             messageSenders[messageId] = msg.sender;
         }
 
-        // Emit both Glacis event and the EIP-5164 event
+        // Emit Glacis message dispatched event
         emit GlacisRouter__MessageDispatched(
             messageId,
             from,
@@ -151,7 +152,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             refundAddress
         );
 
-        // Emit both Glacis event and the EIP-5164 event
+        // Emit Glacis message retried event
         emit GlacisRouter__MessageRetried(
             messageId,
             from,
