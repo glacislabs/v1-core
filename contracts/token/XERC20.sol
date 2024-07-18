@@ -5,7 +5,6 @@ import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-
 error XERC20__OnlyBridge();
 
 contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
