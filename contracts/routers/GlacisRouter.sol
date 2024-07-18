@@ -38,7 +38,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     mapping(bytes32 => MessageData) private messageReceipts;
     mapping(bytes32 => mapping(address => bool))
         private receivedCustomAdapterMessages;
-    mapping(bytes32 => address[]) receivedAdaptersList;
+    mapping(bytes32 => address[]) private receivedAdaptersList;
 
     struct MessageData {
         uint248 uniqueMessagesReceived;
