@@ -1,20 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.8.18;
+import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
 /// @title IGlacisAccessControlClient
 /// @notice An interface that determines Glacis' required access control
 interface IGlacisAccessControlClient {
     /// @notice Adds an allowed route for this client
     /// @notice Queries if a route from path GMP+Chain+Address is allowed for this client
-    /// @param fromChainId The chain ID of a message's origin
-    /// @param fromAddress The source address of a message's origin
-    /// @param fromAdapter The GMP ID or custom adapter address of a message's origin
+    /// @param route The origin route for the message
     /// @param payload The payload of a message
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
-        uint256 fromChainId,
-        bytes32 fromAddress,
-        address fromAdapter, // Could ethereum address, or GMP ID
+        GlacisCommons.GlacisRoute memory route,
         bytes memory payload
     ) external view returns (bool);
 }

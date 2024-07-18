@@ -27,9 +27,9 @@ contract GlacisTokenMediator is
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 
-    /// @param _glacisRouter This chain's deployment of the GlacisRouter  
-    /// @param _quorum The default quorum that you would like. If you implement dynamic quorum, this value can be ignored and 
-    /// set to 0  
+    /// @param _glacisRouter This chain's deployment of the GlacisRouter
+    /// @param _quorum The default quorum that you would like. If you implement dynamic quorum, this value can be ignored and
+    /// set to 0
     /// @param _owner The owner of this contract
     constructor(
         address _glacisRouter,
@@ -121,15 +121,16 @@ contract GlacisTokenMediator is
         );
 
         // Use helper function (otherwise stack too deep)
-        return _routeRetry(
-            chainId,
-            tokenPayload,
-            adapters,
-            fees,
-            refundAddress,
-            messageId,
-            nonce
-        );
+        return
+            _routeRetry(
+                chainId,
+                tokenPayload,
+                adapters,
+                fees,
+                refundAddress,
+                messageId,
+                nonce
+            );
     }
 
     /// @notice An internal routing function that helps with stack too deep
@@ -148,7 +149,7 @@ contract GlacisTokenMediator is
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
-    ) private returns(bytes32) {
+    ) private returns (bytes32) {
         bytes32 destinationTokenMediator = remoteCounterpart[chainId];
         if (destinationTokenMediator == bytes32(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();
@@ -210,7 +211,11 @@ contract GlacisTokenMediator is
         // Mint & execute
         address toAddress = to.toAddress();
         IXERC20(token.toAddress()).mint(toAddress, tokenAmount);
-        emit GlacisTokenMediator__TokensMinted(toAddress, token.toAddress(), tokenAmount);
+        emit GlacisTokenMediator__TokensMinted(
+            toAddress,
+            token.toAddress(),
+            tokenAmount
+        );
         IGlacisTokenClient client = IGlacisTokenClient(toAddress);
 
         if (toAddress.code.length > 0) {
@@ -262,18 +267,16 @@ contract GlacisTokenMediator is
     }
 
     /// @notice Queries if a route from path GMP+Chain+Address is allowed for this client
-    /// @param fromChainId Source chain Id
-    /// @param fromAddress Source address
-    /// @param fromAdapter source GMP Id
+    /// @param route_ Origin route for the message
+    /// @param payload message payload
     /// @return True if route is allowed, false otherwise
     function isAllowedRoute(
-        uint256 fromChainId,
-        bytes32 fromAddress,
-        address fromAdapter,
+        GlacisRoute memory route_,
         bytes memory payload
     ) external view returns (bool) {
         // First checks to ensure that the GlacisTokenMediator is speaking to a registered remote version
-        if (fromAddress != remoteCounterpart[fromChainId]) return false;
+        if (route_.fromAddress != remoteCounterpart[route_.fromChainId])
+            return false;
 
         (
             bytes32 to,
@@ -287,22 +290,32 @@ contract GlacisTokenMediator is
         // If the destination smart contract is an EOA, then we can only allow adapters that are using
         // our canonical GMPs. Otherwise, we would allow malicious custom adapters.
         address toAddress = to.toAddress();
-        if (toAddress.code.length == 0) 
-            return GlacisRouter(GLACIS_ROUTER).adapterToGlacisGMPId(fromAdapter) > 0 || 
-                (uint160(fromAdapter) <= GLACIS_RESERVED_IDS && GlacisRouter(GLACIS_ROUTER).glacisGMPIdToAdapter(uint8(uint160(fromAdapter))) != address(0));
+        if (toAddress.code.length == 0)
+            return
+                GlacisRouter(GLACIS_ROUTER).adapterToGlacisGMPId(
+                    route_.fromAdapter
+                ) >
+                0 ||
+                (uint160(route_.fromAdapter) <= GLACIS_RESERVED_IDS &&
+                    GlacisRouter(GLACIS_ROUTER).glacisGMPIdToAdapter(
+                        uint8(uint160(route_.fromAdapter))
+                    ) !=
+                    address(0));
 
         // Forwards check to the token client
         return
             IGlacisTokenClient(toAddress).isAllowedRoute(
-                fromChainId,
-                originalFrom,
-                fromAdapter,
+                GlacisRoute(
+                    route_.fromChainId,
+                    originalFrom,
+                    route_.fromAdapter
+                ),
                 originalPayload
             );
     }
 
     /// @notice Determines if a token from a chain ID is a token variant for this chain's token
-    /// @param token The address of the token in question  
+    /// @param token The address of the token in question
     /// @param chainId The chain ID that the token in question is deployed
     function getTokenVariant(
         address token,
@@ -342,7 +355,7 @@ contract GlacisTokenMediator is
             );
     }
 
-    /// @notice Decodes a received token payload 
+    /// @notice Decodes a received token payload
     /// @param payload The payload
     function decodeTokenPayload(
         bytes memory payload

@@ -136,9 +136,11 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
 
         assert(
             harness.isAllowedRoute(
-                block.chainid,
-                address(harness).toBytes32(),
-                AXELAR_GMP_ID,
+                GlacisRoute(
+                    block.chainid,
+                    address(harness).toBytes32(),
+                    AXELAR_GMP_ID
+                ),
                 ""
             )
         );
