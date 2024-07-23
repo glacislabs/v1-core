@@ -31,7 +31,7 @@ abstract contract GlacisAbstractAdapter is
     /// @param _glacisRouter This chain's glacis router  
     /// @param _owner This adapter's owner  
     constructor(IGlacisRouter _glacisRouter, address _owner) {
-        transferOwnership(_owner);
+        _transferOwnership(_owner);
         GLACIS_ROUTER = _glacisRouter;
     }
 

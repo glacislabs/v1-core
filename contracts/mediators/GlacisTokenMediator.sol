@@ -38,7 +38,7 @@ contract GlacisTokenMediator is
     ) IGlacisClient(_quorum) {
         // Approve conversation between token routers in all chains through all GMPs
         GLACIS_ROUTER = _glacisRouter;
-        transferOwnership(_owner);
+        _transferOwnership(_owner);
     }
 
     address public immutable GLACIS_ROUTER;
