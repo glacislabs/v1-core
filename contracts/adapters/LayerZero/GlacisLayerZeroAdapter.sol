@@ -30,6 +30,9 @@ contract GlacisLayerZeroAdapter is
     mapping(uint256 => uint16) public glacisChainIdToAdapterChainId;
     mapping(uint16 => uint256) public adapterChainIdToGlacisChainId;
 
+    address public zroPaymentAddress;
+    bytes public adapterParams = bytes("");
+
     /// @notice Sets the corresponding LayerZero chain ID for the specified Glacis chain ID
     /// @param glacisIDs Glacis chain IDs
     /// @param lzIDs Layer Zero chain IDs
@@ -93,8 +96,8 @@ contract GlacisLayerZeroAdapter is
             _dstChainAddress: remoteCounterpart.toAddress(),
             _payload: payload,
             _refundAddress: payable(refundAddress),
-            _zroPaymentAddress: address(0x0),
-            _adapterParams: bytes(""),
+            _zroPaymentAddress: zroPaymentAddress,
+            _adapterParams: adapterParams,
             _nativeFee: msg.value
         });
     }
@@ -121,4 +124,16 @@ contract GlacisLayerZeroAdapter is
             payload
         );
     }
+
+    /// Sets the zro payment address for LayerZero messages.
+    /// @param zro The desired zro payment address.
+    function setZroPaymentAddress(address zro) external onlyOwner {
+        zroPaymentAddress = zro;
+    } 
+
+    /// Sets the adapter parameters for LayerZero messages.
+    /// @param params The desired adapter params.
+    function setAdapterParams(bytes memory params) external onlyOwner {
+        adapterParams = params;
+    } 
 }
