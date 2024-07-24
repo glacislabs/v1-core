@@ -20,6 +20,13 @@ abstract contract IGlacisRouterEvents is GlacisCommons
         address adapter,
         bytes32 to
     );
+    event GlacisRouter__ExecutedMessage(
+        bytes32 indexed messageId,
+        bytes32 indexed from,
+        uint256 indexed fromChainId,
+        address adapter,
+        bytes32 to
+    );
     event GlacisRouter__MessageDispatched(
         bytes32 indexed messageId,
         bytes32 indexed from,

@@ -10,9 +10,6 @@ import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpar
 error GlacisAbstractAdapter__OnlyGlacisRouterAllowed();
 error GlacisAbstractAdapter__OnlyAdapterAllowed();
 error GlacisAbstractAdapter__DestinationChainIdNotValid();
-error GlacisAbstractAdapter__InvalidAdapterAddress();
-error GlacisAbstractAdapter__InvalidChainId();
-error GlacisAbstractAdapter__NoAdapterConfiguredForChain();
 error GlacisAbstractAdapter__SourceChainNotRegistered();
 error GlacisAbstractAdapter__IDArraysMustBeSameLength();
 error GlacisAbstractAdapter__NoRemoteAdapterForChainId(uint256 chainId);

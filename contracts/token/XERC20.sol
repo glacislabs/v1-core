@@ -5,7 +5,6 @@ import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-error XERC20__OnlyBridge();
 
 contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
     /**
@@ -35,7 +34,6 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
      * @param _symbol The symbol of the token
      * @param _factory The factory which deployed this contract
      */
-
     constructor(
         string memory _name,
         string memory _symbol,
@@ -47,7 +45,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
 
     /**
      * @notice Mints tokens for a user
-     * @dev Can only be called by a bridge
+     * @dev Can only be called by a bridge or lockbox
      * @param _user The address of the user who needs tokens minted
      * @param _amount The amount of tokens being minted
      */
@@ -58,7 +56,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
 
     /**
      * @notice Burns tokens for a user
-     * @dev Can only be called by a bridge
+     * @dev Can only be called by a bridge or lockbox
      * @param _user The address of the user who needs tokens burned
      * @param _amount The amount of tokens being burned
      */

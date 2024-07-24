@@ -9,10 +9,7 @@ import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {GlacisRemoteCounterpartManager} from "../managers/GlacisRemoteCounterpartManager.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 
-error SimpleTokenMediator__OnlyTokenMediatorAllowed();
-error SimpleTokenMediator__IncorrectTokenVariant(address, uint256);
 error SimpleTokenMediator__DestinationChainUnavailable();
-error SimpleTokenMediator__TokenMapInitializationIncorrect();
 
 /// @title Simple Token Mediator
 /// @notice This contract burns and mints XERC-20 tokens without additional

@@ -5,6 +5,8 @@ pragma solidity 0.8.18;
 /// @title String to Address Library
 /// @notice A library that a string to addresses
 library AddressString {
+    error AddressString__InvalidByteValue(bytes1 b);
+
     /// @notice Converts an hex string to address
     /// @param _hexString The hex string to be converted
     function toAddress(
@@ -32,7 +34,7 @@ library AddressString {
         } else if (uint8(_byte) >= 97 && uint8(_byte) <= 102) {
             return uint8(_byte) - 87;
         } else {
-            revert(string(abi.encode("Invalid byte value: ", _byte)));
+            revert AddressString__InvalidByteValue(_byte);
         }
     }
 }

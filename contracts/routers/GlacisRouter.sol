@@ -13,7 +13,6 @@ error GlacisRouter__RouteDoesNotExist(); //0xeb470cd2
 error GlacisRouter__ClientDeniedRoute();
 error GlacisRouter__NotOwnerOfMessageToRetry();
 error GlacisRouter__MessageInputNotIdenticalForRetry();
-error GlacisRouter__ImpossibleGMPId(uint8 gmpId);
 error GlacisRouter__MessageAlreadyReceivedFromGMP();
 error GlacisRouter__MessageIdNotValid();
 error GlacisRouter__FeeArrayMustEqualGMPArray();
@@ -297,6 +296,14 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
                 fromChainId,
                 glacisData.originalFrom,
                 payload
+            );
+
+            emit GlacisRouter__ExecutedMessage(
+                glacisData.messageId,
+                glacisData.originalFrom,
+                fromChainId,
+                msg.sender,
+                glacisData.originalTo
             );
         } else {
             messageReceipts[glacisData.messageId] = currentReceipt;
