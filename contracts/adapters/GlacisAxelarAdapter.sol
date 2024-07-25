@@ -25,6 +25,8 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     mapping(uint256 => string) public glacisChainIdToAdapterChainId;
     mapping(string => uint256) public adapterChainIdToGlacisChainId;
 
+    event GlacisAxelarAdapter__SetGlacisChainIDs(uint256[] chainIDs, string[] chainLabels);
+
     /// @param _glacisRouter This chain's glacis router
     /// @param _axelarGateway This chain's axelar gateway
     /// @param _axelarGasReceiver This chain's axelar gas receiver
@@ -42,18 +44,18 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     }
 
     /// @notice Sets the corresponding Axelar chain label for the specified Glacis chain ID
-    /// @param glacisIds Glacis chain IDs
+    /// @param chainIDs Glacis chain IDs
     /// @param chainLabels Axelar corresponding chain labels
     function setGlacisChainIds(
-        uint256[] memory glacisIds,
+        uint256[] memory chainIDs,
         string[] memory chainLabels
     ) external onlyOwner {
-        uint256 chainIdLen = glacisIds.length;
+        uint256 chainIdLen = chainIDs.length;
         if (chainIdLen != chainLabels.length)
             revert GlacisAbstractAdapter__IDArraysMustBeSameLength();
 
         for (uint256 i; i < chainIdLen; ) {
-            uint256 chainId = glacisIds[i];
+            uint256 chainId = chainIDs[i];
             string memory chainLabel = chainLabels[i];
 
             if (chainId == 0)
@@ -66,6 +68,8 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
                 ++i;
             }
         }
+
+        emit GlacisAxelarAdapter__SetGlacisChainIDs(chainIDs, chainLabels);
     }
 
     /// @notice Gets the corresponding Axelar chain label for the specified Glacis chain ID

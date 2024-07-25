@@ -21,5 +21,4 @@ interface IGlacisAdapter {
         GlacisCommons.CrossChainGas memory incentives,
         bytes memory payload
     ) external payable;
-
 }

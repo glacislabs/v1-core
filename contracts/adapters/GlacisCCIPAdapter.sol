@@ -31,6 +31,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         uint256 extrapolation,
         uint256 messageValue
     );
+    event GlacisCCIPAdapter__SetGlacisChainIDs(uint256[] chainIDs, uint64[] chainSelectors);
 
     /// @param _glacisRouter This chain's glacis router
     /// @param _ccipRouter This chain's CCIP router
@@ -45,18 +46,18 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     {}
 
     /// @notice Sets the corresponding CCIP selectors for the specified Glacis chain ID
-    /// @param chainIds Glacis chain IDs
+    /// @param chainIDs Glacis chain IDs
     /// @param chainSelectors Corresponding CCIP chain selectors
     function setGlacisChainIds(
-        uint256[] memory chainIds,
+        uint256[] memory chainIDs,
         uint64[] memory chainSelectors
     ) external onlyOwner {
-        uint256 chainIdLen = chainIds.length;
+        uint256 chainIdLen = chainIDs.length;
         if (chainIdLen != chainSelectors.length)
             revert GlacisAbstractAdapter__IDArraysMustBeSameLength();
 
         for (uint256 i; i < chainIdLen; ) {
-            uint256 chainId = chainIds[i];
+            uint256 chainId = chainIDs[i];
             uint64 selector = chainSelectors[i];
 
             if (chainId == 0)
@@ -69,6 +70,8 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
                 ++i;
             }
         }
+
+        emit GlacisCCIPAdapter__SetGlacisChainIDs(chainIDs, chainSelectors);
     }
 
     /// @notice Gets the corresponding CCIP chain selector for the specified Glacis chain ID

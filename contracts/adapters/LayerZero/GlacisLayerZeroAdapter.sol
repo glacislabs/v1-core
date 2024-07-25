@@ -30,22 +30,23 @@ contract GlacisLayerZeroAdapter is
     mapping(uint256 => uint16) public glacisChainIdToAdapterChainId;
     mapping(uint16 => uint256) public adapterChainIdToGlacisChainId;
 
-    address public zroPaymentAddress;
     bytes public adapterParams = bytes("");
 
+    event GlacisLayerZeroAdapter__SetGlacisChainIDs(uint256[] chainIDs, uint16[] lzIDs);
+
     /// @notice Sets the corresponding LayerZero chain ID for the specified Glacis chain ID
-    /// @param glacisIDs Glacis chain IDs
+    /// @param chainIDs Glacis chain IDs
     /// @param lzIDs Layer Zero chain IDs
     function setGlacisChainIds(
-        uint256[] calldata glacisIDs,
+        uint256[] calldata chainIDs,
         uint16[] calldata lzIDs
     ) external onlyOwner {
-        uint256 glacisIDsLen = glacisIDs.length;
+        uint256 glacisIDsLen = chainIDs.length;
         if (glacisIDsLen != lzIDs.length)
             revert GlacisAbstractAdapter__IDArraysMustBeSameLength();
 
         for (uint256 i; i < glacisIDsLen; ) {
-            uint256 glacisID = glacisIDs[i];
+            uint256 glacisID = chainIDs[i];
             uint16 lzID = lzIDs[i];
 
             if (glacisID == 0)
@@ -58,6 +59,8 @@ contract GlacisLayerZeroAdapter is
                 ++i;
             }
         }
+
+        emit GlacisLayerZeroAdapter__SetGlacisChainIDs(chainIDs, lzIDs);
     }
 
     /// @notice Gets the corresponding LayerZero chain ID for the specified Glacis chain ID
@@ -96,7 +99,7 @@ contract GlacisLayerZeroAdapter is
             _dstChainAddress: remoteCounterpart.toAddress(),
             _payload: payload,
             _refundAddress: payable(refundAddress),
-            _zroPaymentAddress: zroPaymentAddress,
+            _zroPaymentAddress: address(0),
             _adapterParams: adapterParams,
             _nativeFee: msg.value
         });
@@ -124,12 +127,6 @@ contract GlacisLayerZeroAdapter is
             payload
         );
     }
-
-    /// Sets the zro payment address for LayerZero messages.
-    /// @param zro The desired zro payment address.
-    function setZroPaymentAddress(address zro) external onlyOwner {
-        zroPaymentAddress = zro;
-    } 
 
     /// Sets the adapter parameters for LayerZero messages.
     /// @param params The desired adapter params.

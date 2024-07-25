@@ -13,6 +13,15 @@ abstract contract IGlacisRouterEvents is GlacisCommons
         bytes32 indexed sender,
         uint256 nonce
     );
+    event GlacisAbstractRouter__AdapterRegistered(
+        uint8 indexed gmpId,
+        address indexed adapterAddress,
+        address indexed previousAddress
+    );
+    event GlacisAbstractRouter__AdapterUnregistered(
+        uint8 indexed gmpId,
+        address indexed adapterAddress
+    );
     event GlacisRouter__ReceivedMessage(
         bytes32 indexed messageId,
         bytes32 indexed from,

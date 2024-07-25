@@ -28,6 +28,8 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     mapping(uint256 => uint32) public glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;
 
+    event GlacisHyperlaneAdapter__SetGlacisChainIDs(uint256[] chainIDs, uint32[] domains);
+
     /// @param _glacisRouter This chain's glacis router
     /// @param _hyperlaneMailbox This chain's hyperlane router
     /// @param _owner This adapter's owner
@@ -41,18 +43,18 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     }
 
     /// @notice Sets the corresponding Hyperlane domain for the specified Glacis chain ID
-    /// @param chainIds Glacis chain IDs
+    /// @param chainIDs Glacis chain IDs
     /// @param domains Hyperlane corresponding chain domains
     function setGlacisChainIds(
-        uint256[] memory chainIds,
+        uint256[] memory chainIDs,
         uint32[] memory domains
     ) public onlyOwner {
-        uint256 chainIdLen = chainIds.length;
+        uint256 chainIdLen = chainIDs.length;
         if (chainIdLen != domains.length)
             revert GlacisAbstractAdapter__IDArraysMustBeSameLength();
 
         for (uint256 i; i < chainIdLen; ) {
-            uint256 chainId = chainIds[i];
+            uint256 chainId = chainIDs[i];
             uint32 chainLabel = domains[i];
 
             if (chainId == 0)
@@ -65,6 +67,8 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
                 ++i;
             }
         }
+
+        emit GlacisHyperlaneAdapter__SetGlacisChainIDs(chainIDs, domains);
     }
 
     /// @notice Gets the corresponding Hyperlane domain ID for the specified Glacis chain ID
