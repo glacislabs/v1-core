@@ -64,6 +64,7 @@ interface IGlacisRouter {
     /// @param refundAddress An address for native currency to be sent to that are greater than fees charged. If it is a 
     /// contract it needs to support receive function, reverted otherwise
     /// @param retriable True if this message could pottentially be retried
+    /// @return A tuple with a bytes32 messageId and a uint256 nonce
     function route(
         uint256 chainId,
         bytes32 to,
@@ -86,6 +87,7 @@ interface IGlacisRouter {
     /// contract it needs to support receive function, tx will revert otherwise
     /// @param messageId The messageId to retry
     /// @param nonce Unique value for this message routing
+    /// @return A tuple with a bytes32 messageId and a uint256 nonce
     function routeRetry(
         uint256 chainId,
         bytes32 to,
@@ -95,7 +97,7 @@ interface IGlacisRouter {
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
-    ) external payable returns (bytes32);
+    ) external payable returns (bytes32, uint256);
 
     /// @notice Receives a cross chain message from an IGlacisAdapter.
     /// @param fromChainId Source chain (EIP-155)

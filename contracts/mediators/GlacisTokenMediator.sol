@@ -53,6 +53,7 @@ contract GlacisTokenMediator is
     /// @param refundAddress Address to refund excess gas payment
     /// @param token Token (implementing XERC20 standard) to be sent to remote contract
     /// @param tokenAmount Amount of token to send to remote contract
+    /// @return A tuple with a bytes32 messageId and a uint256 nonce
     function route(
         uint256 chainId,
         bytes32 to,
@@ -99,6 +100,7 @@ contract GlacisTokenMediator is
     /// @param nonce The nonce emitted by the original message routing
     /// @param token Token (implementing XERC20 standard) to be sent to remote contract
     /// @param tokenAmount Amount of token to send to remote contract
+    /// @return A tuple with a bytes32 messageId and a uint256 nonce
     function routeRetry(
         uint256 chainId,
         bytes32 to,
@@ -110,7 +112,7 @@ contract GlacisTokenMediator is
         uint256 nonce,
         address token,
         uint256 tokenAmount
-    ) public payable virtual returns (bytes32) {
+    ) public payable virtual returns (bytes32, uint256) {
         // Pack with a function (otherwise stack too deep)
         bytes memory tokenPayload = packTokenPayload(
             chainId,
@@ -141,6 +143,7 @@ contract GlacisTokenMediator is
     /// @param refundAddress Address to refund excess gas payment
     /// @param messageId The message ID of the message to retry
     /// @param nonce The nonce emitted by the original message routing
+    /// @return A bytes32 messageId
     function _routeRetry(
         uint256 chainId,
         bytes memory tokenPayload,
@@ -149,7 +152,7 @@ contract GlacisTokenMediator is
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
-    ) private returns (bytes32) {
+    ) private returns (bytes32, uint256) {
         bytes32 destinationTokenMediator = remoteCounterpart[chainId];
         if (destinationTokenMediator == bytes32(0))
             revert GlacisTokenMediator__DestinationChainUnavailable();

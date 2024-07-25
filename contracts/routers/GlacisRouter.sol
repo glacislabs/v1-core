@@ -112,6 +112,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param refundAddress An (ideally EOA) address for native currency to be sent to that are greater than fees charged
     /// @param messageId The messageId to retry
     /// @param nonce Unique value for this message routing
+    /// @return A tuple with a bytes32 messageId and a uint256 nonce
     function routeRetry(
         uint256 chainId,
         bytes32 to,
@@ -121,7 +122,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
-    ) public payable virtual returns (bytes32) {
+    ) public payable virtual returns (bytes32, uint256) {
         // Validate input
         validateFeesInput(adapters.length, fees);
 
@@ -168,7 +169,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         );
 
         // There is no need to check that this has been retried before. Retry as many times as desired.
-        return messageId;
+        return (messageId, nonce);
     }
 
     /// @notice Performs actual message dispatching to all the required adapters
