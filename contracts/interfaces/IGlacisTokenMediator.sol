@@ -8,13 +8,13 @@ import {GlacisCommons} from "../commons/GlacisCommons.sol";
 /// @notice An interface of a mediator that sends XERC20s with a payload across chains  
 interface IGlacisTokenMediator {
     event GlacisTokenMediator__TokensBurnt(
-        address from,
-        address token,
+        address indexed from,
+        address indexed token,
         uint256 amount
     );
     event GlacisTokenMediator__TokensMinted(
-        address to,
-        address token,
+        address indexed to,
+        address indexed token,
         uint256 amount
     );
 

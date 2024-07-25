@@ -15,7 +15,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     address public immutable GLACIS_ROUTER;
 
     event GlacisClient__MessageRouted(
-        bytes32 messageId,
+        bytes32 indexed messageId,
         uint256 toChainId,
         bytes32 to
     );

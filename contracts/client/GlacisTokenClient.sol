@@ -15,7 +15,7 @@ error GlacisTokenClient__CanOnlyBeCalledByTokenRouter();
 abstract contract GlacisTokenClient is GlacisClient, IGlacisTokenClient {
     address public immutable GLACIS_TOKEN_ROUTER;
     event GlacisTokenClient__MessageRouted(
-        bytes32 messageId,
+        bytes32 indexed messageId,
         uint256 toChainId,
         bytes32 to
     );
