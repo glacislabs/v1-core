@@ -76,7 +76,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
 
         _processRouting(
             chainId,
-            // @notice This follows GlacisData stored within GlacisCommons
+            // @notice This follows GlacisData (within GlacisCommons) + payload
             abi.encode(messageId, nonce, from, to, payload),
             adapters,
             fees,
