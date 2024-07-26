@@ -25,7 +25,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     IMailbox public immutable MAIL_BOX;
     uint32 public immutable LOCAL_DOMAIN;
 
-    mapping(uint256 => uint32) public glacisChainIdToAdapterChainId;
+    mapping(uint256 => uint32) internal glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;
 
     event GlacisHyperlaneAdapter__SetGlacisChainIDs(uint256[] chainIDs, uint32[] domains);

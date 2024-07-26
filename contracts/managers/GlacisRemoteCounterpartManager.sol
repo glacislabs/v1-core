@@ -15,7 +15,7 @@ contract GlacisRemoteCounterpartManager is
     IGlacisRemoteCounterpartManager,
     Ownable2Step
 {
-    mapping(uint256 => bytes32) public remoteCounterpart;
+    mapping(uint256 => bytes32) internal remoteCounterpart;
 
     /// @notice Adds an authorized glacis counterpart component in a remote chain that interacts with this component
     /// @param chainIDs An array with chains of the glacis remote components

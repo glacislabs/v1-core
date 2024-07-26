@@ -27,7 +27,7 @@ contract GlacisLayerZeroAdapter is
         GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner)
     {}
 
-    mapping(uint256 => uint16) public glacisChainIdToAdapterChainId;
+    mapping(uint256 => uint16) internal glacisChainIdToAdapterChainId;
     mapping(uint16 => uint256) public adapterChainIdToGlacisChainId;
 
     bytes public adapterParams = bytes("");

@@ -35,7 +35,6 @@ contract AdapterTests__CCIP is LocalTestSetup {
 
         ccipAdapter.setGlacisChainIds(chains, ccipDomains);
 
-        assertEq(ccipAdapter.glacisChainIdToAdapterChainId(chain), chain);
         assertEq(ccipAdapter.adapterChainID(chain), chain);
         assertEq(ccipAdapter.adapterChainIdToGlacisChainId(chain), chain);
         assertTrue(ccipAdapter.chainIsAvailable(chain));

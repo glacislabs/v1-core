@@ -24,7 +24,7 @@ error GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
 contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     using AddressBytes32 for address;
 
-    mapping(uint256 => uint64) public glacisChainIdToAdapterChainId;
+    mapping(uint256 => uint64) internal glacisChainIdToAdapterChainId;
     mapping(uint64 => uint256) public adapterChainIdToGlacisChainId;
 
     event GlacisCCIPAdapter__ExtrapolatedGasLimit(

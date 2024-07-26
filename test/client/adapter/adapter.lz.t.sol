@@ -89,7 +89,6 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
 
         lzAdapter.setGlacisChainIds(chains, lzIDs);
 
-        assertEq(lzAdapter.glacisChainIdToAdapterChainId(chain), lzId);
         assertEq(lzAdapter.adapterChainID(chain), lzId);
         assertEq(lzAdapter.adapterChainIdToGlacisChainId(lzId), chain);
         assertTrue(lzAdapter.chainIsAvailable(chain));

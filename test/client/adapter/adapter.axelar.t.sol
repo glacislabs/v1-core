@@ -63,7 +63,6 @@ contract AdapterTests__Axelar is LocalTestSetup {
 
         axelarAdapter.setGlacisChainIds(chains, axelarNames);
 
-        assertEq(axelarAdapter.glacisChainIdToAdapterChainId(chain), name);
         assertEq(axelarAdapter.adapterChainID(chain), name);
         assertEq(axelarAdapter.adapterChainIdToGlacisChainId(name), chain);
         assertTrue(axelarAdapter.chainIsAvailable(chain));

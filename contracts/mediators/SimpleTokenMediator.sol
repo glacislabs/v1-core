@@ -26,8 +26,8 @@ contract SimpleTokenMediator is GlacisRemoteCounterpartManager, GlacisClient {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 
-    event SimpleTokenMediator__TokensMinted(indexed address, indexed address, uint256);
-    event SimpleTokenMediator__TokensBurnt(indexed address, indexed address, uint256);
+    event SimpleTokenMediator__TokensMinted(address indexed, address indexed, uint256);
+    event SimpleTokenMediator__TokensBurnt(address indexed, address indexed, uint256);
 
     constructor(
         address _glacisRouter,

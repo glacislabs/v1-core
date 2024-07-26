@@ -22,7 +22,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     using AddressBytes32 for address;
     IAxelarGasService public immutable GAS_SERVICE;
 
-    mapping(uint256 => string) public glacisChainIdToAdapterChainId;
+    mapping(uint256 => string) internal glacisChainIdToAdapterChainId;
     mapping(string => uint256) public adapterChainIdToGlacisChainId;
 
     event GlacisAxelarAdapter__SetGlacisChainIDs(uint256[] chainIDs, string[] chainLabels);
