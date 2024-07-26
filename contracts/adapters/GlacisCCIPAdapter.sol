@@ -27,6 +27,9 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     mapping(uint256 => uint64) internal glacisChainIdToAdapterChainId;
     mapping(uint64 => uint256) public adapterChainIdToGlacisChainId;
 
+    // CCIP caps at 3 million gas: https://docs.chain.link/ccip/service-limits
+    uint256 public ccipGasLimit = 3_000_000;
+
     event GlacisCCIPAdapter__ExtrapolatedGasLimit(
         uint256 extrapolation,
         uint256 messageValue
@@ -260,8 +263,13 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         // Calculates x = (y-b) / m, but increased m by 0.5% to overestimate value needed
         uint256 gasLimit = (value - feeAt0GasLimit) / (m + (m / 200));
 
-        // CCIP caps at 3 million gas: https://docs.chain.link/ccip/service-limits
-        if (gasLimit > 3_000_000) return 3_000_000;
+        if (gasLimit > ccipGasLimit) return ccipGasLimit;
         else return gasLimit;
+    }
+
+    /// @notice Sets the CCIP Gas limit (described here: https://docs.chain.link/ccip/service-limits)
+    /// @param gasLimit New CCIP gas limit
+    function setCCIPGasLimit(uint256 gasLimit) public onlyOwner {
+        ccipGasLimit = gasLimit;
     }
 }
