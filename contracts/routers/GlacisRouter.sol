@@ -74,6 +74,11 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes32 from = msg.sender.toBytes32();
         (messageId, nonce) = _createGlacisMessageId(chainId, to, payload);
 
+        // Store messageId owner if retriable flagged
+        if (retriable) {
+            messageSenders[messageId] = msg.sender;
+        }
+
         _processRouting(
             chainId,
             // @notice This follows GlacisData (within GlacisCommons) + payload
@@ -82,9 +87,6 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             fees,
             refundAddress
         );
-        if (retriable) {
-            messageSenders[messageId] = msg.sender;
-        }
 
         // Emit Glacis message dispatched event
         emit GlacisRouter__MessageDispatched(
