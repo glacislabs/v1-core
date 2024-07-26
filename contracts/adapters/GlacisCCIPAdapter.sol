@@ -118,7 +118,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             evm2AnyMessage = Client.EVM2AnyMessage({
                 receiver: abi.encode(remoteAdapter), // ABI-encoded receiver address
                 data: payload,
-                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
+                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array as no tokens are transferred
                 // NOTE: extraArgs is subject to changes by CCIP in the future.
                 // We are not supposed to hard code this, but it's hard to get around. We will likely have to
                 // regularly redeploy this adapter.
@@ -153,7 +153,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             evm2AnyMessage = Client.EVM2AnyMessage({
                 receiver: abi.encode(remoteCounterpart[toChainId]), // ABI-encoded receiver address
                 data: payload,
-                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
+                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array as no tokens are transferred
                 // NOTE: extraArgs is subject to changes by CCIP in the future.
                 // We are not supposed to hard code this, but it's hard to get around. We will likely have to
                 // regularly redeploy this adapter.
@@ -226,7 +226,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             Client.EVM2AnyMessage({
                 receiver: abi.encode(remoteCounterpart[destinationChain]), // ABI-encoded receiver address
                 data: payload,
-                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
+                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array as no tokens are transferred
                 // NOTE: extraArgs is subject to changes by CCIP in the future.
                 // We are not supposed to hard code this, but it's hard to get around. We will likely have to
                 // regularly redeploy this adapter.

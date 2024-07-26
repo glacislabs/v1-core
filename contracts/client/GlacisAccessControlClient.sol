@@ -12,7 +12,7 @@ abstract contract GlacisAccessControlClient is GlacisCommons, IGlacisAccessContr
     mapping(uint256 => mapping(bytes32 => mapping(address => bool))) public allowedRoutes;
 
     bytes32 constant internal WILD_BYTES = bytes32(uint256(WILDCARD));
-    address constant internal WILD_ADDR = address(uint160(uint256(WILDCARD)));
+    address constant internal WILD_ADDR = address(WILDCARD);
 
     /// @notice Adds an allowed route for this client
     /// @param route Route to be added

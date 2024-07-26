@@ -16,7 +16,7 @@ error GlacisHyperlaneAdapter__FeeNotEnough();
 error GlacisHyperlaneAdapter__RefundAddressMustReceiveNativeCurrency();
 
 /// @title Glacis Adapter for Hyperlane
-/// @notice A Glacis Adapter for the cannonical Hyperlane network. Sends messages through dispatch() and receives
+/// @notice A Glacis Adapter for the canonical Hyperlane network. Sends messages through dispatch() and receives
 /// messages via handle()
 /// @notice Opted to create our own mailbox client because Hyperlane's base Mailbox refund address was static
 contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {

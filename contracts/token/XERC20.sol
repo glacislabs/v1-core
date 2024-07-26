@@ -86,7 +86,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
      * @dev Can only be called by the owner
      * @param _mintingLimit The updated minting limit we are setting to the bridge
      * @param _burningLimit The updated burning limit we are setting to the bridge
-     * @param _bridge The address of the bridge we are setting the limits too
+     * @param _bridge The address of the bridge we are setting the limits to
      */
     function setLimits(
         address _bridge,
@@ -162,7 +162,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
 
     /**
      * @notice Uses the limit of any bridge
-     * @param _bridge The address of the bridge who is being changed
+     * @param _bridge The address of the bridge that is being changed
      * @param _change The change in the limit
      */
 
@@ -174,7 +174,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
 
     /**
      * @notice Uses the limit of any bridge
-     * @param _bridge The address of the bridge who is being changed
+     * @param _bridge The address of the bridge that is being changed
      * @param _change The change in the limit
      */
 
@@ -187,7 +187,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
     /**
      * @notice Updates the limit of any bridge
      * @dev Can only be called by the owner
-     * @param _bridge The address of the bridge we are setting the limit too
+     * @param _bridge The address of the bridge we are setting the limit to
      * @param _limit The updated limit we are setting to the bridge
      */
 
@@ -209,7 +209,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
     /**
      * @notice Updates the limit of any bridge
      * @dev Can only be called by the owner
-     * @param _bridge The address of the bridge we are setting the limit too
+     * @param _bridge The address of the bridge we are setting the limit to
      * @param _limit The updated limit we are setting to the bridge
      */
 
