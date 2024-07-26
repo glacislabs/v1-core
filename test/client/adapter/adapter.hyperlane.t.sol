@@ -70,19 +70,6 @@ contract AdapterTests__Hyperlane is LocalTestSetup {
         assertFalse(hyperlaneAdapter.chainIsAvailable(chainId));
     }
 
-    function test__sendMessageOnlyAllowsAdapter_Hyperlane(uint256 chainId) external {
-        vm.assume(chainId != 0);
-        GlacisHyperlaneAdapterHarness harness = deployHarness();
-
-        vm.expectRevert(GlacisAbstractAdapter__OnlyGlacisRouterAllowed.selector);
-        harness.sendMessagePublic(
-            chainId,
-            address(this),
-            CrossChainGas(100, 100),
-            abi.encode(0)
-        );
-    }
-
     function test__sendMessageChecksAvailability_Hyperlane(uint256 chainId) external {
         vm.assume(chainId != 0);
         GlacisHyperlaneAdapterHarness harness = deployHarness();

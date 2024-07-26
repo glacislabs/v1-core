@@ -95,7 +95,7 @@ contract GlacisLayerZeroAdapter is
         if (_dstchainId == 0)
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
         _lzSend({
-            _dstChainId: glacisChainIdToAdapterChainId[toChainId],
+            _dstChainId: _dstchainId,
             _dstChainAddress: remoteCounterpart.toAddress(),
             _payload: payload,
             _refundAddress: payable(refundAddress),

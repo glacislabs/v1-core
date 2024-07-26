@@ -99,7 +99,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
         address refundAddress,
         GlacisCommons.CrossChainGas memory,
         bytes memory payload
-    ) internal override onlyGlacisRouter {
+    ) internal override {
         string memory destinationChain = glacisChainIdToAdapterChainId[
             toChainId
         ];

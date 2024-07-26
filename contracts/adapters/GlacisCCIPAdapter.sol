@@ -98,7 +98,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         address refundAddress,
         GlacisCommons.CrossChainGas memory incentives,
         bytes memory payload
-    ) internal override onlyGlacisRouter {
+    ) internal override {
         bytes32 remoteAdapter = remoteCounterpart[toChainId];
         uint64 destinationChain = glacisChainIdToAdapterChainId[toChainId];
         if (remoteAdapter == bytes32(0))
@@ -107,7 +107,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
 
         // Initialize a router client instance to interact with cross-chain router
-        IRouterClient router = IRouterClient(this.getRouter());
+        IRouterClient router = IRouterClient(getRouter());
 
         Client.EVM2AnyMessage memory evm2AnyMessage;
         uint256 fees;
@@ -220,7 +220,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         uint64 destinationChain,
         bytes memory payload
     ) public view returns (uint256) {
-        IRouterClient router = IRouterClient(this.getRouter());
+        IRouterClient router = IRouterClient(getRouter());
         uint256 feeAt0GasLimit = router.getFee(
             destinationChain,
             Client.EVM2AnyMessage({

@@ -96,7 +96,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
         address refundAddress,
         GlacisCommons.CrossChainGas memory,
         bytes memory payload
-    ) internal override onlyGlacisRouter {
+    ) internal override {
         uint32 destinationDomain = glacisChainIdToAdapterChainId[toChainId];
         bytes32 destinationAddress = remoteCounterpart[toChainId];
 

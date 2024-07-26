@@ -73,19 +73,6 @@ contract AdapterTests__CCIP is LocalTestSetup {
         assertFalse(ccipAdapter.chainIsAvailable(chainId));
     }
 
-    function test__sendMessageOnlyAllowsAdapter_CCIP(uint256 chainId) external {
-        vm.assume(chainId != 0);
-        GlacisCCIPAdapterHarness harness = deployHarness();
-
-        vm.expectRevert(GlacisAbstractAdapter__OnlyGlacisRouterAllowed.selector);
-        harness.sendMessagePublic(
-            chainId,
-            address(this),
-            CrossChainGas(100, 100),
-            abi.encode(0)
-        );
-    }
-
     function test__sendMessageChecksAvailability_CCIP(uint256 chainId) external {
         vm.assume(chainId != 0);
         GlacisCCIPAdapterHarness harness = deployHarness();

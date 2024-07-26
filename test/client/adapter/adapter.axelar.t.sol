@@ -107,19 +107,6 @@ contract AdapterTests__Axelar is LocalTestSetup {
         assertEq(harness.toLowerCase(str1), convertStr1);
     }
 
-    function test__sendMessageOnlyAllowsAdapter_Axelar(uint256 chainId) external {
-        vm.assume(chainId != 0);
-        GlacisAxelarAdapterHarness harness = deployHarness();
-
-        vm.expectRevert(GlacisAbstractAdapter__OnlyGlacisRouterAllowed.selector);
-        harness.sendMessagePublic(
-            chainId,
-            address(this),
-            CrossChainGas(100, 100),
-            abi.encode(0)
-        );
-    }
-
     function test__sendMessageChecksAvailability_Axelar(uint256 chainId) external {
         vm.assume(chainId != 0);
         GlacisAxelarAdapterHarness harness = deployHarness();
