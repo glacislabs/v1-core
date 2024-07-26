@@ -9,8 +9,9 @@ import {GlacisRouter__ClientDeniedRoute} from "../../contracts/routers/GlacisRou
 import {GlacisCommons} from "../../contracts/commons/GlacisCommons.sol";
 import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 import {GlacisTokenMediator__IncorrectTokenVariant} from "../../contracts/mediators/GlacisTokenMediator.sol";
-
 import {GlacisTokenMediator, GlacisTokenClientSampleSource, GlacisTokenClientSampleDestination, XERC20Sample, ERC20Sample, XERC20LockboxSample, XERC20NativeLockboxSample} from "../LocalTestSetup.sol";
+import {console} from "forge-std/console.sol";
+import {IXERC20} from "../../contracts/interfaces/IXERC20.sol";
 
 /* solhint-disable contract-name-camelcase */
 contract TokenTests__Axelar is LocalTestSetup {
@@ -306,20 +307,131 @@ contract TokenTests__Axelar is LocalTestSetup {
         );
     }
 
-    function test__Token_XERC20_Limits(
+    function test__Token_XERC20_LimitsBurn(
         uint256 maxMintLimit,
-        uint256 maxBurnLimit
+        uint256 maxBurnLimit,
+        uint256 excess
     ) external {
-        vm.assume(maxMintLimit < 10e17);
-        vm.assume(maxBurnLimit < 10e17);
-        xERC20Sample.setLimits(address(this), maxMintLimit, maxBurnLimit);
-        assertEq(xERC20Sample.mintingMaxLimitOf(address(this)), maxMintLimit);
-        assertEq(xERC20Sample.burningMaxLimitOf(address(this)), maxBurnLimit);
+        vm.assume(maxBurnLimit > 0 && maxBurnLimit < 10e9);
+        vm.assume(maxMintLimit > 0 && maxMintLimit < 10e9);
+        vm.assume(excess > 0 && excess < 10e3);
+        uint256 amount = maxBurnLimit + excess;
+        address glacisRouter_ = glacisTokenClientSampleSource
+            .GLACIS_TOKEN_ROUTER();
+
+        // Set xERC20 limits to glacis router
+        xERC20Sample.setLimits(glacisRouter_, maxMintLimit, maxBurnLimit);
+        assertEq(xERC20Sample.mintingMaxLimitOf(glacisRouter_), maxMintLimit);
+        assertEq(xERC20Sample.burningMaxLimitOf(glacisRouter_), maxBurnLimit);
+        assertEq(
+            xERC20Sample.mintingCurrentLimitOf(glacisRouter_),
+            maxMintLimit
+        );
+        assertEq(
+            xERC20Sample.burningCurrentLimitOf(glacisRouter_),
+            maxBurnLimit
+        );
+
+        xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
+
+        vm.expectRevert(IXERC20.IXERC20_NotHighEnoughLimits.selector);
+
+        // Send more tokens that max burn limit
+        glacisTokenClientSampleSource.sendMessageAndTokens__abstract{
+            value: 0.1 ether
+        }(
+            block.chainid,
+            address(glacisTokenClientSampleDestination).toBytes32(),
+            AXELAR_GMP_ID,
+            abi.encode(1),
+            address(xERC20Sample),
+            amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleDestination)),
+            0
+        );
+    }
+
+    function test__Token_XERC20_LimitsMint(
+        uint256 maxMintLimit,
+        uint256 maxBurnLimit,
+        uint256 excess
+    ) external {
+        vm.assume(maxMintLimit > 0 && maxMintLimit < 10e9);
+        vm.assume(excess > 0 && excess < 10e3);
+        // Set burn limit higher than mint limit
+        maxBurnLimit = maxMintLimit + excess;
+        uint256 amount = maxBurnLimit;
+        address glacisRouter_ = glacisTokenClientSampleSource
+            .GLACIS_TOKEN_ROUTER();
+
+        // Set xERC20 limits to glacis router
+        xERC20Sample.setLimits(glacisRouter_, maxMintLimit, maxBurnLimit);
+        assertEq(xERC20Sample.mintingMaxLimitOf(glacisRouter_), maxMintLimit);
+        assertEq(xERC20Sample.burningMaxLimitOf(glacisRouter_), maxBurnLimit);
+        assertEq(
+            xERC20Sample.mintingCurrentLimitOf(glacisRouter_),
+            maxMintLimit
+        );
+        assertEq(
+            xERC20Sample.burningCurrentLimitOf(glacisRouter_),
+            maxBurnLimit
+        );
+
+        xERC20Sample.transfer(address(glacisTokenClientSampleSource), amount);
+
+        vm.expectRevert(IXERC20.IXERC20_NotHighEnoughLimits.selector);
+
+        // Send more tokens that max mint limit
+        glacisTokenClientSampleSource.sendMessageAndTokens__abstract{
+            value: 0.1 ether
+        }(
+            block.chainid,
+            address(glacisTokenClientSampleDestination).toBytes32(),
+            AXELAR_GMP_ID,
+            abi.encode(1),
+            address(xERC20Sample),
+            amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(glacisTokenClientSampleDestination)),
+            0
+        );
     }
 
     function test__Token_XERC20LockBox_Deposit(uint256 amount) external {
         vm.assume(amount < 10e17);
         erc20Sample.approve(address(xERC20LockboxSample), amount);
+        uint256 preERC20SourceBalance = erc20Sample.balanceOf(address(this));
+        uint256 preXERC20SourceBalance = xERC20Sample.balanceOf(address(this));
+        xERC20LockboxSample.deposit(amount);
+        assertEq(
+            erc20Sample.balanceOf(address(this)),
+            preERC20SourceBalance - amount
+        );
+        assertEq(
+            xERC20Sample.balanceOf(address(this)),
+            preXERC20SourceBalance + amount
+        );
+    }
+
+    function test__Token_XERC20LockBox_LimitsDeposit(
+        uint256 maxBurnLimit,
+        uint256 maxMintLimit,
+        uint256 excess
+    ) external {
+        vm.assume(maxBurnLimit > 0 && maxBurnLimit < 10e17);
+        vm.assume(maxMintLimit > 0 && maxMintLimit < 10e17);
+        vm.assume(excess > 0 && excess < 10e3);
+
+        // Lockbox should no apply caller mint limits
+        uint256 amount = maxMintLimit + excess;
+        erc20Sample.approve(address(xERC20LockboxSample), amount);
+        address glacisRouter_ = glacisTokenClientSampleSource
+            .GLACIS_TOKEN_ROUTER();
+        xERC20Sample.setLimits(glacisRouter_, maxMintLimit, maxBurnLimit);
+        xERC20Sample.setLockbox(address(xERC20LockboxSample));
         uint256 preERC20SourceBalance = erc20Sample.balanceOf(address(this));
         uint256 preXERC20SourceBalance = xERC20Sample.balanceOf(address(this));
         xERC20LockboxSample.deposit(amount);

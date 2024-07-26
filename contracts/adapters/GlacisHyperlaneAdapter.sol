@@ -6,7 +6,6 @@ import {GlacisAbstractAdapter} from "./GlacisAbstractAdapter.sol";
 import {IGlacisRouter} from "../routers/GlacisRouter.sol";
 import {IMailbox} from "@hyperlane-xyz/core/contracts/interfaces/IMailbox.sol";
 import {StandardHookMetadata} from "@hyperlane-xyz/core/contracts/hooks/libs/StandardHookMetadata.sol";
-import {TypeCasts} from "@hyperlane-xyz/core/contracts/libs/TypeCasts.sol";
 import {IInterchainSecurityModule} from "@hyperlane-xyz/core/contracts/interfaces/IInterchainSecurityModule.sol";
 import {IPostDispatchHook} from "@hyperlane-xyz/core/contracts/interfaces/hooks/IPostDispatchHook.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__ChainIsNotAvailable} from "./GlacisAbstractAdapter.sol";
@@ -17,7 +16,7 @@ error GlacisHyperlaneAdapter__FeeNotEnough();
 error GlacisHyperlaneAdapter__RefundAddressMustReceiveNativeCurrency();
 
 /// @title Glacis Adapter for Hyperlane
-/// @notice A Glacis Adapter for the cannonical Hyperlane network. Sends messages through dispatch() and receives
+/// @notice A Glacis Adapter for the canonical Hyperlane network. Sends messages through dispatch() and receives
 /// messages via handle()
 /// @notice Opted to create our own mailbox client because Hyperlane's base Mailbox refund address was static
 contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
@@ -26,8 +25,10 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     IMailbox public immutable MAIL_BOX;
     uint32 public immutable LOCAL_DOMAIN;
 
-    mapping(uint256 => uint32) public glacisChainIdToAdapterChainId;
+    mapping(uint256 => uint32) internal glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;
+
+    event GlacisHyperlaneAdapter__SetGlacisChainIDs(uint256[] chainIDs, uint32[] domains);
 
     /// @param _glacisRouter This chain's glacis router
     /// @param _hyperlaneMailbox This chain's hyperlane router
@@ -42,18 +43,18 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     }
 
     /// @notice Sets the corresponding Hyperlane domain for the specified Glacis chain ID
-    /// @param chainIds Glacis chain IDs
+    /// @param chainIDs Glacis chain IDs
     /// @param domains Hyperlane corresponding chain domains
     function setGlacisChainIds(
-        uint256[] memory chainIds,
+        uint256[] memory chainIDs,
         uint32[] memory domains
     ) public onlyOwner {
-        uint256 chainIdLen = chainIds.length;
+        uint256 chainIdLen = chainIDs.length;
         if (chainIdLen != domains.length)
             revert GlacisAbstractAdapter__IDArraysMustBeSameLength();
 
         for (uint256 i; i < chainIdLen; ) {
-            uint256 chainId = chainIds[i];
+            uint256 chainId = chainIDs[i];
             uint32 chainLabel = domains[i];
 
             if (chainId == 0)
@@ -66,6 +67,8 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
                 ++i;
             }
         }
+
+        emit GlacisHyperlaneAdapter__SetGlacisChainIDs(chainIDs, domains);
     }
 
     /// @notice Gets the corresponding Hyperlane domain ID for the specified Glacis chain ID
@@ -93,7 +96,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
         address refundAddress,
         GlacisCommons.CrossChainGas memory,
         bytes memory payload
-    ) internal override onlyGlacisRouter {
+    ) internal override {
         uint32 destinationDomain = glacisChainIdToAdapterChainId[toChainId];
         bytes32 destinationAddress = remoteCounterpart[toChainId];
 

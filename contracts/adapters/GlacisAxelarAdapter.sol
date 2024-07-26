@@ -4,7 +4,7 @@ pragma solidity 0.8.18;
 
 import {AxelarExecutable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/executable/AxelarExecutable.sol";
 import {IAxelarGasService} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IAxelarGasService.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__SourceChainNotRegistered, GlacisAbstractAdapter__ChainIsNotAvailable} from "./GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__ChainIsNotAvailable} from "./GlacisAbstractAdapter.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {AddressString} from "../libraries/AddressString.sol";
 import {GlacisAbstractAdapter} from "./GlacisAbstractAdapter.sol";
@@ -22,8 +22,10 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     using AddressBytes32 for address;
     IAxelarGasService public immutable GAS_SERVICE;
 
-    mapping(uint256 => string) public glacisChainIdToAdapterChainId;
+    mapping(uint256 => string) internal glacisChainIdToAdapterChainId;
     mapping(string => uint256) public adapterChainIdToGlacisChainId;
+
+    event GlacisAxelarAdapter__SetGlacisChainIDs(uint256[] chainIDs, string[] chainLabels);
 
     /// @param _glacisRouter This chain's glacis router
     /// @param _axelarGateway This chain's axelar gateway
@@ -42,18 +44,18 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
     }
 
     /// @notice Sets the corresponding Axelar chain label for the specified Glacis chain ID
-    /// @param glacisIds Glacis chain IDs
+    /// @param chainIDs Glacis chain IDs
     /// @param chainLabels Axelar corresponding chain labels
     function setGlacisChainIds(
-        uint256[] memory glacisIds,
+        uint256[] memory chainIDs,
         string[] memory chainLabels
     ) external onlyOwner {
-        uint256 chainIdLen = glacisIds.length;
+        uint256 chainIdLen = chainIDs.length;
         if (chainIdLen != chainLabels.length)
             revert GlacisAbstractAdapter__IDArraysMustBeSameLength();
 
         for (uint256 i; i < chainIdLen; ) {
-            uint256 chainId = glacisIds[i];
+            uint256 chainId = chainIDs[i];
             string memory chainLabel = chainLabels[i];
 
             if (chainId == 0)
@@ -66,6 +68,8 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
                 ++i;
             }
         }
+
+        emit GlacisAxelarAdapter__SetGlacisChainIDs(chainIDs, chainLabels);
     }
 
     /// @notice Gets the corresponding Axelar chain label for the specified Glacis chain ID
@@ -95,7 +99,7 @@ contract GlacisAxelarAdapter is GlacisAbstractAdapter, AxelarExecutable {
         address refundAddress,
         GlacisCommons.CrossChainGas memory,
         bytes memory payload
-    ) internal override onlyGlacisRouter {
+    ) internal override {
         string memory destinationChain = glacisChainIdToAdapterChainId[
             toChainId
         ];

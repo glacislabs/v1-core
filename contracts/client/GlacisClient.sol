@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.18;
 
-import {GlacisCommons} from "../commons/GlacisCommons.sol";
 import {IGlacisRouter} from "../interfaces/IGlacisRouter.sol";
 import {IGlacisClient} from "../interfaces/IGlacisClient.sol";
 import {GlacisAccessControlClient} from "../client/GlacisAccessControlClient.sol";
@@ -16,14 +15,20 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     address public immutable GLACIS_ROUTER;
 
     event GlacisClient__MessageRouted(
-        bytes32 messageId,
+        bytes32 indexed messageId,
         uint256 toChainId,
         bytes32 to
     );
+    
+    event GlacisClient__MessageArrived(
+        address[] fromAdapters,
+        uint256 fromChainId,
+        bytes32 fromAddress
+    );
 
     /// @param _glacisRouter This chain's deployment of the GlacisRouter  
-    /// @param _quorum The default quorum that you would like. If you implement dynamic quorum, this value can be ignored and 
-    /// set to 0  
+    /// @param _quorum The initial default quorum for this client. If dynamic quorum is to be implemented (depending on payload)
+    /// this value can be ignored and set to 0  
     constructor(
         address _glacisRouter,
         uint256 _quorum
@@ -163,8 +168,8 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     ) external virtual override {
         if (msg.sender != GLACIS_ROUTER)
             revert GlacisClient__CanOnlyBeCalledByRouter();
-
         _receiveMessage(fromAdapters, fromChainId, fromAddress, payload);
+        emit GlacisClient__MessageArrived(fromAdapters, fromChainId, fromAddress);
     }
 
     /// @notice Receives message from GMP(s) through GlacisRouter

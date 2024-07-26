@@ -54,7 +54,7 @@ contract TokenMediatorTests is LocalTestSetup {
     ) external {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr);
-        assertEq(glacisTokenMediator.remoteCounterpart(chainId), addr);
+        assertEq(glacisTokenMediator.getRemoteCounterpart(chainId), addr);
     }
 
     function test__TokenMediator_RemovesRemoteAddress(
@@ -64,7 +64,7 @@ contract TokenMediatorTests is LocalTestSetup {
         vm.assume(chainId != 0);
         addRemoteMediator(chainId, addr.toBytes32());
         glacisTokenMediator.removeRemoteCounterpart(chainId);
-        assertEq(glacisTokenMediator.remoteCounterpart(chainId), bytes32(0));
+        assertEq(glacisTokenMediator.getRemoteCounterpart(chainId), bytes32(0));
     }
 
     function test__TokenMediator_NonOwnersCannotAddRemote() external {
@@ -147,9 +147,11 @@ contract TokenMediatorTests is LocalTestSetup {
             bytes("")
         );
         bool isAllowed = glacisTokenMediator.isAllowedRoute(
-            chainId,
-            address(0x456).toBytes32(), // wrong mediator address (what we're testing)
-            AXELAR_GMP_ID,
+            GlacisRoute(
+                chainId,
+                address(0x456).toBytes32(), // wrong mediator address (what we're testing)
+                AXELAR_GMP_ID
+            ),
             payload
         );
         assertFalse(isAllowed);
@@ -171,9 +173,11 @@ contract TokenMediatorTests is LocalTestSetup {
         );
         addRemoteMediator(chainId, addr.toBytes32());
         bool isAllowed = glacisTokenMediator.isAllowedRoute(
-            chainId,
-            addr.toBytes32(), // correct mediator address (what we're testing)
-            AXELAR_GMP_ID,
+            GlacisRoute(
+                chainId,
+                addr.toBytes32(), // correct mediator address (what we're testing)
+                AXELAR_GMP_ID
+            ),
             payload
         );
         assertTrue(isAllowed);
@@ -195,9 +199,11 @@ contract TokenMediatorTests is LocalTestSetup {
         );
         addRemoteMediator(chainId, addr.toBytes32());
         bool isAllowed = glacisTokenMediator.isAllowedRoute(
-            chainId,
-            addr.toBytes32(), // correct mediator address
-            address(0x123456789), // Custom Adapter
+            GlacisRoute(
+                chainId,
+                addr.toBytes32(), // correct mediator address
+                address(0x123456789)
+            ), // Custom Adapter
             payload
         );
         assertFalse(isAllowed);

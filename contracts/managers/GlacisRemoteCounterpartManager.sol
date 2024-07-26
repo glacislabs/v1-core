@@ -15,21 +15,21 @@ contract GlacisRemoteCounterpartManager is
     IGlacisRemoteCounterpartManager,
     Ownable2Step
 {
-    mapping(uint256 => bytes32) public remoteCounterpart;
+    mapping(uint256 => bytes32) internal remoteCounterpart;
 
     /// @notice Adds an authorized glacis counterpart component in a remote chain that interacts with this component
-    /// @param chainIds An array with chains of the glacis remote components
+    /// @param chainIDs An array with chains of the glacis remote components
     /// @param counterpart An array of addresses of the glacis components on remote chains
     function addRemoteCounterparts(
-        uint256[] calldata chainIds,
+        uint256[] calldata chainIDs,
         bytes32[] calldata counterpart
     ) external onlyOwner {
-        if (chainIds.length != counterpart.length)
+        if (chainIDs.length != counterpart.length)
             revert GlacisRemoteCounterpartManager__CounterpartsAndChainIDsMustHaveSameLength();
-        for (uint256 i; i < chainIds.length; ++i) {
-            if (chainIds[i] == 0)
+        for (uint256 i; i < chainIDs.length; ++i) {
+            if (chainIDs[i] == 0)
                 revert GlacisRemoteCounterpartManager__RemoteCounterpartCannotHaveChainIdZero();
-            remoteCounterpart[chainIds[i]] = counterpart[i];
+            remoteCounterpart[chainIDs[i]] = counterpart[i];
         }
     }
 

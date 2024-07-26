@@ -7,7 +7,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
 /// @title Glacis Ownable Token Client
-/// @dev This contract encapsulates Glacis Token PAssing client logic, contracts inheriting this will have access to all
+/// @dev This contract encapsulates Glacis Token Passing client logic, contracts inheriting this will have access to all
 /// Glacis Token Passing and Message Passing features
 /// @notice This contract is Ownable
 abstract contract GlacisTokenClientOwnable is GlacisTokenClient, Ownable {

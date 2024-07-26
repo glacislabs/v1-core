@@ -7,7 +7,7 @@ import {IGlacisRouter} from "../routers/GlacisRouter.sol";
 import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__SourceChainNotRegistered, GlacisAbstractAdapter__ChainIsNotAvailable, GlacisAbstractAdapter__NoRemoteAdapterForChainId} from "./GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable, GlacisAbstractAdapter__NoRemoteAdapterForChainId} from "./GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../libraries/AddressBytes32.sol";
 import {GlacisCommons} from "../commons/GlacisCommons.sol";
 
@@ -24,13 +24,17 @@ error GlacisCCIPAdapter__PaymentTooSmallForAnyDestinationExecution();
 contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     using AddressBytes32 for address;
 
-    mapping(uint256 => uint64) public glacisChainIdToAdapterChainId;
+    mapping(uint256 => uint64) internal glacisChainIdToAdapterChainId;
     mapping(uint64 => uint256) public adapterChainIdToGlacisChainId;
+
+    // CCIP caps at 3 million gas: https://docs.chain.link/ccip/service-limits
+    uint256 public ccipGasLimit = 3_000_000;
 
     event GlacisCCIPAdapter__ExtrapolatedGasLimit(
         uint256 extrapolation,
         uint256 messageValue
     );
+    event GlacisCCIPAdapter__SetGlacisChainIDs(uint256[] chainIDs, uint64[] chainSelectors);
 
     /// @param _glacisRouter This chain's glacis router
     /// @param _ccipRouter This chain's CCIP router
@@ -45,18 +49,18 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
     {}
 
     /// @notice Sets the corresponding CCIP selectors for the specified Glacis chain ID
-    /// @param chainIds Glacis chain IDs
+    /// @param chainIDs Glacis chain IDs
     /// @param chainSelectors Corresponding CCIP chain selectors
     function setGlacisChainIds(
-        uint256[] memory chainIds,
+        uint256[] memory chainIDs,
         uint64[] memory chainSelectors
     ) external onlyOwner {
-        uint256 chainIdLen = chainIds.length;
+        uint256 chainIdLen = chainIDs.length;
         if (chainIdLen != chainSelectors.length)
             revert GlacisAbstractAdapter__IDArraysMustBeSameLength();
 
         for (uint256 i; i < chainIdLen; ) {
-            uint256 chainId = chainIds[i];
+            uint256 chainId = chainIDs[i];
             uint64 selector = chainSelectors[i];
 
             if (chainId == 0)
@@ -69,6 +73,8 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
                 ++i;
             }
         }
+
+        emit GlacisCCIPAdapter__SetGlacisChainIDs(chainIDs, chainSelectors);
     }
 
     /// @notice Gets the corresponding CCIP chain selector for the specified Glacis chain ID
@@ -95,7 +101,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         address refundAddress,
         GlacisCommons.CrossChainGas memory incentives,
         bytes memory payload
-    ) internal override onlyGlacisRouter {
+    ) internal override {
         bytes32 remoteAdapter = remoteCounterpart[toChainId];
         uint64 destinationChain = glacisChainIdToAdapterChainId[toChainId];
         if (remoteAdapter == bytes32(0))
@@ -104,7 +110,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
 
         // Initialize a router client instance to interact with cross-chain router
-        IRouterClient router = IRouterClient(this.getRouter());
+        IRouterClient router = IRouterClient(getRouter());
 
         Client.EVM2AnyMessage memory evm2AnyMessage;
         uint256 fees;
@@ -115,7 +121,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             evm2AnyMessage = Client.EVM2AnyMessage({
                 receiver: abi.encode(remoteAdapter), // ABI-encoded receiver address
                 data: payload,
-                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
+                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array as no tokens are transferred
                 // NOTE: extraArgs is subject to changes by CCIP in the future.
                 // We are not supposed to hard code this, but it's hard to get around. We will likely have to
                 // regularly redeploy this adapter.
@@ -150,7 +156,7 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
             evm2AnyMessage = Client.EVM2AnyMessage({
                 receiver: abi.encode(remoteCounterpart[toChainId]), // ABI-encoded receiver address
                 data: payload,
-                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
+                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array as no tokens are transferred
                 // NOTE: extraArgs is subject to changes by CCIP in the future.
                 // We are not supposed to hard code this, but it's hard to get around. We will likely have to
                 // regularly redeploy this adapter.
@@ -217,13 +223,13 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         uint64 destinationChain,
         bytes memory payload
     ) public view returns (uint256) {
-        IRouterClient router = IRouterClient(this.getRouter());
+        IRouterClient router = IRouterClient(getRouter());
         uint256 feeAt0GasLimit = router.getFee(
             destinationChain,
             Client.EVM2AnyMessage({
                 receiver: abi.encode(remoteCounterpart[destinationChain]), // ABI-encoded receiver address
                 data: payload,
-                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array aas no tokens are transferred
+                tokenAmounts: new Client.EVMTokenAmount[](0), // Empty array as no tokens are transferred
                 // NOTE: extraArgs is subject to changes by CCIP in the future.
                 // We are not supposed to hard code this, but it's hard to get around. We will likely have to
                 // regularly redeploy this adapter.
@@ -257,8 +263,13 @@ contract GlacisCCIPAdapter is GlacisAbstractAdapter, CCIPReceiver {
         // Calculates x = (y-b) / m, but increased m by 0.5% to overestimate value needed
         uint256 gasLimit = (value - feeAt0GasLimit) / (m + (m / 200));
 
-        // CCIP caps at 3 million gas: https://docs.chain.link/ccip/service-limits
-        if (gasLimit > 3_000_000) return 3_000_000;
+        if (gasLimit > ccipGasLimit) return ccipGasLimit;
         else return gasLimit;
+    }
+
+    /// @notice Sets the CCIP Gas limit (described here: https://docs.chain.link/ccip/service-limits)
+    /// @param gasLimit New CCIP gas limit
+    function setCCIPGasLimit(uint256 gasLimit) public onlyOwner {
+        ccipGasLimit = gasLimit;
     }
 }

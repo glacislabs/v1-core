@@ -8,13 +8,13 @@ import {GlacisCommons} from "../commons/GlacisCommons.sol";
 /// @notice An interface of a mediator that sends XERC20s with a payload across chains  
 interface IGlacisTokenMediator {
     event GlacisTokenMediator__TokensBurnt(
-        address from,
-        address token,
+        address indexed from,
+        address indexed token,
         uint256 amount
     );
     event GlacisTokenMediator__TokensMinted(
-        address to,
-        address token,
+        address indexed to,
+        address indexed token,
         uint256 amount
     );
 
@@ -28,6 +28,7 @@ interface IGlacisTokenMediator {
     /// @param refundAddress Address to refund excess gas payment
     /// @param token Token (implementing XERC20 standard) to be sent to remote contract
     /// @param tokenAmount Amount of token to send to remote contract
+    /// @return A tuple with a bytes32 messageId and a uint256 nonce
     function route(
         uint256 chainId,
         bytes32 to,
@@ -50,6 +51,7 @@ interface IGlacisTokenMediator {
     /// @param nonce The nonce emitted by the original message routing
     /// @param token Token (implementing XERC20 standard) to be sent to remote contract
     /// @param tokenAmount Amount of token to send to remote contract
+    /// @return A tuple with a bytes32 messageId and a uint256 nonce
     function routeRetry(
         uint256 chainId,
         bytes32 to,
@@ -61,5 +63,5 @@ interface IGlacisTokenMediator {
         uint256 nonce,
         address token,
         uint256 tokenAmount
-    ) external payable returns (bytes32);
+    ) external payable returns (bytes32, uint256);
 }

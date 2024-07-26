@@ -171,7 +171,7 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
 
         lzAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
         assertEq(
-            lzAdapter.glacisChainIdToAdapterChainId(glacisChainIds[0]),
+            lzAdapter.adapterChainID(glacisChainIds[0]),
             adapterIds[0]
         );
     }
@@ -477,7 +477,7 @@ contract AdapterTests__CCIP is LocalTestSetup {
 
         adapter.setGlacisChainIds(glacisChainIds, adapterIds);
         assertEq(
-            adapter.glacisChainIdToAdapterChainId(glacisChainIds[0]),
+            adapter.adapterChainID(glacisChainIds[0]),
             adapterIds[0]
         );
     }
@@ -608,7 +608,7 @@ contract AdapterTests__Hyperlane is LocalTestSetup {
 
         adapter.setGlacisChainIds(glacisChainIds, adapterIds);
         assertEq(
-            adapter.glacisChainIdToAdapterChainId(glacisChainIds[0]),
+            adapter.adapterChainID(glacisChainIds[0]),
             adapterIds[0]
         );
     }

@@ -40,7 +40,6 @@ contract AdapterTests__Hyperlane is LocalTestSetup {
 
         hyperlaneAdapter.setGlacisChainIds(chains, hyperlaneDomains);
 
-        assertEq(hyperlaneAdapter.glacisChainIdToAdapterChainId(chain), chain);
         assertEq(hyperlaneAdapter.adapterChainID(chain), chain);
         assertEq(hyperlaneAdapter.adapterChainIdToGlacisChainId(chain), chain);
         assertTrue(hyperlaneAdapter.chainIsAvailable(chain));
@@ -69,19 +68,6 @@ contract AdapterTests__Hyperlane is LocalTestSetup {
     function test__chainIsNotAvailable_Hyperlane(uint256 chainId) external {
         vm.assume(chainId != block.chainid);
         assertFalse(hyperlaneAdapter.chainIsAvailable(chainId));
-    }
-
-    function test__sendMessageOnlyAllowsAdapter_Hyperlane(uint256 chainId) external {
-        vm.assume(chainId != 0);
-        GlacisHyperlaneAdapterHarness harness = deployHarness();
-
-        vm.expectRevert(GlacisAbstractAdapter__OnlyGlacisRouterAllowed.selector);
-        harness.sendMessagePublic(
-            chainId,
-            address(this),
-            CrossChainGas(100, 100),
-            abi.encode(0)
-        );
     }
 
     function test__sendMessageChecksAvailability_Hyperlane(uint256 chainId) external {

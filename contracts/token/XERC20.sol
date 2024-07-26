@@ -5,9 +5,6 @@ import {IXERC20, IXERC20GlacisExtension} from "../interfaces/IXERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {AddressBytes32} from "../libraries/AddressBytes32.sol";
-
-error XERC20__OnlyBridge();
 
 contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
     /**
@@ -37,7 +34,6 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
      * @param _symbol The symbol of the token
      * @param _factory The factory which deployed this contract
      */
-
     constructor(
         string memory _name,
         string memory _symbol,
@@ -49,7 +45,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
 
     /**
      * @notice Mints tokens for a user
-     * @dev Can only be called by a bridge
+     * @dev Can only be called by a bridge or lockbox
      * @param _user The address of the user who needs tokens minted
      * @param _amount The amount of tokens being minted
      */
@@ -60,7 +56,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
 
     /**
      * @notice Burns tokens for a user
-     * @dev Can only be called by a bridge
+     * @dev Can only be called by a bridge or lockbox
      * @param _user The address of the user who needs tokens burned
      * @param _amount The amount of tokens being burned
      */
@@ -90,7 +86,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
      * @dev Can only be called by the owner
      * @param _mintingLimit The updated minting limit we are setting to the bridge
      * @param _burningLimit The updated burning limit we are setting to the bridge
-     * @param _bridge The address of the bridge we are setting the limits too
+     * @param _bridge The address of the bridge we are setting the limits to
      */
     function setLimits(
         address _bridge,
@@ -166,7 +162,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
 
     /**
      * @notice Uses the limit of any bridge
-     * @param _bridge The address of the bridge who is being changed
+     * @param _bridge The address of the bridge that is being changed
      * @param _change The change in the limit
      */
 
@@ -178,7 +174,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
 
     /**
      * @notice Uses the limit of any bridge
-     * @param _bridge The address of the bridge who is being changed
+     * @param _bridge The address of the bridge that is being changed
      * @param _change The change in the limit
      */
 
@@ -191,7 +187,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
     /**
      * @notice Updates the limit of any bridge
      * @dev Can only be called by the owner
-     * @param _bridge The address of the bridge we are setting the limit too
+     * @param _bridge The address of the bridge we are setting the limit to
      * @param _limit The updated limit we are setting to the bridge
      */
 
@@ -213,7 +209,7 @@ contract XERC20Basic is ERC20, Ownable, IXERC20, ERC20Permit {
     /**
      * @notice Updates the limit of any bridge
      * @dev Can only be called by the owner
-     * @param _bridge The address of the bridge we are setting the limit too
+     * @param _bridge The address of the bridge we are setting the limit to
      * @param _limit The updated limit we are setting to the bridge
      */
 

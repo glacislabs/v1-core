@@ -27,22 +27,26 @@ contract GlacisLayerZeroAdapter is
         GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner)
     {}
 
-    mapping(uint256 => uint16) public glacisChainIdToAdapterChainId;
+    mapping(uint256 => uint16) internal glacisChainIdToAdapterChainId;
     mapping(uint16 => uint256) public adapterChainIdToGlacisChainId;
 
+    bytes public adapterParams = bytes("");
+
+    event GlacisLayerZeroAdapter__SetGlacisChainIDs(uint256[] chainIDs, uint16[] lzIDs);
+
     /// @notice Sets the corresponding LayerZero chain ID for the specified Glacis chain ID
-    /// @param glacisIDs Glacis chain IDs
+    /// @param chainIDs Glacis chain IDs
     /// @param lzIDs Layer Zero chain IDs
     function setGlacisChainIds(
-        uint256[] calldata glacisIDs,
+        uint256[] calldata chainIDs,
         uint16[] calldata lzIDs
     ) external onlyOwner {
-        uint256 glacisIDsLen = glacisIDs.length;
+        uint256 glacisIDsLen = chainIDs.length;
         if (glacisIDsLen != lzIDs.length)
             revert GlacisAbstractAdapter__IDArraysMustBeSameLength();
 
         for (uint256 i; i < glacisIDsLen; ) {
-            uint256 glacisID = glacisIDs[i];
+            uint256 glacisID = chainIDs[i];
             uint16 lzID = lzIDs[i];
 
             if (glacisID == 0)
@@ -55,6 +59,8 @@ contract GlacisLayerZeroAdapter is
                 ++i;
             }
         }
+
+        emit GlacisLayerZeroAdapter__SetGlacisChainIDs(chainIDs, lzIDs);
     }
 
     /// @notice Gets the corresponding LayerZero chain ID for the specified Glacis chain ID
@@ -89,12 +95,12 @@ contract GlacisLayerZeroAdapter is
         if (_dstchainId == 0)
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
         _lzSend({
-            _dstChainId: glacisChainIdToAdapterChainId[toChainId],
+            _dstChainId: _dstchainId,
             _dstChainAddress: remoteCounterpart.toAddress(),
             _payload: payload,
             _refundAddress: payable(refundAddress),
-            _zroPaymentAddress: address(0x0),
-            _adapterParams: bytes(""),
+            _zroPaymentAddress: address(0),
+            _adapterParams: adapterParams,
             _nativeFee: msg.value
         });
     }
@@ -121,4 +127,10 @@ contract GlacisLayerZeroAdapter is
             payload
         );
     }
+
+    /// Sets the adapter parameters for LayerZero messages.
+    /// @param params The desired adapter params.
+    function setAdapterParams(bytes memory params) external onlyOwner {
+        adapterParams = params;
+    } 
 }

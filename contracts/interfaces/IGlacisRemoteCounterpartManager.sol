@@ -6,10 +6,10 @@ pragma solidity 0.8.18;
 /// @notice An interface that defines the existence and addition of a contract's remote counterparts
 interface IGlacisRemoteCounterpartManager {
     /// @notice Adds an authorized glacis counterpart component in a remote chain that interacts with this component
-    /// @param chainIds An array with chains of the glacis remote components
+    /// @param chainIDs An array with chains of the glacis remote components
     /// @param glacisComponents An array of addresses of the glacis components on remote chains
     function addRemoteCounterparts(
-        uint256[] calldata chainIds,
+        uint256[] calldata chainIDs,
         bytes32[] calldata glacisComponents
     ) external;
 

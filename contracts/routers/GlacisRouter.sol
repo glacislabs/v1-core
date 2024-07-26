@@ -13,13 +13,16 @@ error GlacisRouter__RouteDoesNotExist(); //0xeb470cd2
 error GlacisRouter__ClientDeniedRoute();
 error GlacisRouter__NotOwnerOfMessageToRetry();
 error GlacisRouter__MessageInputNotIdenticalForRetry();
-error GlacisRouter__ImpossibleGMPId(uint8 gmpId);
 error GlacisRouter__MessageAlreadyReceivedFromGMP();
 error GlacisRouter__MessageIdNotValid();
 error GlacisRouter__FeeArrayMustEqualGMPArray();
 error GlacisRouter__GMPCountMustBeAtLeastOne();
 error GlacisRouter__FeeSumMustBeEqualToValue();
-error GlacisRouter__DestinationRetryNotSatisfied(bool quorumSatisfied, bool notExecuted, bool quorumIsNotZero);
+error GlacisRouter__DestinationRetryNotSatisfied(
+    bool quorumSatisfied,
+    bool notExecuted,
+    bool quorumIsNotZero
+);
 
 /// @title Glacis Router
 /// @notice A central router to send and receive cross-chain messages
@@ -34,7 +37,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     mapping(bytes32 => MessageData) private messageReceipts;
     mapping(bytes32 => mapping(address => bool))
         private receivedCustomAdapterMessages;
-    mapping(bytes32 => address[]) receivedAdaptersList;
+    mapping(bytes32 => address[]) private receivedAdaptersList;
 
     struct MessageData {
         uint248 uniqueMessagesReceived;
@@ -46,15 +49,16 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         _transferOwnership(_owner);
     }
 
-    /// @notice Routes the payload to the specific address on the destination chain
-    /// using specified GMPs with quorum and retribale feature
-    /// @param chainId Destination chain (Glacis chain ID)
+    /// @notice Routes the payload to the specific address on the destination chain using specified adapters
+    /// @param chainId Destination chain (EIP-155)
     /// @param to Destination address on remote chain
     /// @param payload Payload to be routed
-    /// @param adapters An array of adapters to be used for the routing
+    /// @param adapters An array of adapters to be used for the routing (addresses 0x01-0xF8 for Glacis adapters
+    /// or specific addresses for custom adapters)
     /// @param fees Array of fees to be sent to each GMP & custom adapter for routing (must be same length as gmps)
-    /// @param refundAddress An (ideally EOA) address for native currency to be sent to that are greater than fees charged
-    /// @param retriable True if this message could be retried
+    /// @param refundAddress An address for native currency to be sent to that are greater than fees charged. If it is a
+    /// contract it needs to support receive function, tx will revert otherwise
+    /// @param retriable True if this message could pottentially be retried
     function route(
         uint256 chainId,
         bytes32 to,
@@ -70,19 +74,21 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes32 from = msg.sender.toBytes32();
         (messageId, nonce) = _createGlacisMessageId(chainId, to, payload);
 
+        // Store messageId owner if retriable flagged
+        if (retriable) {
+            messageSenders[messageId] = msg.sender;
+        }
+
         _processRouting(
             chainId,
-            // @notice This follows GlacisData stored within GlacisCommons
+            // @notice This follows GlacisData (within GlacisCommons) + payload
             abi.encode(messageId, nonce, from, to, payload),
             adapters,
             fees,
             refundAddress
         );
-        if (retriable) {
-            messageSenders[messageId] = msg.sender;
-        }
 
-        // Emit both Glacis event and the EIP-5164 event
+        // Emit Glacis message dispatched event
         emit GlacisRouter__MessageDispatched(
             messageId,
             from,
@@ -108,6 +114,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param refundAddress An (ideally EOA) address for native currency to be sent to that are greater than fees charged
     /// @param messageId The messageId to retry
     /// @param nonce Unique value for this message routing
+    /// @return A tuple with a bytes32 messageId and a uint256 nonce
     function routeRetry(
         uint256 chainId,
         bytes32 to,
@@ -117,7 +124,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         address refundAddress,
         bytes32 messageId,
         uint256 nonce
-    ) public payable virtual returns (bytes32) {
+    ) public payable virtual returns (bytes32, uint256) {
         // Validate input
         validateFeesInput(adapters.length, fees);
 
@@ -151,7 +158,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             refundAddress
         );
 
-        // Emit both Glacis event and the EIP-5164 event
+        // Emit Glacis message retried event
         emit GlacisRouter__MessageRetried(
             messageId,
             from,
@@ -164,7 +171,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         );
 
         // There is no need to check that this has been retried before. Retry as many times as desired.
-        return messageId;
+        return (messageId, nonce);
     }
 
     /// @notice Performs actual message dispatching to all the required adapters
@@ -188,16 +195,14 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             // If adapter address is a reserved ID, we override it with a Glacis default adapter
             if (uint160(adapter) <= GLACIS_RESERVED_IDS) {
                 adapter = glacisGMPIdToAdapter[uint8(uint160(adapter))];
-                if (adapter == address(0)) revert GlacisRouter__GMPNotSupported();
-            }
-            else if (adapter == address(0)) revert GlacisRouter__RouteDoesNotExist();
+                if (adapter == address(0))
+                    revert GlacisRouter__GMPNotSupported();
+            } else if (adapter == address(0))
+                revert GlacisRouter__RouteDoesNotExist();
 
-            IGlacisAdapter(adapter).sendMessage{value: fees[adapterIndex].nativeCurrencyValue}(
-                chainId,
-                refundAddress,
-                fees[adapterIndex],
-                glacisPackedPayload
-            );
+            IGlacisAdapter(adapter).sendMessage{
+                value: fees[adapterIndex].nativeCurrencyValue
+            }(chainId, refundAddress, fees[adapterIndex], glacisPackedPayload);
 
             // This is acceptable, as there is no "continue" within the for loop
             unchecked {
@@ -225,16 +230,16 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         // Verifies that the sender is an allowed route
         uint8 gmpId = adapterToGlacisGMPId[msg.sender];
         bool routeAllowed = client.isAllowedRoute(
-            fromChainId,
-            glacisData.originalFrom,
-            msg.sender,
+            GlacisRoute(fromChainId, glacisData.originalFrom, msg.sender),
             payload
         );
         if (!routeAllowed && gmpId != 0) {
             routeAllowed = client.isAllowedRoute(
-                fromChainId,
-                glacisData.originalFrom,
-                address(uint160(gmpId)),
+                GlacisRoute(
+                    fromChainId,
+                    glacisData.originalFrom,
+                    address(uint160(gmpId))
+                ),
                 payload
             );
         }
@@ -250,7 +255,11 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             revert GlacisRouter__MessageAlreadyReceivedFromGMP();
 
         // Get the quorum requirements
-        uint256 quorum = client.getQuorum(glacisData, payload, currentReceipt.uniqueMessagesReceived);
+        uint256 quorum = client.getQuorum(
+            glacisData,
+            payload,
+            currentReceipt.uniqueMessagesReceived
+        );
 
         receivedCustomAdapterMessages[glacisData.messageId][msg.sender] = true;
 
@@ -291,6 +300,14 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
                 glacisData.originalFrom,
                 payload
             );
+
+            emit GlacisRouter__ExecutedMessage(
+                glacisData.messageId,
+                glacisData.originalFrom,
+                fromChainId,
+                msg.sender,
+                glacisData.originalTo
+            );
         } else {
             messageReceipts[glacisData.messageId] = currentReceipt;
         }
@@ -318,7 +335,11 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         ];
 
         // Get the quorum requirements
-        uint256 quorum = client.getQuorum(glacisData, payload, currentReceipt.uniqueMessagesReceived);
+        uint256 quorum = client.getQuorum(
+            glacisData,
+            payload,
+            currentReceipt.uniqueMessagesReceived
+        );
 
         // Verify that the messageID can be calculated from the data provided,
         if (
@@ -348,8 +369,12 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
                 glacisData.originalFrom,
                 payload
             );
-        }
-        else revert GlacisRouter__DestinationRetryNotSatisfied(currentReceipt.uniqueMessagesReceived >= quorum, !currentReceipt.executed, quorum > 0);
+        } else
+            revert GlacisRouter__DestinationRetryNotSatisfied(
+                currentReceipt.uniqueMessagesReceived >= quorum,
+                !currentReceipt.executed,
+                quorum > 0
+            );
     }
 
     /// @notice Validates that all the fees sum up to the total payment

@@ -18,9 +18,9 @@ contract GlacisCommons {
     }
 
     struct GlacisRoute {
-        uint256 fromChainId; // 0 means any chain
-        bytes32 fromAddress; // 0x00 means any address
-        address fromAdapter; // 0 means any GMP, can also hold address
+        uint256 fromChainId; // WILDCARD means any chain
+        bytes32 fromAddress; // WILDCARD means any address
+        address fromAdapter; // WILDCARD means any GMP, can also hold address
     }
 
     struct CrossChainGas {
@@ -30,5 +30,4 @@ contract GlacisCommons {
 
     uint160 constant public WILDCARD = type(uint160).max;
     uint256 constant public GLACIS_RESERVED_IDS = 248;
-
 }

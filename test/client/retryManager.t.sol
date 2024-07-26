@@ -178,7 +178,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
             createFees(0, gmp.length),
             abi.encode(1000),
             messageId,
-            0
+            nonce
         );
     }
 
@@ -310,7 +310,7 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
             createFees(0, gmps.length),
             abi.encode(1000),
             messageId,
-            0
+            nonce
         );
         assertEq(1000, clientSample.value());
 

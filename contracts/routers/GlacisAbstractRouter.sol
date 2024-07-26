@@ -45,12 +45,15 @@ abstract contract GlacisAbstractRouter is
         if (glacisGMPId > GlacisCommons.GLACIS_RESERVED_IDS) revert GlacisAbstractRouter__GMPIDTooHigh();
 
         // Unregister previous adapter
-        delete adapterToGlacisGMPId[glacisGMPIdToAdapter[glacisGMPId]];
+        address previousAdapter = glacisGMPIdToAdapter[glacisGMPId];
+        delete adapterToGlacisGMPId[previousAdapter];
         delete glacisGMPIdToAdapter[glacisGMPId];
 
         // Adds new adapter
         glacisGMPIdToAdapter[glacisGMPId] = glacisAdapter;
         adapterToGlacisGMPId[glacisAdapter] = glacisGMPId;
+
+        emit GlacisAbstractRouter__AdapterRegistered(glacisGMPId, glacisAdapter, previousAdapter);
     }
 
     /// @notice Unregisters a GMP adapter
@@ -65,6 +68,8 @@ abstract contract GlacisAbstractRouter is
         
         delete glacisGMPIdToAdapter[glacisGMPId];
         delete adapterToGlacisGMPId[adapter];
+
+        emit GlacisAbstractRouter__AdapterUnregistered(glacisGMPId, adapter);
     }
 
     /// @notice Creates a messageId

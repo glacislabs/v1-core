@@ -35,7 +35,6 @@ contract AdapterTests__CCIP is LocalTestSetup {
 
         ccipAdapter.setGlacisChainIds(chains, ccipDomains);
 
-        assertEq(ccipAdapter.glacisChainIdToAdapterChainId(chain), chain);
         assertEq(ccipAdapter.adapterChainID(chain), chain);
         assertEq(ccipAdapter.adapterChainIdToGlacisChainId(chain), chain);
         assertTrue(ccipAdapter.chainIsAvailable(chain));
@@ -72,19 +71,6 @@ contract AdapterTests__CCIP is LocalTestSetup {
     function test__chainIsNotAvailable_CCIP(uint256 chainId) external {
         vm.assume(chainId != block.chainid);
         assertFalse(ccipAdapter.chainIsAvailable(chainId));
-    }
-
-    function test__sendMessageOnlyAllowsAdapter_CCIP(uint256 chainId) external {
-        vm.assume(chainId != 0);
-        GlacisCCIPAdapterHarness harness = deployHarness();
-
-        vm.expectRevert(GlacisAbstractAdapter__OnlyGlacisRouterAllowed.selector);
-        harness.sendMessagePublic(
-            chainId,
-            address(this),
-            CrossChainGas(100, 100),
-            abi.encode(0)
-        );
     }
 
     function test__sendMessageChecksAvailability_CCIP(uint256 chainId) external {
