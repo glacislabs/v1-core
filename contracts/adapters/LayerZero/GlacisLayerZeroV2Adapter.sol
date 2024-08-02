@@ -7,7 +7,7 @@ import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.so
 import {Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppReceiver.sol";
 import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
-import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable, GlacisAbstractAdapter__NoRemoteAdapterForChainId} from "../GlacisAbstractAdapter.sol";
+import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__OnlyAdapterAllowed} from "../GlacisAbstractAdapter.sol";
 import {GlacisCommons} from "../../commons/GlacisCommons.sol";
 
 contract GlacisLayerZeroV2Adapter is OApp, GlacisAbstractAdapter {
@@ -117,9 +117,21 @@ contract GlacisLayerZeroV2Adapter is OApp, GlacisAbstractAdapter {
             bytes32(bytes20(_origin.sender)) >> 96              
         )
     {
-        GLACIS_ROUTER.receiveMessage(
-            adapterChainIdToGlacisChainId[_origin.srcEid],
-            payload
-        );
+        // We have to do a custom version of onlyAuthorizedAdapter because we want to support both non-evms
+        // & evms
+        uint256 chainId = adapterChainIdToGlacisChainId[_origin.srcEid];
+        bytes32 remoteCounterpartOfChainId = remoteCounterpart[chainId];
+        if (
+            chainId == 0 ||
+            remoteCounterpartOfChainId == bytes32(0) ||
+            (
+                bytes32(bytes20(_origin.sender)) >> 96 != remoteCounterpartOfChainId || // evm address
+                _origin.sender != remoteCounterpartOfChainId // bytes32 address
+            )
+        ) {
+            revert GlacisAbstractAdapter__OnlyAdapterAllowed();
+        }
+
+        GLACIS_ROUTER.receiveMessage(chainId, payload);
     }
 }
