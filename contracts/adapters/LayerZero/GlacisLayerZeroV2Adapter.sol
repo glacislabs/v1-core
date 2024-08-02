@@ -111,11 +111,6 @@ contract GlacisLayerZeroV2Adapter is OApp, GlacisAbstractAdapter {
     )
         internal
         override
-        onlyAuthorizedAdapter(
-            adapterChainIdToGlacisChainId[_origin.srcEid],
-            // TODO: check if this has changed with LZV2, and future-proof for non-evms
-            bytes32(bytes20(_origin.sender)) >> 96              
-        )
     {
         // We have to do a custom version of onlyAuthorizedAdapter because we want to support both non-evms
         // & evms
