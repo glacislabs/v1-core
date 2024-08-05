@@ -2,22 +2,27 @@
 pragma solidity ^0.8.18;
 
 import {IGlacisRouter} from "../../interfaces/IGlacisRouter.sol";
-import {OApp} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
+import {OAppNoPeer} from "./v2/OAppNoPeer.sol";
 import {Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppReceiver.sol";
+import {MessagingParams} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__OnlyAdapterAllowed} from "../GlacisAbstractAdapter.sol";
 import {GlacisCommons} from "../../commons/GlacisCommons.sol";
 
-contract GlacisLayerZeroV2Adapter is OApp, GlacisAbstractAdapter {
+error GlacisLayerZeroV2Adapter__PeersDisabledUseCounterpartInstead();
+
+contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
     using AddressBytes32 for bytes32;
 
     constructor(
         IGlacisRouter _glacisRouter,
         address _lzEndpoint,
         address _owner
-    ) OApp(_lzEndpoint, _owner) GlacisAbstractAdapter(_glacisRouter, _owner) {}
+    )
+        OAppNoPeer(_lzEndpoint, _owner)
+        GlacisAbstractAdapter(_glacisRouter, _owner)
+    {}
 
     mapping(uint256 => uint32) internal glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;
@@ -87,11 +92,10 @@ contract GlacisLayerZeroV2Adapter is OApp, GlacisAbstractAdapter {
             revert GlacisAbstractAdapter__NoRemoteAdapterForChainId(toChainId);
         if (_dstEid == 0)
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
-        _lzSend(
-            _dstEid,
-            payload,
-            "",
-            MessagingFee(msg.value, 0), // does not include ZRO payments
+
+        // solhint-disable-next-line check-send-result
+        endpoint.send{value: msg.value}(
+            MessagingParams(_dstEid, remoteCounterpart, payload, "", false),
             refundAddress
         );
     }
@@ -108,10 +112,7 @@ contract GlacisLayerZeroV2Adapter is OApp, GlacisAbstractAdapter {
         bytes calldata payload,
         address, // Executor address as specified by the OApp.
         bytes calldata // Any extra data or options to trigger on receipt.
-    )
-        internal
-        override
-    {
+    ) internal override {
         // We have to do a custom version of onlyAuthorizedAdapter because we want to support both non-evms
         // & evms
         uint256 chainId = adapterChainIdToGlacisChainId[_origin.srcEid];
@@ -119,14 +120,33 @@ contract GlacisLayerZeroV2Adapter is OApp, GlacisAbstractAdapter {
         if (
             chainId == 0 ||
             remoteCounterpartOfChainId == bytes32(0) ||
-            (
-                bytes32(bytes20(_origin.sender)) >> 96 != remoteCounterpartOfChainId || // evm address
-                _origin.sender != remoteCounterpartOfChainId // bytes32 address
-            )
+            (bytes32(bytes20(_origin.sender)) >> 96 !=
+                remoteCounterpartOfChainId || // evm address
+                _origin.sender != remoteCounterpartOfChainId) // bytes32 address
         ) {
             revert GlacisAbstractAdapter__OnlyAdapterAllowed();
         }
 
         GLACIS_ROUTER.receiveMessage(chainId, payload);
+    }
+
+    /**
+     * @notice Checks if the path initialization is allowed based on the provided origin.
+     * @param origin The origin information containing the source endpoint and sender address.
+     * @return Whether the path has been initialized.
+     *
+     * @dev This indicates to the endpoint that the OApp has enabled msgs for this particular path to be received.
+     * @dev This defaults to assuming if a peer has been set, its initialized.
+     */
+    function allowInitializePath(Origin calldata origin) public view override returns (bool) {
+        return remoteCounterpart[adapterChainIdToGlacisChainId[origin.srcEid]] == origin.sender;
+    }
+
+    function peers(uint32 _eid) external view returns (bytes32 peer) {
+        return remoteCounterpart[adapterChainIdToGlacisChainId[_eid]];
+    }
+
+    function setPeer(uint32, bytes32) onlyOwner external view {
+        revert GlacisLayerZeroV2Adapter__PeersDisabledUseCounterpartInstead(); 
     }
 }
