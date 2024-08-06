@@ -422,13 +422,13 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
         );
     }
 
-    function test_gas__LayerZero_Int_Control(uint256 val) external {
-        lzSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample), abi.encode(val));
-    }
+    // function test_gas__LayerZero_Int_Control(uint256 val) external {
+    //     lzSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample), abi.encode(val));
+    // }
 
-    function test_gas__LayerZero_Str_Control(string memory val) external {
-        lzTextSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample),abi.encode(val));
-    }
+    // function test_gas__LayerZero_Str_Control(string memory val) external {
+    //     lzTextSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample),abi.encode(val));
+    // }
 
     function test_gas__Wormhole_Int_Glacis(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(

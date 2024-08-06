@@ -26,18 +26,14 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
         glacisRouter = deployGlacisRouter();
         (lzGatewayMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
-        // (clientSample, ) = deployGlacisClientSample(glacisRouter);
-        // lzAdapterHarness = new GlacisLayerZeroV2AdapterHarness(
-        //     address(lzGatewayMock),
-        //     address(glacisRouter),
-        //     address(this)
-        // );
+        lzAdapterHarness = new GlacisLayerZeroV2AdapterHarness(address(glacisRouter), address(lzGatewayMock), address(this));
     }
 
     function test__onlyAuthorizedAdapterShouldRevert_LayerZero(
         uint256 chainId,
         address origin
     ) external {
+        vm.assume(origin != address(lzAdapterHarness));
         vm.expectRevert(GlacisAbstractAdapter__OnlyAdapterAllowed.selector);
         lzAdapterHarness.harness_onlyAuthorizedAdapter(
             chainId,
@@ -47,14 +43,7 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
 
     function test__Adapter_onlyAuthorizedAdapterFailure_LayerZero() external {
         // 1. Expect error
-        vm.expectEmit(false, false, false, false);
-        emit SimpleNonblockingLzAppEvents.MessageFailed(
-            0,
-            bytes(""),
-            0,
-            bytes(""),
-            bytes("")
-        );
+        vm.expectRevert(GlacisAbstractAdapter__OnlyAdapterAllowed.selector);
 
         // 2. Send fake message to GlacisAxelarAdapter through AxelarGatewayMock
         lzGatewayMock.send(
@@ -161,10 +150,10 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
 
 contract GlacisLayerZeroV2AdapterHarness is GlacisLayerZeroV2Adapter, GlacisCommons {
     constructor(
-        address lzEndpoint_,
         address glacisRouter_,
+        address lzEndpoint_,
         address owner
-    ) GlacisLayerZeroV2Adapter(lzEndpoint_, glacisRouter_, owner) {}
+    ) GlacisLayerZeroV2Adapter(glacisRouter_, lzEndpoint_, owner) {}
 
     function harness_onlyAuthorizedAdapter(
         uint256 chainId,

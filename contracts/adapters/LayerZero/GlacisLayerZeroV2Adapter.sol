@@ -112,22 +112,31 @@ contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
         bytes calldata payload,
         address, // Executor address as specified by the OApp.
         bytes calldata // Any extra data or options to trigger on receipt.
-    ) internal override {
+    )
+        internal
+        override
+        onlyAuthorizedAdapter(
+            adapterChainIdToGlacisChainId[_origin.srcEid],
+            _origin.sender
+        )
+    {
         // We have to do a custom version of onlyAuthorizedAdapter because we want to support both non-evms
         // & evms
-        uint256 chainId = adapterChainIdToGlacisChainId[_origin.srcEid];
-        bytes32 remoteCounterpartOfChainId = remoteCounterpart[chainId];
-        if (
-            chainId == 0 ||
-            remoteCounterpartOfChainId == bytes32(0) ||
-            (bytes32(bytes20(_origin.sender)) >> 96 !=
-                remoteCounterpartOfChainId || // evm address
-                _origin.sender != remoteCounterpartOfChainId) // bytes32 address
-        ) {
-            revert GlacisAbstractAdapter__OnlyAdapterAllowed();
-        }
+        // bytes32 remoteCounterpartOfChainId = remoteCounterpart[chainId];
+        // if (
+        //     chainId == 0 ||
+        //     remoteCounterpartOfChainId == bytes32(0) ||
+        //     (bytes32(bytes20(_origin.sender)) >> 96 !=
+        //         remoteCounterpartOfChainId || // evm address
+        //         _origin.sender != remoteCounterpartOfChainId) // bytes32 address
+        // ) {
+        //     revert GlacisAbstractAdapter__OnlyAdapterAllowed();
+        // }
 
-        GLACIS_ROUTER.receiveMessage(chainId, payload);
+        GLACIS_ROUTER.receiveMessage(
+            adapterChainIdToGlacisChainId[_origin.srcEid],
+            payload
+        );
     }
 
     /**
@@ -138,15 +147,19 @@ contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
      * @dev This indicates to the endpoint that the OApp has enabled msgs for this particular path to be received.
      * @dev This defaults to assuming if a peer has been set, its initialized.
      */
-    function allowInitializePath(Origin calldata origin) public view override returns (bool) {
-        return remoteCounterpart[adapterChainIdToGlacisChainId[origin.srcEid]] == origin.sender;
+    function allowInitializePath(
+        Origin calldata origin
+    ) public view override returns (bool) {
+        return
+            remoteCounterpart[adapterChainIdToGlacisChainId[origin.srcEid]] ==
+            origin.sender;
     }
 
     function peers(uint32 _eid) external view returns (bytes32 peer) {
         return remoteCounterpart[adapterChainIdToGlacisChainId[_eid]];
     }
 
-    function setPeer(uint32, bytes32) onlyOwner external view {
-        revert GlacisLayerZeroV2Adapter__PeersDisabledUseCounterpartInstead(); 
+    function setPeer(uint32, bytes32) external view onlyOwner {
+        revert GlacisLayerZeroV2Adapter__PeersDisabledUseCounterpartInstead();
     }
 }
