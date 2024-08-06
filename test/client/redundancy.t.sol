@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter, WormholeRelayerMock, GlacisWormholeAdapter} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroV2Mock, GlacisLayerZeroV2Adapter, WormholeRelayerMock, GlacisWormholeAdapter} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisCommons} from "../../contracts/commons/GlacisCommons.sol";
 import {GlacisClient} from "../../contracts/client/GlacisClient.sol";
@@ -15,8 +15,8 @@ contract RedundancyTests is LocalTestSetup {
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
 
-    LayerZeroGMPMock internal lzGatewayMock;
-    GlacisLayerZeroAdapter internal lzAdapter;
+    LayerZeroV2Mock internal lzGatewayMock;
+    GlacisLayerZeroV2Adapter internal lzAdapter;
 
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;
@@ -100,8 +100,8 @@ contract RedundancyReceivingDataTests is LocalTestSetup {
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
 
-    LayerZeroGMPMock internal lzGatewayMock;
-    GlacisLayerZeroAdapter internal lzAdapter;
+    LayerZeroV2Mock internal lzGatewayMock;
+    GlacisLayerZeroV2Adapter internal lzAdapter;
 
     WormholeRelayerMock internal whMock;
     GlacisWormholeAdapter internal whAdapter;
@@ -182,8 +182,8 @@ contract DestinationRedundancyTests is LocalTestSetup {
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
 
-    LayerZeroGMPMock internal lzGatewayMock;
-    GlacisLayerZeroAdapter internal lzAdapter;
+    LayerZeroV2Mock internal lzGatewayMock;
+    GlacisLayerZeroV2Adapter internal lzAdapter;
 
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;

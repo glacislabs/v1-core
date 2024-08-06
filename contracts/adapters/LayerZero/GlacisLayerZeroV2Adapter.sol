@@ -16,12 +16,12 @@ contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
     using AddressBytes32 for bytes32;
 
     constructor(
-        IGlacisRouter _glacisRouter,
+        address _glacisRouter,
         address _lzEndpoint,
         address _owner
     )
         OAppNoPeer(_lzEndpoint, _owner)
-        GlacisAbstractAdapter(_glacisRouter, _owner)
+        GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner)
     {}
 
     mapping(uint256 => uint32) internal glacisChainIdToAdapterChainId;

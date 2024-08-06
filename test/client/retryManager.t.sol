@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, GlacisAxelarAdapter, LayerZeroGMPMock, GlacisLayerZeroAdapter, GlacisCommons} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, GlacisAxelarAdapter, LayerZeroV2Mock, GlacisLayerZeroV2Adapter, GlacisCommons} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {IGlacisRouterEvents} from "../../contracts/interfaces/IGlacisRouter.sol";
 import {GlacisRouter__MessageAlreadyReceivedFromGMP} from "../../contracts/routers/GlacisRouter.sol";
@@ -17,8 +17,8 @@ contract RetryTests is LocalTestSetup, IGlacisRouterEvents {
     AxelarGasServiceMock internal axelarGasServiceMock;
     GlacisAxelarAdapter internal axelarAdapter;
 
-    LayerZeroGMPMock internal lzGatewayMock;
-    GlacisLayerZeroAdapter internal lzAdapter;
+    LayerZeroV2Mock internal lzGatewayMock;
+    GlacisLayerZeroV2Adapter internal lzAdapter;
 
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;

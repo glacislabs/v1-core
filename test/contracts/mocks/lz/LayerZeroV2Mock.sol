@@ -4,7 +4,7 @@ import {GlacisLayerZeroV2Adapter} from "../../../../contracts/adapters/LayerZero
 import {AddressBytes32} from "../../../../contracts/libraries/AddressBytes32.sol";
 import {MessagingParams, MessagingReceipt, Origin, MessagingFee} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
-contract LayerZeroV2GMPMock {
+contract LayerZeroV2Mock {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
 

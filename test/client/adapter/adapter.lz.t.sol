@@ -1,23 +1,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisRouter, LayerZeroGMPMock, GlacisLayerZeroAdapter, GlacisCommons} from "../../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisRouter, LayerZeroV2Mock, GlacisLayerZeroV2Adapter, GlacisCommons} from "../../LocalTestSetup.sol";
 import {GlacisClientSample} from "../../contracts/samples/GlacisClientSample.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {GlacisAbstractAdapter__OnlyAdapterAllowed, GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__OnlyGlacisRouterAllowed, GlacisAbstractAdapter__SourceChainNotRegistered, GlacisAbstractAdapter__ChainIsNotAvailable} from "../../../contracts/adapters/GlacisAbstractAdapter.sol";
 import {IGlacisAdapter} from "../../../contracts/interfaces/IGlacisAdapter.sol";
 import {SimpleNonblockingLzAppEvents} from "../../../contracts/adapters/LayerZero/SimpleNonblockingLzApp.sol";
 import {AddressBytes32} from "../../../contracts/libraries/AddressBytes32.sol";
+import {MessagingParams} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
-// | contracts/adapters/LayerZero/GlacisLayerZeroAdapter.sol       | 90.00% (18/20)    | 90.91% (20/22)    | 75.00% (6/8)     | 83.33% (5/6)     |
+// | contracts/adapters/LayerZero/GlacisLayerZeroV2Adapter.sol       | 90.00% (18/20)    | 90.91% (20/22)    | 75.00% (6/8)     | 83.33% (5/6)     |
 
 // solhint-disable-next-line
 contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
     using AddressBytes32 for address;
 
-    LayerZeroGMPMock internal lzGatewayMock;
-    GlacisLayerZeroAdapter internal lzAdapter;
-    GlacisLayerZeroAdapterHarness internal lzAdapterHarness;
+    LayerZeroV2Mock internal lzGatewayMock;
+    GlacisLayerZeroV2Adapter internal lzAdapter;
+    GlacisLayerZeroV2AdapterHarness internal lzAdapterHarness;
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;
 
@@ -25,12 +26,12 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
         glacisRouter = deployGlacisRouter();
         (lzGatewayMock) = deployLayerZeroFixture();
         lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
-        (clientSample, ) = deployGlacisClientSample(glacisRouter);
-        lzAdapterHarness = new GlacisLayerZeroAdapterHarness(
-            address(lzGatewayMock),
-            address(glacisRouter),
-            address(this)
-        );
+        // (clientSample, ) = deployGlacisClientSample(glacisRouter);
+        // lzAdapterHarness = new GlacisLayerZeroV2AdapterHarness(
+        //     address(lzGatewayMock),
+        //     address(glacisRouter),
+        //     address(this)
+        // );
     }
 
     function test__onlyAuthorizedAdapterShouldRevert_LayerZero(
@@ -44,7 +45,7 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
         );
     }
 
-    function test__onlyAuthorizedAdapterFailure_LayerZero() external {
+    function test__Adapter_onlyAuthorizedAdapterFailure_LayerZero() external {
         // 1. Expect error
         vm.expectEmit(false, false, false, false);
         emit SimpleNonblockingLzAppEvents.MessageFailed(
@@ -57,21 +58,22 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
 
         // 2. Send fake message to GlacisAxelarAdapter through AxelarGatewayMock
         lzGatewayMock.send(
-            1,
-            // This address injection is also the attack that we are trying to avoid
-            abi.encodePacked(address(lzAdapter), address(lzAdapter)),
-            abi.encode(
-                keccak256("random message ID"),
-                // This address injection is the attack that we are trying to avoid
-                address(lzAdapter),
-                address(lzAdapter),
-                1,
-                false,
-                "my text"
-            ),
-            msg.sender,
-            msg.sender,
-            bytes("")
+            MessagingParams(
+                1, 
+                address(lzAdapter).toBytes32(),
+                abi.encode(
+                    keccak256("random message ID"),
+                    // This address injection is the attack that we are trying to avoid
+                    address(lzAdapter),
+                    address(lzAdapter),
+                    1,
+                    false,
+                    "my text"
+                ),
+                "",
+                false
+            ), 
+            msg.sender
         );
     }
 
@@ -84,7 +86,7 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
 
         uint256[] memory chains = new uint256[](1);
         chains[0] = chain;
-        uint16[] memory lzIDs = new uint16[](1);
+        uint32[] memory lzIDs = new uint32[](1);
         lzIDs[0] = lzId;
 
         lzAdapter.setGlacisChainIds(chains, lzIDs);
@@ -136,14 +138,14 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
 
         uint256[] memory chains = new uint256[](1);
         chains[0] = chain;
-        uint16[] memory lzIDs = new uint16[](2);
+        uint32[] memory lzIDs = new uint32[](2);
         lzIDs[0] = lzId;
         lzIDs[0] = lzId;
         
         vm.expectRevert(GlacisAbstractAdapter__IDArraysMustBeSameLength.selector);
         lzAdapter.setGlacisChainIds(chains, lzIDs);
 
-        lzIDs = new uint16[](1);
+        lzIDs = new uint32[](1);
         lzIDs[0] = lzId;
         chains[0] = 0;
         
@@ -157,12 +159,12 @@ contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
     }
 }
 
-contract GlacisLayerZeroAdapterHarness is GlacisLayerZeroAdapter, GlacisCommons {
+contract GlacisLayerZeroV2AdapterHarness is GlacisLayerZeroV2Adapter, GlacisCommons {
     constructor(
         address lzEndpoint_,
         address glacisRouter_,
         address owner
-    ) GlacisLayerZeroAdapter(lzEndpoint_, glacisRouter_, owner) {}
+    ) GlacisLayerZeroV2Adapter(lzEndpoint_, glacisRouter_, owner) {}
 
     function harness_onlyAuthorizedAdapter(
         uint256 chainId,

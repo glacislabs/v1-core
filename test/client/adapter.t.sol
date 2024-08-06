@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter, WormholeRelayerMock, GlacisWormholeAdapter, CCIPRouterMock, GlacisCCIPAdapter, HyperlaneMailboxMock, GlacisHyperlaneAdapter} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroV2Mock, GlacisLayerZeroV2Adapter, WormholeRelayerMock, GlacisWormholeAdapter, CCIPRouterMock, GlacisCCIPAdapter, HyperlaneMailboxMock, GlacisHyperlaneAdapter} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {GlacisAbstractAdapter__OnlyAdapterAllowed, GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable} from "../../contracts/adapters/GlacisAbstractAdapter.sol";
@@ -10,6 +10,9 @@ import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {IPostDispatchHook} from "@hyperlane-xyz/core/contracts/interfaces/hooks/IPostDispatchHook.sol";
 import {IMailbox} from "@hyperlane-xyz/core/contracts/interfaces/IMailbox.sol";
+import {MessagingParams} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+
+// TODO: ensure that this file isn't being repeated in the adapter folder
 
 /* solhint-disable contract-name-camelcase */
 contract AdapterTests__Axelar is LocalTestSetup {
@@ -53,178 +56,12 @@ contract AdapterTests__Axelar is LocalTestSetup {
     }
 }
 
-// solhint-disable-next-line
-contract AdapterTests__LZ is LocalTestSetup, SimpleNonblockingLzAppEvents {
-    using AddressBytes32 for address;
-
-    LayerZeroGMPMock internal lzGatewayMock;
-    GlacisLayerZeroAdapter internal lzAdapter;
-    GlacisLayerZeroAdapterHarness internal lzAdapterHarness;
-    GlacisRouter internal glacisRouter;
-    GlacisClientSample internal clientSample;
-
-    function setUp() public {
-        glacisRouter = deployGlacisRouter();
-        (lzGatewayMock) = deployLayerZeroFixture();
-        lzAdapter = deployLayerZeroAdapters(glacisRouter, lzGatewayMock);
-        (clientSample, ) = deployGlacisClientSample(glacisRouter);
-        lzAdapterHarness = new GlacisLayerZeroAdapterHarness(
-            address(lzGatewayMock),
-            address(glacisRouter),
-            address(this)
-        );
-    }
-
-    function test__onlyAuthorizedAdapterShouldRevert_LayerZero(
-        uint256 chainId,
-        address origin
-    ) external {
-        vm.expectRevert(GlacisAbstractAdapter__OnlyAdapterAllowed.selector);
-        lzAdapterHarness.harness_onlyAuthorizedAdapter(
-            chainId,
-            origin.toBytes32()
-        );
-    }
-
-    function test__Adapter_onlyAuthorizedAdapterFailure_LayerZero() external {
-        // 1. Expect error
-        vm.expectEmit(false, false, false, false);
-        emit SimpleNonblockingLzAppEvents.MessageFailed(
-            0,
-            bytes(""),
-            0,
-            bytes(""),
-            bytes("")
-        );
-
-        // 2. Send fake message to GlacisAxelarAdapter through AxelarGatewayMock
-        lzGatewayMock.send(
-            1,
-            // This address injection is also the attack that we are trying to avoid
-            abi.encodePacked(address(lzAdapter), address(lzAdapter)),
-            abi.encode(
-                keccak256("random message ID"),
-                // This address injection is the attack that we are trying to avoid
-                address(lzAdapter),
-                address(lzAdapter),
-                1,
-                false,
-                "my text"
-            ),
-            msg.sender,
-            msg.sender,
-            bytes("")
-        );
-    }
-
-    // TODO: cannot reach LZChainIdNotAccepted revert
-    /*    function test__Adapter_ChainIdNotAccepted_LayerZero() external {
-         vm.expectRevert(GlacisLayerZeroAdapter__LZChainIdNotAccepted.selector);
-         uint256[] memory glacisChainIds = new uint256[](1);
-        glacisChainIds[0] = 1;
-        uint16[] memory adapterIds = new uint16[](1);
-        adapterIds[0] = 1;
-
-        lzAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
-
-        // Add self as a remote counterpart
-        bytes32[] memory adapterCounterparts = new bytes32[](1);
-        adapterCounterparts[0] = address(lzAdapter).toBytes32();
-        lzAdapter.addRemoteCounterparts(glacisChainIds, adapterCounterparts);
-
-        lzGatewayMock.lzReceive(
-            address(lzAdapter),
-            adapterIds[0],
-            abi.encodePacked(address(lzAdapter), address(lzAdapter)),
-            0,
-            "0x111111"
-        );
-    }
-*/
-
-    function test__Adapter_ArraysMustBeSameLength_LayerZero() external {
-        vm.expectRevert(
-            GlacisAbstractAdapter__IDArraysMustBeSameLength.selector
-        );
-        uint256[] memory glacisChainIds = new uint256[](1);
-        uint16[] memory adapterLabels = new uint16[](2);
-
-        lzAdapter.setGlacisChainIds(glacisChainIds, adapterLabels);
-    }
-
-    function test__Adapter_DestinationChainIdNotValid_LayerZero() external {
-        vm.expectRevert(
-            GlacisAbstractAdapter__DestinationChainIdNotValid.selector
-        );
-        uint256[] memory glacisChainIds = new uint256[](1);
-        glacisChainIds[0] = 0;
-        uint16[] memory adapterIds = new uint16[](1);
-
-        lzAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
-    }
-
-    function test__Adapter_ChainIdToAdapterChainId_LayerZero() external {
-        uint256[] memory glacisChainIds = new uint256[](1);
-        glacisChainIds[0] = 1;
-        uint16[] memory adapterIds = new uint16[](1);
-        adapterIds[0] = 1;
-
-        lzAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
-        assertEq(
-            lzAdapter.adapterChainID(glacisChainIds[0]),
-            adapterIds[0]
-        );
-    }
-
-    function test__Adapter_AdapterChainId_LayerZero() external {
-        uint256[] memory glacisChainIds = new uint256[](1);
-        glacisChainIds[0] = 1;
-        uint16[] memory adapterIds = new uint16[](1);
-        adapterIds[0] = 1;
-
-        lzAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
-        assertEq(lzAdapter.adapterChainID(glacisChainIds[0]), adapterIds[0]);
-    }
-
-    function test__Adapter_ChainIsAvailable_LayerZero() external {
-        uint256[] memory glacisChainIds = new uint256[](1);
-        glacisChainIds[0] = 1;
-        uint16[] memory adapterIds = new uint16[](1);
-        adapterIds[0] = 1;
-
-        lzAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
-        assertTrue(lzAdapter.chainIsAvailable(glacisChainIds[0]));
-    }
-
-    function test__Adapter_ChainIsNotAvailable_LayerZero() external {
-        uint256[] memory glacisChainIds = new uint256[](1);
-        glacisChainIds[0] = block.chainid;
-        uint16[] memory adapterIds = new uint16[](1);
-        adapterIds[0] = 0;
-
-        lzAdapter.setGlacisChainIds(glacisChainIds, adapterIds);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                GlacisAbstractAdapter__ChainIsNotAvailable.selector,
-                block.chainid
-            )
-        );
-        clientSample.setRemoteValue__execute(
-            block.chainid,
-            bytes32(0),
-            LAYERZERO_GMP_ID,
-            ""
-        );
-    }
-}
-
-contract GlacisLayerZeroAdapterHarness is GlacisLayerZeroAdapter {
+contract GlacisLayerZeroAdapterHarness is GlacisLayerZeroV2Adapter {
     constructor(
         address lzEndpoint_,
         address glacisRouter_,
         address owner
-    ) GlacisLayerZeroAdapter(lzEndpoint_, glacisRouter_, owner) {}
+    ) GlacisLayerZeroV2Adapter(lzEndpoint_, glacisRouter_, owner) {}
 
     function harness_onlyAuthorizedAdapter(
         uint256 chainId,
