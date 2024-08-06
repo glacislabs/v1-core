@@ -11,6 +11,7 @@ contract LayerZeroV2Mock {
     error LayerZeroV2GMPMock__RefundAddressDoesNotReceiveRefund();
     
     uint64 private nonce = 0;
+    mapping(address => address) delegates;
 
     function send(
         MessagingParams calldata _params,
@@ -38,5 +39,9 @@ contract LayerZeroV2Mock {
 
     function getChainId() public pure returns (uint32) {
         return 1;
+    }
+
+    function setDelegate(address delegate) external {
+        delegates[msg.sender] = delegate;
     }
 }
