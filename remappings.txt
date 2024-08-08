@@ -1,3 +1,4 @@
+forge-std/=lib/forge-std/src/
 @arbitrum/=node_modules/@arbitrum/
 @axelar-network/=node_modules/@axelar-network/
 @chainlink/=node_modules/@chainlink/

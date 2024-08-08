@@ -26,7 +26,7 @@ contract GlacisHyperlaneAdapter is GlacisAbstractAdapter {
     IMailbox public immutable MAIL_BOX;
     uint32 public immutable LOCAL_DOMAIN;
 
-    uint256 internal constant DEFAULT_GAS_LIMIT = 250_000;
+    uint256 internal constant DEFAULT_GAS_LIMIT = 350_000;
 
     mapping(uint256 => uint32) public glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;

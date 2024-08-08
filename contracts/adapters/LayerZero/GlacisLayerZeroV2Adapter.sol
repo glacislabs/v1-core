@@ -5,6 +5,7 @@ import {IGlacisRouter} from "../../interfaces/IGlacisRouter.sol";
 import {OAppNoPeer} from "./v2/OAppNoPeer.sol";
 import {Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppReceiver.sol";
 import {MessagingParams} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import {GlacisAbstractAdapter} from "../GlacisAbstractAdapter.sol";
 import {AddressBytes32} from "../../libraries/AddressBytes32.sol";
 import {GlacisAbstractAdapter__IDArraysMustBeSameLength, GlacisAbstractAdapter__DestinationChainIdNotValid, GlacisAbstractAdapter__ChainIsNotAvailable, GlacisAbstractAdapter__NoRemoteAdapterForChainId, GlacisAbstractAdapter__OnlyAdapterAllowed} from "../GlacisAbstractAdapter.sol";
@@ -14,6 +15,7 @@ error GlacisLayerZeroV2Adapter__PeersDisabledUseCounterpartInstead();
 
 contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
     using AddressBytes32 for bytes32;
+    using OptionsBuilder for bytes;
 
     constructor(
         address _glacisRouter,
@@ -23,6 +25,8 @@ contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
         OAppNoPeer(_lzEndpoint, _owner)
         GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner)
     {}
+
+    uint128 internal constant DEFAULT_GAS_LIMIT = 350_000;
 
     mapping(uint256 => uint32) internal glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;
@@ -82,7 +86,7 @@ contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
     function _sendMessage(
         uint256 toChainId,
         address refundAddress,
-        GlacisCommons.CrossChainGas memory,
+        GlacisCommons.CrossChainGas memory gas,
         bytes memory payload
     ) internal override {
         bytes32 remoteCounterpart = remoteCounterpart[toChainId];
@@ -93,9 +97,17 @@ contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
         if (_dstEid == 0)
             revert GlacisAbstractAdapter__ChainIsNotAvailable(toChainId);
 
+        uint128 expectedGasLimit = gas.gasLimit == 0 ? DEFAULT_GAS_LIMIT : gas.gasLimit;
+
         // solhint-disable-next-line check-send-result
         endpoint.send{value: msg.value}(
-            MessagingParams(_dstEid, remoteCounterpart, payload, "", false),
+            MessagingParams(
+                _dstEid, 
+                remoteCounterpart, 
+                payload,
+                OptionsBuilder.newOptions().addExecutorLzReceiveOption(expectedGasLimit, gas.nativeCurrencyValue),
+                false
+            ),
             refundAddress
         );
     }
