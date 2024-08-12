@@ -105,7 +105,7 @@ contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
                 _dstEid, 
                 remoteCounterpart, 
                 payload,
-                OptionsBuilder.newOptions().addExecutorLzReceiveOption(expectedGasLimit, gas.nativeCurrencyValue),
+                OptionsBuilder.newOptions().addExecutorLzReceiveOption(expectedGasLimit, 0),
                 false
             ),
             refundAddress
