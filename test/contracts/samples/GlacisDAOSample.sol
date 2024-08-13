@@ -22,7 +22,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
 
     struct Proposal {
         uint256 toChain;
-        bool retriable;
+        bool retryable;
         address[] gmps;
         address token;
         uint256 tokenAmount;
@@ -163,7 +163,7 @@ contract GlacisDAOSample is GlacisTokenClientOwnable {
                 adapters: p.gmps,
                 fees: fees,
                 refundAddress: msg.sender,
-                retriable: p.retriable,
+                retryable: p.retryable,
                 gasPayment: gasPayment
             });
         } else {

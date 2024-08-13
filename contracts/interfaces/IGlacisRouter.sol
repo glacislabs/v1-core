@@ -45,7 +45,7 @@ abstract contract IGlacisRouterEvents is GlacisCommons
         address[] adapters,
         CrossChainGas[] fees,
         address refundAddress,
-        bool retriable
+        bool retryable
     );
     event GlacisRouter__MessageRetried(
         bytes32 indexed messageId,
@@ -72,7 +72,7 @@ interface IGlacisRouter {
     /// @param fees Array of fees to be sent to each GMP & custom adapter for routing (must be same length as gmps)
     /// @param refundAddress An address for native currency to be sent to that are greater than fees charged. If it is a 
     /// contract it needs to support receive function, reverted otherwise
-    /// @param retriable True if this message could pottentially be retried
+    /// @param retryable True if this message could pottentially be retried
     /// @return A tuple with a bytes32 messageId and a uint256 nonce
     function route(
         uint256 chainId,
@@ -81,7 +81,7 @@ interface IGlacisRouter {
         address[] memory adapters,
         GlacisCommons.CrossChainGas[] memory fees,
         address refundAddress,
-        bool retriable
+        bool retryable
     ) external payable returns (bytes32, uint256);
 
     /// @notice Retries routing the payload to the specific address on destination chain

@@ -100,7 +100,7 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
     /// @param adapters An array of custom adapters to be used for the routing
     /// @param fees Payment for each GMP to cover source and destination gas fees (excess will be refunded)
     /// @param refundAddress Address to refund excess gas payment
-    /// @param retriable True to enable retry feature for this message
+    /// @param retryable True to enable retry feature for this message
     /// @param gasPayment Amount of gas to cover source and destination gas fees (excess will be refunded)
     function _route(
         uint256 chainId,
@@ -109,12 +109,12 @@ abstract contract GlacisClient is GlacisAccessControlClient, IGlacisClient {
         address[] memory adapters,
         CrossChainGas[] memory fees,
         address refundAddress,
-        bool retriable,
+        bool retryable,
         uint256 gasPayment
     ) internal returns (bytes32,uint256) {
         (bytes32 messageId,uint256 nonce) = IGlacisRouter(GLACIS_ROUTER).route{
             value: gasPayment
-        }(chainId, to, payload, adapters, fees, refundAddress, retriable);
+        }(chainId, to, payload, adapters, fees, refundAddress, retryable);
         emit GlacisClient__MessageRouted(messageId, chainId, to);
         return (messageId,nonce);
     }

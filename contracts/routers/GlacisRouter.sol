@@ -58,7 +58,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
     /// @param fees Array of fees to be sent to each GMP & custom adapter for routing (must be same length as gmps)
     /// @param refundAddress An address for native currency to be sent to that are greater than fees charged. If it is a
     /// contract it needs to support receive function, tx will revert otherwise
-    /// @param retriable True if this message could pottentially be retried
+    /// @param retryable True if this message could pottentially be retried
     function route(
         uint256 chainId,
         bytes32 to,
@@ -66,7 +66,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         address[] memory adapters,
         GlacisRouter.CrossChainGas[] memory fees,
         address refundAddress,
-        bool retriable
+        bool retryable
     ) public payable virtual returns (bytes32 messageId, uint256 nonce) {
         // Validate input
         validateFeesInput(adapters.length, fees);
@@ -74,8 +74,8 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
         bytes32 from = msg.sender.toBytes32();
         (messageId, nonce) = _createGlacisMessageId(chainId, to, payload);
 
-        // Store messageId owner if retriable flagged
-        if (retriable) {
+        // Store messageId owner if retryable flagged
+        if (retryable) {
             messageSenders[messageId] = msg.sender;
         }
 
@@ -98,7 +98,7 @@ contract GlacisRouter is GlacisAbstractRouter, IGlacisRouter {
             adapters,
             fees,
             refundAddress,
-            retriable
+            retryable
         );
 
         return (messageId, nonce);
