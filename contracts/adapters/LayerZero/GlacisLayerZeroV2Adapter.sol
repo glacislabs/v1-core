@@ -132,19 +132,6 @@ contract GlacisLayerZeroV2Adapter is OAppNoPeer, GlacisAbstractAdapter {
             _origin.sender
         )
     {
-        // We have to do a custom version of onlyAuthorizedAdapter because we want to support both non-evms
-        // & evms
-        // bytes32 remoteCounterpartOfChainId = remoteCounterpart[chainId];
-        // if (
-        //     chainId == 0 ||
-        //     remoteCounterpartOfChainId == bytes32(0) ||
-        //     (bytes32(bytes20(_origin.sender)) >> 96 !=
-        //         remoteCounterpartOfChainId || // evm address
-        //         _origin.sender != remoteCounterpartOfChainId) // bytes32 address
-        // ) {
-        //     revert GlacisAbstractAdapter__OnlyAdapterAllowed();
-        // }
-
         GLACIS_ROUTER.receiveMessage(
             adapterChainIdToGlacisChainId[_origin.srcEid],
             payload
