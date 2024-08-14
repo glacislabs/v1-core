@@ -165,7 +165,7 @@ contract LocalTestSetup is Test, GlacisCommons {
 
         // Register lzID <-> glacisID
         uint32[] memory lzIDs = new uint32[](1);
-        lzIDs[0] = 1;
+        lzIDs[0] = lzEndpoint.getChainId();
         uint256[] memory glacisIDs = new uint256[](1);
         glacisIDs[0] = uint32(block.chainid);
         adapter.setGlacisChainIds(glacisIDs, lzIDs);
