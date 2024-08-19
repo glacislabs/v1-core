@@ -37,7 +37,7 @@ contract LayerZeroV2Mock {
         return MessagingReceipt(messageId, nonce - 1, MessagingFee(msg.value, 0));
     }
 
-    function getChainId() public view returns (uint32) {
+    function getChainId() public pure returns (uint32) {
         return 33137;
     }
 
