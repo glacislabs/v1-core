@@ -38,7 +38,7 @@ contract LayerZeroV2Mock {
     }
 
     function getChainId() public pure returns (uint32) {
-        return 33137;
+        return 31337;
     }
 
     function setDelegate(address delegate) external {
