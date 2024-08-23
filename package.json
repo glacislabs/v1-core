@@ -2,7 +2,7 @@
   "name": "glacisv1",
   "scripts": {
     "test": "forge test",
-    "coverage": "forge coverage --report lcov --report-file coverage/lcov.info; lcov --rc lcov_branch_coverage=1 --remove coverage/lcov.info --output-file coverage/filtered-lcov.info '*test*' '*SimpleNonblockingLzApp*'; genhtml --branch-coverage coverage/filtered-lcov.info -output coverage/lcov.html",
+    "coverage": "forge coverage --report lcov --report-file coverage/lcov.info; lcov --rc lcov_branch_coverage=1 --remove coverage/lcov.info --output-file coverage/filtered-lcov.info '*test*' '*node_modules*' '*GlacisLayerZeroAdapter.sol*' '*SimpleNonblockingLzApp.sol*' '*GlacisLayerZeroAdapter.sol*' '*OApp*'; genhtml --branch-coverage coverage/filtered-lcov.info -output coverage/lcov.html",
     "test:forge:debug": "forge test -vvv",
     "test:gas": "bash scripts/plotGas.sh",
     "hint": "solhint 'contracts/**/*.sol' 'test/**/*.sol'",
