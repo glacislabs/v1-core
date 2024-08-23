@@ -25,6 +25,8 @@ contract GlacisConnextAdapter is IXReceiver, GlacisAbstractAdapter {
     mapping(uint256 => uint32) public glacisChainIdToAdapterChainId;
     mapping(uint32 => uint256) public adapterChainIdToGlacisChainId;
 
+    address public delegate;
+
     /// @param _glacisRouter This chain's glacis router
     /// @param _connext This chain's Connext bridge
     /// @param _owner This adapter's owner
@@ -34,6 +36,7 @@ contract GlacisConnextAdapter is IXReceiver, GlacisAbstractAdapter {
         address _owner
     ) GlacisAbstractAdapter(IGlacisRouter(_glacisRouter), _owner) {
         CONNEXT = IConnext(_connext);
+        delegate = address(this);
     }
 
     /// @notice Sets the corresponding Hyperlane domain for the specified Glacis chain ID
@@ -101,7 +104,7 @@ contract GlacisConnextAdapter is IXReceiver, GlacisAbstractAdapter {
             // This should not present any problems so long as we do not add non-EVM chains
             destinationAddress.toAddress(), 
             address(0), // _asset: use address zero for 0-value transfers
-            address(this), // _delegate: address that can revert or forceLocal on destination
+            delegate, // _delegate: address that can revert or forceLocal on destination
             0, // _amount: 0 because no funds are being transferred
             0, // _slippage: can be anything between 0-10000 because no funds are being transferred
             payload // _callData: the encoded calldata to send
@@ -133,6 +136,7 @@ contract GlacisConnextAdapter is IXReceiver, GlacisAbstractAdapter {
         return "";
     }
 
-    // TODO: special delegate stuff with connext
-    // https://docs.connext.network/developers/guides/handling-failures#increasing-slippage-tolerance
+    function setDelegate(address _delegate) external onlyOwner {
+        delegate = _delegate;
+    }
 }
