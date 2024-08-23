@@ -1,7 +1,7 @@
 LINE_COVERAGE=$1
 FUNCTION_COVERAGE=$2
 BRANCH_COVERAGE=$3
-
+npm run coverage
 genhtml --branch-coverage coverage/filtered-lcov.info -output coverage/lcov.html | grep "\.:" > coverage/lcov.txt
 
 sed -i 's/\.*:\ /=/g' coverage/lcov.txt
