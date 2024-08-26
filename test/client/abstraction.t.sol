@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter, WormholeRelayerMock, GlacisWormholeAdapter} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroV2Mock, GlacisLayerZeroV2Adapter, WormholeRelayerMock, GlacisWormholeAdapter} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisClientTextSample} from "../contracts/samples/GlacisClientTextSample.sol";
 import {AxelarOneWayGatewayMock} from "../contracts/mocks/axelar/AxelarOneWayGatewayMock.sol";
@@ -83,8 +83,8 @@ contract AbstractionTests__Axelar is LocalTestSetup {
 contract AbstractionTests__LayerZero is LocalTestSetup {
     using AddressBytes32 for address;
 
-    LayerZeroGMPMock internal lzGatewayMock;
-    GlacisLayerZeroAdapter internal lzAdapter;
+    LayerZeroV2Mock internal lzGatewayMock;
+    GlacisLayerZeroV2Adapter internal lzAdapter;
     GlacisRouter internal glacisRouter;
     GlacisClientSample internal clientSample;
 
@@ -298,8 +298,8 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
     AxelarSample internal axelarSample;
     AxelarTextSample internal axelarTextSample;
 
-    LayerZeroGMPMock internal lzEndpointMock;
-    GlacisLayerZeroAdapter internal lzAdapter;
+    LayerZeroV2Mock internal lzEndpointMock;
+    GlacisLayerZeroV2Adapter internal lzAdapter;
     LayerZeroSample internal lzSample;
     LayerZeroTextSample internal lzTextSample;
 
@@ -422,13 +422,13 @@ contract AbstractionTests__FullGasBenchmark is LocalTestSetup {
         );
     }
 
-    function test_gas__LayerZero_Int_Control(uint256 val) external {
-        lzSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample), abi.encode(val));
-    }
+    // function test_gas__LayerZero_Int_Control(uint256 val) external {
+    //     lzSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample), abi.encode(val));
+    // }
 
-    function test_gas__LayerZero_Str_Control(string memory val) external {
-        lzTextSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample),abi.encode(val));
-    }
+    // function test_gas__LayerZero_Str_Control(string memory val) external {
+    //     lzTextSample.setRemoteValue{value: 0.1 ether}(1, address(lzSample),abi.encode(val));
+    // }
 
     function test_gas__Wormhole_Int_Glacis(uint256 val) external {
         clientSample.setRemoteValue__execute{value: 0.1 ether}(

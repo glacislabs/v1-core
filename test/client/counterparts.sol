@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock, GlacisLayerZeroAdapter, WormholeRelayerMock, GlacisWormholeAdapter, CCIPRouterMock, GlacisCCIPAdapter, HyperlaneMailboxMock, GlacisHyperlaneAdapter} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroV2Mock, GlacisLayerZeroV2Adapter, WormholeRelayerMock, GlacisWormholeAdapter, CCIPRouterMock, GlacisCCIPAdapter, HyperlaneMailboxMock, GlacisHyperlaneAdapter} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {GlacisRemoteCounterpartManager__CounterpartsAndChainIDsMustHaveSameLength, GlacisRemoteCounterpartManager__RemoteCounterpartCannotHaveChainIdZero} from "../../contracts/managers/GlacisRemoteCounterpartManager.sol";
@@ -11,8 +11,8 @@ import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 contract CounterpartManagerTests is LocalTestSetup {
     using AddressBytes32 for address;
     using AddressBytes32 for bytes32;
-    LayerZeroGMPMock internal lzGatewayMock;
-    GlacisLayerZeroAdapter internal adapter;
+    LayerZeroV2Mock internal lzGatewayMock;
+    GlacisLayerZeroV2Adapter internal adapter;
     GlacisRouter internal glacisRouter;
 
     function setUp() public {

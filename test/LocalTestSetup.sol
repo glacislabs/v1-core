@@ -11,8 +11,10 @@ import {AxelarGatewayMock} from "./contracts/mocks/axelar/AxelarGatewayMock.sol"
 import {AxelarRetryGatewayMock} from "./contracts/mocks/axelar/AxelarRetryGatewayMock.sol";
 import {AxelarGasServiceMock} from "./contracts/mocks/axelar/AxelarGasServiceMock.sol";
 import {LayerZeroGMPMock} from "./contracts/mocks/lz/LayerZeroMock.sol";
+import {LayerZeroV2Mock} from "./contracts/mocks/lz/LayerZeroV2Mock.sol";
 import {GlacisAxelarAdapter} from "../contracts/adapters/GlacisAxelarAdapter.sol";
 import {GlacisLayerZeroAdapter} from "../contracts/adapters/LayerZero/GlacisLayerZeroAdapter.sol";
+import {GlacisLayerZeroV2Adapter} from "../contracts/adapters/LayerZero/GlacisLayerZeroV2Adapter.sol";
 import {GlacisClientSample} from "./contracts/samples/GlacisClientSample.sol";
 import {GlacisClientTextSample} from "./contracts/samples/GlacisClientTextSample.sol";
 import {GlacisDAOSample} from "./contracts/samples/GlacisDAOSample.sol";
@@ -89,9 +91,9 @@ contract LocalTestSetup is Test, GlacisCommons {
     /// Deploys a mock LayerZero endpoint
     function deployLayerZeroFixture()
         internal
-        returns (LayerZeroGMPMock layerZeroGMP)
+        returns (LayerZeroV2Mock layerZeroGMP)
     {
-        layerZeroGMP = new LayerZeroGMPMock();
+        layerZeroGMP = new LayerZeroV2Mock();
     }
 
     /// Deploys a mock Wormhole endpoint
@@ -153,19 +155,19 @@ contract LocalTestSetup is Test, GlacisCommons {
     /// Deploys and sets up a new adapter for LayerZero
     function deployLayerZeroAdapters(
         GlacisRouter router,
-        LayerZeroGMPMock lzEndpoint
-    ) internal returns (GlacisLayerZeroAdapter adapter) {
-        adapter = new GlacisLayerZeroAdapter(
+        LayerZeroV2Mock lzEndpoint
+    ) internal returns (GlacisLayerZeroV2Adapter adapter) {
+        adapter = new GlacisLayerZeroV2Adapter(
             address(router),
             address(lzEndpoint),
             address(this)
         );
 
         // Register lzID <-> glacisID
-        uint16[] memory lzIDs = new uint16[](1);
-        lzIDs[0] = 1;
+        uint32[] memory lzIDs = new uint32[](1);
+        lzIDs[0] = lzEndpoint.getChainId();
         uint256[] memory glacisIDs = new uint256[](1);
-        glacisIDs[0] = uint16(block.chainid);
+        glacisIDs[0] = uint32(block.chainid);
         adapter.setGlacisChainIds(glacisIDs, lzIDs);
 
         // Add self as a remote counterpart
@@ -175,8 +177,6 @@ contract LocalTestSetup is Test, GlacisCommons {
 
         // Register adapter in GlacisRouter
         router.registerAdapter(uint8(uint160(LAYERZERO_GMP_ID)), address(adapter));
-
-        return adapter;
     }
 
     /// Deploys and sets up adapters for Wormhole

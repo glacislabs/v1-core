@@ -117,6 +117,7 @@ contract GlacisLayerZeroAdapter is
     )
         internal
         override
+        // Only supports EVMs
         onlyAuthorizedAdapter(
             adapterChainIdToGlacisChainId[srcChainId],
             bytes32(bytes20(sourceAddress)) >> 96

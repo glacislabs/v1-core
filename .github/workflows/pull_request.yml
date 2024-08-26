@@ -20,6 +20,8 @@ jobs:
       - run: sudo apt update
       - run: sudo apt-get install -y lcov
 
+      - run: rm -f package-lock.json
+
       - run: npm install
       - run: echo "The npm is now ready to test your code on the runner."
 

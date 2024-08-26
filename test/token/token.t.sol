@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroGMPMock} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroV2Mock} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisTokenClientSampleSource} from "../contracts/samples/GlacisTokenClientSampleSource.sol";
 import {GlacisTokenClientSampleDestination} from "../contracts/samples/GlacisTokenClientSampleDestination.sol";
@@ -47,7 +47,7 @@ contract TokenTests__Axelar is LocalTestSetup {
             axelarGatewayMock,
             axelarGasServiceMock
         );
-        LayerZeroGMPMock lzEndpoint = deployLayerZeroFixture();
+        LayerZeroV2Mock lzEndpoint = deployLayerZeroFixture();
         deployLayerZeroAdapters(glacisRouter, lzEndpoint);
     }
 

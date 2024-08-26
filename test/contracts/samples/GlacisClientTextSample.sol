@@ -39,7 +39,7 @@ contract GlacisClientTextSample is GlacisClientOwnable {
             );
     }
 
-    function setRemoteValue__retriable(
+    function setRemoteValue__retryable(
         uint256 chainId,
         bytes32 to,
         address[] memory adapters,
@@ -66,7 +66,7 @@ contract GlacisClientTextSample is GlacisClientOwnable {
         address[] memory adapters,
         CrossChainGas[] memory fees,
         address refundAddress,
-        bool retriable,
+        bool retryable,
         uint256 gasPayment
     ) external payable returns (bytes32,uint256) {
         return
@@ -77,7 +77,7 @@ contract GlacisClientTextSample is GlacisClientOwnable {
                 adapters,
                 fees,
                 refundAddress,
-                retriable,
+                retryable,
                 gasPayment
             );
     }
