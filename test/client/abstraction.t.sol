@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.18;
-import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroV2Mock, GlacisLayerZeroV2Adapter, WormholeRelayerMock, GlacisWormholeAdapter} from "../LocalTestSetup.sol";
+import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroV2Mock, GlacisLayerZeroV2Adapter, WormholeRelayerMock, GlacisWormholeAdapter, ConnextMock, GlacisConnextAdapter} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisClientTextSample} from "../contracts/samples/GlacisClientTextSample.sol";
 import {AxelarOneWayGatewayMock} from "../contracts/mocks/axelar/AxelarOneWayGatewayMock.sol";
@@ -280,6 +280,36 @@ contract AbstractionTests__CCIP is LocalTestSetup {
         );
 
         assertGt(randomRefundAddress.balance, 0);
+    }
+
+    receive() external payable {}
+}
+
+contract AbstractionTests__Connext is LocalTestSetup {
+    using AddressBytes32 for address;
+
+    ConnextMock internal connextMock;
+    GlacisConnextAdapter internal connextAdapter;
+
+    GlacisRouter internal glacisRouter;
+    GlacisClientSample internal clientSample;
+
+    function setUp() public {
+        glacisRouter = deployGlacisRouter();
+        (connextMock) = deployConnextFixture();
+        connextAdapter = deployConnextAdapter(glacisRouter, connextMock);
+        (clientSample, ) = deployGlacisClientSample(glacisRouter);
+    }
+
+    function test__Abstraction_Connext(uint256 val) external {
+        clientSample.setRemoteValue__execute{value: 0.1 ether}(
+            block.chainid,
+            address(clientSample).toBytes32(),
+            CONNEXT_GMP_ID,
+            abi.encode(val)
+        );
+
+        assertEq(clientSample.value(), val);
     }
 
     receive() external payable {}

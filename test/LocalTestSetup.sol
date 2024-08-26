@@ -20,6 +20,8 @@ import {GlacisClientTextSample} from "./contracts/samples/GlacisClientTextSample
 import {GlacisDAOSample} from "./contracts/samples/GlacisDAOSample.sol";
 import {WormholeRelayerMock} from "./contracts/mocks/wormhole/WormholeRelayerMock.sol";
 import {GlacisWormholeAdapter} from "../contracts/adapters/Wormhole/GlacisWormholeAdapter.sol";
+import {GlacisConnextAdapter} from "../contracts/adapters/GlacisConnextAdapter.sol";
+import {ConnextMock} from "./contracts/mocks/connext/ConnextMock.sol";
 import {GlacisCommons} from "../contracts/commons/GlacisCommons.sol";
 import {GlacisTokenMediator} from "../contracts/mediators/GlacisTokenMediator.sol";
 import {XERC20Sample} from "./contracts/samples/token/XERC20Sample.sol";
@@ -44,6 +46,7 @@ contract LocalTestSetup is Test, GlacisCommons {
     address internal constant WORMHOLE_GMP_ID = address(3);
     address internal constant CCIP_GMP_ID = address(4);
     address internal constant HYPERLANE_GMP_ID = address(5);
+    address internal constant CONNEXT_GMP_ID = address(6);
 
     constructor() {}
 
@@ -104,7 +107,7 @@ contract LocalTestSetup is Test, GlacisCommons {
         mock = new WormholeRelayerMock();
     }
 
-    /// Deploys a mock Hyperlane endpoint
+    /// Deploys a mock CCIP endpoint
     function deployCCIPFixture() internal returns (CCIPRouterMock mock) {
         mock = new CCIPRouterMock();
     }
@@ -115,6 +118,11 @@ contract LocalTestSetup is Test, GlacisCommons {
         returns (HyperlaneMailboxMock mock)
     {
         mock = new HyperlaneMailboxMock();
+    }
+
+    /// Deploys a mock Connext endpoint
+    function deployConnextFixture() internal returns (ConnextMock mock) {
+        mock = new ConnextMock();
     }
 
     // endregion
@@ -251,6 +259,32 @@ contract LocalTestSetup is Test, GlacisCommons {
         adapter.setGlacisChainIds(glacisIDs, hyperlaneDomains);
 
         router.registerAdapter(uint8(uint160(HYPERLANE_GMP_ID)), address(adapter));
+        bytes32[] memory adapterCounterparts = new bytes32[](1);
+        adapterCounterparts[0] = address(adapter).toBytes32();
+        adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
+
+        return adapter;
+    }
+
+    /// Deploys and sets up adapters for Connext
+    function deployConnextAdapter(
+        GlacisRouter router,
+        ConnextMock mockConnext
+    ) internal returns (GlacisConnextAdapter adapter) {
+        adapter = new GlacisConnextAdapter(
+            address(router),
+            address(mockConnext),
+            address(this)
+        );
+
+        uint256[] memory glacisIDs = new uint256[](1);
+        glacisIDs[0] = block.chainid;
+        uint32[] memory domains = new uint32[](1);
+        domains[0] = uint32(block.chainid);
+
+        adapter.setGlacisChainIds(glacisIDs, domains);
+
+        router.registerAdapter(uint8(uint160(CONNEXT_GMP_ID)), address(adapter));
         bytes32[] memory adapterCounterparts = new bytes32[](1);
         adapterCounterparts[0] = address(adapter).toBytes32();
         adapter.addRemoteCounterparts(glacisIDs, adapterCounterparts);
