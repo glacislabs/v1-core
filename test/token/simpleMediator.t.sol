@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroV2Mock, SimpleTokenMediator, XERC20Sample, GlacisCommons} from "../LocalTestSetup.sol";
 import {AddressBytes32} from "../../contracts/libraries/AddressBytes32.sol";
 import {GlacisRouter__ClientDeniedRoute} from "../../contracts/routers/GlacisRouter.sol";

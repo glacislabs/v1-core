@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 /// @title IGlacisRemoteCounterpartManager
 /// @notice An interface that defines the existence and addition of a contract's remote counterparts

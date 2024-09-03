@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 import {LocalTestSetup, GlacisRouter, LayerZeroV2Mock, GlacisLayerZeroV2Adapter, GlacisCommons} from "../../LocalTestSetup.sol";
 import {GlacisClientSample} from "../../contracts/samples/GlacisClientSample.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";

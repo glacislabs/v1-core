@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 /* solhint-disable no-console  */
 // solhint-disable-next-line no-global-import

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 import {GlacisLayerZeroV2Adapter} from "../../../../contracts/adapters/LayerZero/GlacisLayerZeroV2Adapter.sol";
 import {AddressBytes32} from "../../../../contracts/libraries/AddressBytes32.sol";
 import {MessagingParams, MessagingReceipt, Origin, MessagingFee} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";

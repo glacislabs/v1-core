@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 import {IWormholeRelayer} from "../../../../contracts/adapters/Wormhole/IWormholeRelayer.sol";
 import {IWormholeReceiver} from "../../../../contracts/adapters/Wormhole/IWormholeReceiver.sol";
 

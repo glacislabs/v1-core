@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: ApacheV2
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 import {Versioned} from "@hyperlane-xyz/core/contracts/upgrade/Versioned.sol";
 import {TypeCasts} from "@hyperlane-xyz/core/contracts/libs/TypeCasts.sol";

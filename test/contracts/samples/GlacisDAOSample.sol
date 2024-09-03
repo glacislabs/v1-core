@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 import {GlacisTokenClientOwnable} from "../../../contracts/client/GlacisTokenClientOwnable.sol";
 import {GlacisCommons} from "../../../contracts/commons/GlacisCommons.sol";

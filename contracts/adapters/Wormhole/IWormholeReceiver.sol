@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache 2
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 /**
  * @notice Interface for a contract which can receive Wormhole messages.

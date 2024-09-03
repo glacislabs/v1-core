@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 import {LocalTestSetup, GlacisAxelarAdapter, GlacisRouter, AxelarGatewayMock, AxelarGasServiceMock, LayerZeroV2Mock} from "../LocalTestSetup.sol";
 import {GlacisClientSample} from "../contracts/samples/GlacisClientSample.sol";
 import {GlacisTokenMediator__OnlyTokenMediatorAllowed} from "../../contracts/mediators/GlacisTokenMediator.sol";

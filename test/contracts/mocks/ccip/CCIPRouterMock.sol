@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: ApacheV2
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {IAny2EVMMessageReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IAny2EVMMessageReceiver.sol";
 

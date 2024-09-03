@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 import {GlacisAbstractAdapter} from "../../../contracts/adapters/GlacisAbstractAdapter.sol";
 import {IGlacisRouter} from "../../../contracts/routers/GlacisRouter.sol";

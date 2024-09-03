@@ -1,7 +1,7 @@
 //0xa1dd11bac04966f03f88309803fffeda4fbe0215f53cccace083ce6ba5c24728
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 library CheckSum {
     /// @notice Converts an address into an address checksum string

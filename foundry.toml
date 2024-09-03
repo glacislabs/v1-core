@@ -4,6 +4,6 @@ out = 'out'
 libs = ['lib']
 test = 'test'
 cache_path  = 'cache_forge'
-solc-version = "0.8.18"
+solc-version = "0.8.20"
 optimizer = true
 optimizer-runs = 10_000_000
