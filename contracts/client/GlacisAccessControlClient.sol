@@ -45,6 +45,7 @@ abstract contract GlacisAccessControlClient is GlacisCommons, IGlacisAccessContr
             (uint160(route_.fromAdapter) <= GLACIS_RESERVED_IDS && (
                 allowedRoutes[route_.fromChainId][route_.fromAddress][WILD_ADDR] ||
                 allowedRoutes[route_.fromChainId][WILD_BYTES][WILD_ADDR] ||
+                allowedRoutes[WILDCARD][route_.fromAddress][WILD_ADDR] ||
                 allowedRoutes[WILDCARD][WILD_BYTES][WILD_ADDR]
             ));
     }
