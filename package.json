@@ -9,10 +9,10 @@
     "prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol' 'test/**/*.sol'"
   },
   "dependencies": {
-    "@axelar-network/axelar-cgp-solidity": "^4.5.0",
+    "@axelar-network/axelar-cgp-solidity": "^6.4.0",
     "@axelar-network/axelar-gmp-sdk-solidity": "^5.3.0",
     "@axelar-network/axelar-local-dev": "^2.0.0",
-    "@chainlink/contracts-ccip": "^1.2.1",
+    "@chainlink/contracts-ccip": "1.2.1",
     "@hyperlane-xyz/core": "^3.5.1",
     "@layerzerolabs/oapp-evm": "https://gitpkg.vercel.app/glacislabs/lz-devtools/packages/oapp-evm?main",
     "@layerzerolabs/solidity-examples": "github:LayerZero-Labs/solidity-examples",
